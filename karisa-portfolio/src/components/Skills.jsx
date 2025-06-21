@@ -20,7 +20,7 @@ const SKILLS_DATA = {
     { name: 'CATIA', level: 80, color: '#005386' },
     { name: 'AutoCAD', level: 90, color: '#0696D7' },
     { name: 'AWS', level: 75, color: '#FF9900' }
-  ]
+  ] 
 };
 
 const CATEGORY_COLORS = {
