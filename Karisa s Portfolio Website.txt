@@ -1,0 +1,164 @@
+Karisa's Portfolio Website Plan
+
+I'll help you build an impressive portfolio website that showcases your unique blend of mechanical engineering and full-stack development skills. Let's create a plan for a high-performance, visually striking portfolio.
+Core Requirements Analysis
+
+    Hybrid identity showcase: Mechanical Engineering + Full-Stack Dev
+
+    Performance focus: As highlighted in your philosophy
+
+    Visual storytelling: Engineering diagrams alongside code
+
+    Impact metrics: Highlighting results like "Reduced client review cycles by 65%"
+
+    Responsive design: Mobile-first approach with desktop enhancements
+
+Tech Stack Selection
+Diagram
+Code
+
+graph TD
+    A[Frontend] --> A1[React + Vite]
+    A --> A2[TypeScript]
+    A --> A3[Tailwind CSS]
+    A --> A4[Framer Motion]
+    B[Visualization] --> B1[Three.js]
+    B --> B2[React Three Fiber]
+    C[Deployment] --> C1[Netlify]
+    D[Backend] --> D1[Supabase]
+    D --> D2[PostgreSQL]
+
+Website Architecture Plan
+1. Navigation & Hero Section
+
+    Engineering-inspired minimalistic header with precision elements
+
+    Animated hero section with:
+
+        "Mechanical Engineer → Full-Stack Developer" transformation animation
+
+        Interactive particle background representing engineering precision
+
+        Call-to-action buttons with hover effects
+
+2. Skills Showcase
+
+    Interactive 3D skill orb using Three.js
+
+    Tabbed interface for:
+
+        Frontend Mastery
+
+        Backend & Database
+
+        Engineering Toolkit
+
+    Animated progress bars for proficiency levels
+
+3. Projects Section
+
+    Engineering blueprint styled project cards
+
+    Each card features:
+
+        Problem/Solution diff-style layout
+
+        Impact metrics visualization
+
+        Technology badges
+
+        Live demo/GitHub links
+
+    Filter by category (Full-Stack, CAD, Analytics)
+
+4. Engineering Philosophy
+
+    Animated Mermaid.js diagrams showing your development process
+
+    Interactive quote component with precision engineering aesthetic
+
+    Comparison table: Engineering Principles → Development Practices
+
+5. GitHub Analytics
+
+    Live GitHub stats using GitHub API
+
+    Contribution heatmap
+
+    Top languages visualization
+
+    Repository showcase with filtering
+
+6. Contact Section
+
+    Precision-engineered contact form with validation
+
+    Interactive location map (optional)
+
+    Social links with engineering-themed icons
+
+    Daily availability indicator
+
+Visual Design Direction
+
+    Color Palette:
+
+        Primary: Engineering Blue (#005792)
+
+        Secondary: Precision Silver (#C0C0C0)
+
+        Accent: React Cyan (#61DAFB)
+
+        Background: Dark Charcoal (#121212)
+
+    Typography:
+
+        Headings: Rajdhani (technical, clean)
+
+        Body: Inter (highly readable)
+
+        Code: Fira Code (with ligatures)
+
+    Design Elements:
+
+        Blueprint grid background
+
+        Precision measurement indicators
+
+        Subtle engineering schematic elements
+
+        Animated loading spinners resembling mechanical parts
+
+Performance Optimization Strategy
+
+    Code Splitting: Component-level lazy loading
+
+    Image Optimization: WebP format with responsive sizing
+
+    Animation Optimization: Hardware-accelerated transforms
+
+    Bundle Analysis: Vite plugin for bundle optimization
+
+    Caching Strategy: Service workers for offline capability
+
+Development Timeline
+Diagram
+Code
+
+gantt
+    title Portfolio Development Timeline
+    dateFormat  YYYY-MM-DD
+    section Design
+    UI/UX Design       :active, des1, 2023-08-01, 5d
+    Component Planning : des2, after des1, 5d
+    section Development
+    Core Framework     : dev1, 2023-08-08, 3d
+    Hero & Navigation  : dev2, after dev1, 3d
+    Skills Section     : dev3, after dev2, 4d
+    Projects Showcase  : dev4, after dev3, 5d
+    section Polish
+    Performance Opt    : crit, after dev4, 4d
+    Responsive Testing : after crit, 3d
+    SEO Optimization   : after crit, 2d
+
+

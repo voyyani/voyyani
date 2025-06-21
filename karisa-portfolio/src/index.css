@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --engineering-blue: #005792;
+  --precision-silver: #C0C0C0;
+  --react-cyan: #61DAFB;
+  --dark-bg: #0a1929;
+  --darker-bg: #061220;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
+  color: #f0f0f0;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+}
+
+.blueprint-bg {
+  background-image: 
+    linear-gradient(rgba(0, 87, 146, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 87, 146, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
