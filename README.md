@@ -127,16 +127,5 @@ graph TD
     E[Engineering] --> E1[MATLAB for data analysis]
 ```
 
----
-
-## 🎯 Highlights
-
-* 🧠 **Hybrid Identity Showcase**: Engineering + Software Dev
-* 📊 **Diff-Formatted Project Insights**: Problems and solutions
-* 📈 **Impact Metrics**: Results-focused project summaries
-* 📋 **Certifications & Visuals**: Verified skills and proof
-* 💬 **Engineering Quote**: Unique personal philosophy
-
----
 
 > Let's build something powerful together. Feel free to reach out via [email](mailto:karisa@thebikecollector.tech) or check out [voyani.tech](https://voyani.tech).
