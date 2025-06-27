@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
-  const [isHovered, setIsHovered] = useState(null);
   
   // African-inspired pattern as base64
   const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
@@ -37,13 +36,11 @@ const Footer = () => {
       ),
       url: 'https://github.com/voyyani'
     },
-    
   ];
 
   const handleSubscribe = (e) => {
     e.preventDefault();
     if (email) {
-      // In a real app, you would send this to your backend
       console.log("Subscribed with email:", email);
       setSubscribed(true);
       setEmail('');
@@ -51,7 +48,6 @@ const Footer = () => {
     }
   };
 
-  // Function to scroll to top smoothly
   const scrollToTop = (e) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -60,22 +56,21 @@ const Footer = () => {
   return (
     <footer 
       id="contact" 
-      className="relative overflow-hidden pt-16 pb-10 px-4 md:px-8 border-t border-[#005792]/30"
+      className="relative overflow-hidden pt-16 pb-10 px-4 border-t border-[#005792]/30"
       style={{ backgroundImage: `url("${africanPattern}")` }}
     >
-      {/* Decorative elements */}
       <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
         <div className="absolute top-10 right-10 w-32 h-32 bg-[#D4A017] rounded-full mix-blend-multiply blur-xl"></div>
         <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#008751] rounded-full mix-blend-multiply blur-xl"></div>
       </div>
       
       <div className="container mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {/* Brand Section */}
           <div className="flex flex-col">
             <div className="flex items-center gap-3 mb-5">
               <div className="w-3 h-3 rounded-full bg-[#61DAFB] animate-pulse"></div>
-              <h2 className="text-2xl font-bold text-white">Voyani.tech</h2>
+              <h2 className="text-xl font-bold text-white">Voyani.tech</h2>
             </div>
             <p className="text-gray-400 mb-6">
               Mechanical Engineer → Full-Stack Developer
@@ -85,13 +80,13 @@ const Footer = () => {
             
             <div className="mt-auto">
               <h3 className="text-lg font-bold mb-4 text-gray-200">Stay Updated</h3>
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
+              <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Your email address"
-                  className="flex-1 bg-[#061220]/70 border border-[#005792]/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]"
+                  className="bg-[#061220]/70 border border-[#005792]/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]"
                   required
                 />
                 <button
@@ -110,12 +105,12 @@ const Footer = () => {
           </div>
           
           {/* Contact Section */}
-          <div className="lg:px-8">
+          <div className="lg:px-6">
             <h3 className="text-xl font-bold mb-6 pb-2 border-b border-[#005792]/30 text-white">
               Get in Touch
             </h3>
             
-            <div className="space-y-4">
+            <div className="space-y-4 mb-6">
               <div className="flex items-start gap-3">
                 <div className="mt-1 text-[#61DAFB]">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +121,7 @@ const Footer = () => {
                   <h4 className="text-gray-400 text-sm">Email</h4>
                   <a 
                     href="mailto:karisa@thebikecollector.info" 
-                    className="text-white hover:text-[#61DAFB] transition-colors"
+                    className="text-white hover:text-[#61DAFB] transition-colors break-all"
                   >
                     karisa@thebikecollector.info
                   </a>
@@ -147,28 +142,22 @@ const Footer = () => {
               </div>
             </div>
             
-            <div className="mt-8">
+            <div>
               <h4 className="text-gray-400 text-sm mb-3">Connect with me</h4>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {socialLinks.map((social) => (
                   <motion.a
                     key={social.name}
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-[#061220]/70 hover:bg-[#005792]/30 backdrop-blur-sm p-3 rounded-lg transition-all border border-[#005792]/30 hover:border-[#61DAFB]/50"
-                    whileHover={{ y: -5 }}
-                    onMouseEnter={() => setIsHovered(social.name)}
-                    onMouseLeave={() => setIsHovered(null)}
+                    className="bg-[#061220]/70 hover:bg-[#005792]/30 backdrop-blur-sm p-3 rounded-lg transition-all border border-[#005792]/30 hover:border-[#61DAFB]/50 flex items-center gap-2"
+                    whileHover={{ y: -3 }}
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="text-[#61DAFB]">
-                        {social.icon}
-                      </div>
-                      {isHovered === social.name && (
-                        <span className="text-sm text-white">{social.name}</span>
-                      )}
+                    <div className="text-[#61DAFB]">
+                      {social.icon}
                     </div>
+                    <span className="text-sm text-white hidden sm:inline">{social.name}</span>
                   </motion.a>
                 ))}
               </div>
@@ -181,7 +170,7 @@ const Footer = () => {
               Quick Links
             </h3>
             
-            <ul className="space-y-3">
+            <ul className="space-y-3 mb-6">
               {[
                 { name: 'Home', href: '#', onClick: scrollToTop },
                 { name: 'Projects', href: '#projects' },
@@ -193,7 +182,7 @@ const Footer = () => {
                   <a 
                     href={link.href} 
                     onClick={link.onClick || undefined}
-                    className="text-gray-400 hover:text-[#61DAFB] transition-colors flex items-center gap-2 group"
+                    className="text-gray-400 hover:text-[#61DAFB] transition-colors flex items-center gap-2 group py-2"
                   >
                     <span className="text-[#61DAFB] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                     {link.name}
@@ -202,7 +191,7 @@ const Footer = () => {
               ))}
             </ul>
             
-            <div className="mt-10 p-4 rounded-xl bg-[#061220]/50 border border-[#005792]/30">
+            <div className="p-4 rounded-xl bg-[#061220]/50 border border-[#005792]/30">
               <h4 className="text-gray-200 font-bold mb-2">Engineering Heritage</h4>
               <p className="text-gray-400 text-sm">
                 Bringing African innovation and engineering excellence to digital solutions
@@ -211,26 +200,25 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-16 pt-8 border-t border-[#005792]/20 text-center">
+        <div className="mt-12 pt-6 border-t border-[#005792]/20 text-center">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm">
               © {new Date().getFullYear()} Karisa. All rights reserved.
             </p>
             
             <div className="flex items-center gap-2">
-              <span className="text-gray-500">Crafted for Karisa with</span>
+              <span className="text-gray-500 hidden sm:inline">Crafted with</span>
               <div className="text-[#61DAFB]">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
                 </svg>
               </div>
-              <span className="text-gray-500"></span>
             </div>
             
             <a 
               href="#" 
               onClick={scrollToTop}
-              className="text-gray-500 hover:text-[#61DAFB] transition-colors flex items-center gap-1"
+              className="text-gray-500 hover:text-[#61DAFB] transition-colors flex items-center gap-1 text-sm"
             >
               Back to top
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
