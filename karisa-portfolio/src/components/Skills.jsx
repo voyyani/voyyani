@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Skill data organized by category
@@ -44,15 +44,15 @@ const SkillCard = ({ skill, isHighlighted }) => {
 
   return (
     <div 
-      className={`p-4 rounded-xl border transition-all duration-300 ${
+      className={`p-3 sm:p-4 rounded-xl border transition-all duration-300 ${
         isHighlighted 
           ? `border-[${categoryColor}] bg-[${withOpacity(categoryColor, 0.1)}]`
           : 'border-[#005792]/30 bg-[#0a1929]/70'
       }`}
     >
       <div className="flex justify-between items-center mb-2">
-        <span className="font-medium text-gray-200">{skill.name}</span>
-        <span className="text-[#61DAFB] font-bold">{skill.level}%</span>
+        <span className="font-medium text-gray-200 text-sm sm:text-base">{skill.name}</span>
+        <span className="text-[#61DAFB] font-bold text-sm sm:text-base">{skill.level}%</span>
       </div>
       <div className="h-2 bg-[#0a1929] rounded-full overflow-hidden">
         <div 
@@ -69,11 +69,11 @@ const SkillCard = ({ skill, isHighlighted }) => {
 
 const CategoryStats = ({ skills, average, color }) => {
   return (
-    <div className="md:col-span-2 p-6 rounded-xl border border-[#005792]/30 bg-gradient-to-br from-[#0a1929]/70 to-[#0a1929]/90 mt-4">
-      <h3 className="text-xl font-bold mb-4 text-gray-200">Category Expertise</h3>
+    <div className="p-4 sm:p-6 rounded-xl border border-[#005792]/30 bg-gradient-to-br from-[#0a1929]/70 to-[#0a1929]/90 mt-4">
+      <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-200">Category Expertise</h3>
       
-      <div className="flex flex-col md:flex-row items-center gap-8">
-        <div className="relative" style={{ width: 120, height: 120 }}>
+      <div className="flex flex-col md:flex-row items-center gap-6">
+        <div className="relative" style={{ width: 100, height: 100 }}>
           <svg className="w-full h-full" viewBox="0 0 120 120">
             <circle
               cx="60"
@@ -97,19 +97,19 @@ const CategoryStats = ({ skills, average, color }) => {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">{average}%</span>
+            <span className="text-white font-bold text-lg">{average}%</span>
           </div>
         </div>
         
         <div className="flex-1">
-          <p className="text-gray-400 mb-4">
+          <p className="text-gray-400 mb-4 text-sm sm:text-base">
             Average proficiency across technologies
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {skills.map(skill => (
               <span 
                 key={skill.name}
-                className="text-xs px-3 py-2 rounded-full font-medium transition-all"
+                className="text-xs px-2 py-1.5 sm:px-3 sm:py-2 rounded-full font-medium transition-all"
                 style={{ 
                   backgroundColor: withOpacity(skill.color, 0.08),
                   color: skill.color,
@@ -146,24 +146,24 @@ const Skills = () => {
   };
 
   return (
-    <section id="skills" className="py-20 px-4 md:px-8 relative">
+    <section id="skills" className="py-16 px-4 md:px-8 relative">
       <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 relative inline-block">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 relative inline-block">
             Technical Expertise
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-[#61DAFB] rounded-full" />
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-1 bg-[#61DAFB] rounded-full" />
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
             Specialized skills and technologies I leverage to deliver robust solutions
           </p>
         </div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
           {Object.keys(SKILLS_DATA).map((category) => (
             <button
               key={category}
-              className={`px-6 py-3 rounded-full font-medium transition-all ${
+              className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full font-medium transition-all text-sm sm:text-base ${
                 activeCategory === category
                   ? `bg-[${CATEGORY_COLORS[category]}] text-[#0a1929]`
                   : 'bg-[#0a1929]/50 text-gray-300 hover:bg-[#0a1929]/70'
@@ -181,7 +181,7 @@ const Skills = () => {
         </div>
 
         {/* Skills Display */}
-        <div className="bg-gradient-to-br from-[#061220]/80 to-[#0a1929]/50 backdrop-blur-sm border border-[#005792]/30 rounded-2xl p-6">
+        <div className="bg-gradient-to-br from-[#061220]/80 to-[#0a1929]/50 backdrop-blur-sm border border-[#005792]/30 rounded-2xl p-4 sm:p-6">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeCategory}
@@ -190,10 +190,10 @@ const Skills = () => {
               animate="animate"
               exit="exit"
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              className="grid grid-cols-1 gap-6"
             >
               {/* Skill Cards */}
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4">
                 {categoryStats.skills.map((skill) => (
                   <SkillCard 
                     key={skill.name} 
@@ -204,54 +204,51 @@ const Skills = () => {
               </div>
               
               {/* Visualization Area */}
-              <div className="flex flex-col justify-between">
-                <div className="p-6 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70 h-full flex flex-col justify-center">
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-bold text-gray-200 mb-2">{activeCategory}</h3>
-                    <div className="flex justify-center">
-                      <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#61DAFB] to-transparent" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {categoryStats.skills.map(skill => (
-                      <div 
-                        key={skill.name} 
-                        className="flex flex-col items-center"
-                        style={{ width: '40%' }}
-                      >
-                        <div className="relative w-20 h-20 mb-2">
-                          <div 
-                            className="absolute inset-0 rounded-full flex items-center justify-center"
-                            style={{
-                              backgroundColor: withOpacity(skill.color, 0.1),
-                              border: `1px solid ${withOpacity(skill.color, 0.3)}`
-                            }}
-                          >
-                            <span className="text-white font-bold">{skill.level}%</span>
-                          </div>
-                        </div>
-                        <span className="text-sm text-gray-300 text-center">{skill.name}</span>
-                      </div>
-                    ))}
+              <div className="p-4 sm:p-6 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70">
+                <div className="text-center mb-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-200 mb-2">{activeCategory}</h3>
+                  <div className="flex justify-center">
+                    <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#61DAFB] to-transparent" />
                   </div>
                 </div>
                 
-                {/* Skill Distribution */}
-                <div className="mt-6 p-4 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70">
-                  <h4 className="font-medium text-gray-300 mb-3">Skill Distribution</h4>
-                  <div className="flex gap-2">
-                    {categoryStats.skills.map(skill => (
-                      <div 
-                        key={skill.name}
-                        className="h-2 rounded-full"
-                        style={{
-                          width: `${skill.level}%`,
-                          backgroundColor: skill.color
-                        }}
-                      />
-                    ))}
-                  </div>
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                  {categoryStats.skills.map(skill => (
+                    <div 
+                      key={skill.name} 
+                      className="flex flex-col items-center"
+                    >
+                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-2">
+                        <div 
+                          className="absolute inset-0 rounded-full flex items-center justify-center"
+                          style={{
+                            backgroundColor: withOpacity(skill.color, 0.1),
+                            border: `1px solid ${withOpacity(skill.color, 0.3)}`
+                          }}
+                        >
+                          <span className="text-white font-bold text-sm sm:text-base">{skill.level}%</span>
+                        </div>
+                      </div>
+                      <span className="text-sm text-gray-300 text-center">{skill.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Skill Distribution */}
+              <div className="p-3 sm:p-4 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70">
+                <h4 className="font-medium text-gray-300 mb-3">Skill Distribution</h4>
+                <div className="flex gap-1 sm:gap-2">
+                  {categoryStats.skills.map(skill => (
+                    <div 
+                      key={skill.name}
+                      className="h-2 rounded-full"
+                      style={{
+                        width: `${skill.level}%`,
+                        backgroundColor: skill.color
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
               
