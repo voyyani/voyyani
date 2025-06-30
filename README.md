@@ -73,10 +73,6 @@ graph LR
 Shenyang Agricultural University
 Thesis: *"Optimization of Mechanical Systems Using Computational Methods"*
 
-**Certifications:**
-![AWS](https://img.shields.io/badge/AWS_Certified-FF9900?style=flat\&logo=amazonaws\&logoColor=white)
-![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=flat\&logo=googlecloud\&logoColor=white)
-**MATLAB Simulation Expert (MathWorks Certified)**
 
 ---
 
