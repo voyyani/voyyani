@@ -7,39 +7,13 @@ const Projects = () => {
 
   const projects = [
     {
-      id: 1,
-      title: "The Bike Collector 254",
-      description: "Modern motorcycle dealership dashboard with inventory, bookings, and payments",
-      technologies: ["React", "TypeScript", "Supabase", "Tailwind CSS", "Clerk"],
-      metrics: [
-        { icon: "cogs", value: "Admin Dashboard" },
-        { icon: "robot", value: "Automated Workflow" }
-      ],
-      category: "Full-Stack",
-      impact: "Streamlined dealership operations with integrated payments",
-      features: [
-        "Secure Auth with Clerk (email, Google)",
-        "Bike Inventory management with Supabase",
-        "Image uploads to Cloudinary",
-        "Stripe and M-Pesa checkout integration",
-        "Admin analytics and role-based dashboard",
-        "Email confirmations using Mailgun or Resend"
-      ],
-      liveUrl: "https://thebikecollector.info",
-      screenshots: [
-        { alt: "Dashboard", description: "Admin analytics dashboard" },
-        { alt: "Inventory", description: "Bike inventory management" },
-        { alt: "Booking", description: "Appointment scheduling" }
-      ]
-    },
-    {
       id: 2,
       title: "Raslipwani Properties",
       description: "Real estate management platform with booking engine and admin dashboard",
       technologies: ["React (Vite)", "Supabase", "Tailwind CSS", "PostgreSQL"],
       metrics: [
-        { icon: "users", value: "5,000+ Users" },
-        { icon: "bolt", value: "40% Faster" }
+        { icon: "users", value: "100+ Users" },
+        { icon: "bolt", value: "40% Faster Load Time" }
       ],
       category: "Real Estate",
       impact: "Solved complex state management for real-time bookings",
