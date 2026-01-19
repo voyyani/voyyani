@@ -1,0 +1,9 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow crawling of admin or private sections (if any in the future)
+# Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://voyani.tech/sitemap.xml

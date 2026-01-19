@@ -1,38 +1,45 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
 
   const projects = [
     {
-      id: 2,
+      id: 1,
       title: "Raslipwani Properties",
-      description: "Real estate management platform with booking engine and admin dashboard",
-      technologies: ["React (Vite)", "Supabase", "Tailwind CSS", "PostgreSQL"],
+      tagline: "Modern Real Estate Platform",
+      description: "A comprehensive property management platform featuring intelligent booking systems, real-time availability tracking, and a powerful admin dashboard for analytics and user management.",
+      technologies: ["React", "Vite", "Supabase", "Tailwind CSS", "PostgreSQL", "EmailJS"],
       metrics: [
-        { icon: "users", value: "100+ Users" },
-        { icon: "bolt", value: "40% Faster Load Time" }
+        { icon: "👥", label: "Active Users", value: "100+" },
+        { icon: "⚡", label: "Load Time", value: "-40%" },
+        { icon: "📊", label: "Conversion", value: "+60%" }
       ],
-      category: "Real Estate",
-      impact: "Solved complex state management for real-time bookings",
+      category: "Full-Stack",
+      challenge: "Complex state management for real-time property bookings with concurrent users",
+      solution: "Implemented optimistic UI updates with Supabase real-time subscriptions",
       features: [
-        "Property listings with images and descriptions",
-        "Viewing appointment scheduling",
-        "Automated email reminders",
-        "Favorites system for users",
-        "Admin dashboard for analytics",
-        "Role-based access control"
+        "Advanced property search with filters",
+        "Intelligent appointment scheduling",
+        "Automated email notifications",
+        "User favorites & saved searches",
+        "Comprehensive admin analytics",
+        "Role-based access control (RBAC)",
+        "Mobile-responsive design"
       ],
       liveUrl: "https://raslipwani.co.ke",
-      screenshots: [
-        { alt: "Listings", description: "Property listings view" },
-        { alt: "Booking", description: "Appointment scheduling" },
-        { alt: "Dashboard", description: "Admin analytics dashboard" }
-      ]
+      color: "#3ECF8E",
+      gradient: "from-[#3ECF8E] to-[#2AA876]"
     }
   ];
+
+  // No need for filtering when we only have one project
+  const filteredProjects = projects;
 
   const openProjectDetails = (project) => {
     setSelectedProject(project);
@@ -54,132 +61,165 @@ const Projects = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl"
             onClick={closeProjectDetails}
           >
             <motion.div 
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              transition={{ type: "spring", damping: 25 }}
-              className="relative bg-gradient-to-br from-[#0a1929] to-[#061220] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-[#005792]/30"
+              initial={{ scale: 0.9, opacity: 0, y: 50 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 50 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              className="relative bg-gradient-to-br from-[#0a1929] to-[#061220] rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto border-2 border-[#005792]/40 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <button 
+              {/* Close Button */}
+              <motion.button 
                 onClick={closeProjectDetails}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                className="absolute top-6 right-6 z-10 text-gray-400 hover:text-white p-3 rounded-full bg-[#061220]/80 backdrop-blur-sm border border-[#005792]/40"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </motion.button>
               
-              <div className="p-8">
-                <div className="flex flex-col md:flex-row gap-8">
-                  <div className="md:w-2/5">
-                    <div className="bg-gradient-to-br from-[#005792] to-[#003056] rounded-xl p-4 mb-6">
-                      <div className="bg-gray-800/50 rounded-lg aspect-video flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="inline-block p-4 rounded-full bg-[#61DAFB]/10 mb-4">
-                            {selectedProject.category === 'Full-Stack' ? (
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-[#61DAFB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                              </svg>
-                            ) : (
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-[#61DAFB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                              </svg>
-                            )}
-                          </div>
-                          <h3 className="text-xl font-bold text-white">{selectedProject.title}</h3>
-                          <p className="text-[#61DAFB]">{selectedProject.category}</p>
-                        </div>
+              <div className="p-8 md:p-10">
+                {/* Header with Gradient */}
+                <div className={`p-8 rounded-2xl bg-gradient-to-r ${selectedProject.gradient} mb-8`}>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-4xl">{selectedProject.category === 'Full-Stack' ? '⚛️' : selectedProject.category === 'E-Commerce' ? '🛍️' : '💼'}</span>
+                        <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-bold text-white">
+                          {selectedProject.category}
+                        </span>
                       </div>
-                    </div>
-                    
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold mb-3 text-white">Key Metrics</h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        {selectedProject.metrics.map(metric => (
-                          <div key={metric.value} className="bg-[#061220]/70 border border-[#005792]/30 rounded-lg p-3">
-                            <div className="flex items-center gap-2">
-                              {metric.icon === 'users' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                              ) : metric.icon === 'bolt' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                              ) : metric.icon === 'cogs' ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                              ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
-                              )}
-                              <span className="text-sm font-medium text-white">{metric.value}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-3">
-                      
-                      <a 
-                        href={selectedProject.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 text-center bg-gradient-to-r from-[#3ECF8E] to-[#2AA876] text-white py-3 rounded-lg transition-all font-medium hover:opacity-90"
-                      >
-                        Live Demo
-                      </a>
+                      <h2 className="text-4xl font-bold text-white mb-2">{selectedProject.title}</h2>
+                      <p className="text-white/80 text-lg">{selectedProject.tagline}</p>
                     </div>
                   </div>
-                  
-                  <div className="md:w-3/5">
-                    <h3 className="text-2xl font-bold mb-4 text-white">Project Details</h3>
-                    <p className="text-gray-300 mb-6">{selectedProject.description}</p>
-                    
-                    <div className="mb-6">
-                      <h4 className="text-lg font-semibold mb-3 text-white">Key Features</h4>
-                      <ul className="space-y-2">
+                </div>
+
+                {/* Content Grid */}
+                <div className="grid md:grid-cols-3 gap-6 mb-8">
+                  {/* Main Content */}
+                  <div className="md:col-span-2 space-y-6">
+                    {/* Description */}
+                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
+                      <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                        <span className="text-2xl">📝</span> Overview
+                      </h3>
+                      <p className="text-gray-300 leading-relaxed">{selectedProject.description}</p>
+                    </div>
+
+                    {/* Challenge & Solution */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="p-6 rounded-2xl bg-[#061220]/60 border border-orange-500/30">
+                        <h4 className="text-lg font-bold text-orange-400 mb-2 flex items-center gap-2">
+                          <span>⚠️</span> Challenge
+                        </h4>
+                        <p className="text-gray-300 text-sm">{selectedProject.challenge}</p>
+                      </div>
+                      <div className="p-6 rounded-2xl bg-[#061220]/60 border border-green-500/30">
+                        <h4 className="text-lg font-bold text-green-400 mb-2 flex items-center gap-2">
+                          <span>✅</span> Solution
+                        </h4>
+                        <p className="text-gray-300 text-sm">{selectedProject.solution}</p>
+                      </div>
+                    </div>
+
+                    {/* Features */}
+                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
+                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-2xl">⚡</span> Key Features
+                      </h3>
+                      <div className="grid md:grid-cols-2 gap-3">
                         {selectedProject.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <div className="mt-1.5 text-[#61DAFB]">
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="flex items-start gap-2 text-gray-300 text-sm"
+                          >
+                            <div className="mt-1 text-[#61DAFB]">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
                             </div>
-                            <span className="text-gray-300">{feature}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-lg font-semibold mb-3 text-white">Technologies</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProject.technologies.map(tech => (
-                          <span key={tech} className="text-sm bg-[#61DAFB]/10 text-[#61DAFB] px-3 py-1.5 rounded-lg">
-                            {tech}
-                          </span>
+                            <span>{feature}</span>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="mt-8">
-                  <h4 className="text-lg font-semibold mb-4 text-white">Project Impact</h4>
-                  <div className="bg-[#0a1929]/70 border border-[#005792]/30 rounded-xl p-5">
-                    <p className="text-gray-300">
-                      <span className="text-[#61DAFB] font-medium">Solution:</span> {selectedProject.impact}
-                    </p>
+
+                  {/* Sidebar */}
+                  <div className="space-y-6">
+                    {/* Metrics */}
+                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-2xl">📊</span> Impact
+                      </h3>
+                      <div className="space-y-4">
+                        {selectedProject.metrics.map((metric, idx) => (
+                          <motion.div
+                            key={metric.label}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="p-4 rounded-xl bg-gradient-to-br from-[#0a1929] to-[#061220] border border-[#005792]/40"
+                          >
+                            <div className="text-2xl mb-2">{metric.icon}</div>
+                            <div className="text-2xl font-bold text-white mb-1">{metric.value}</div>
+                            <div className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Technologies */}
+                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <span className="text-2xl">🛠️</span> Tech Stack
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedProject.technologies.map((tech, idx) => (
+                          <motion.span
+                            key={tech}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="text-xs px-3 py-2 rounded-lg font-medium"
+                            style={{
+                              backgroundColor: `${selectedProject.color}15`,
+                              color: selectedProject.color,
+                              border: `1px solid ${selectedProject.color}40`
+                            }}
+                          >
+                            {tech}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* CTA Button */}
+                    <motion.a 
+                      href={selectedProject.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`block w-full text-center bg-gradient-to-r ${selectedProject.gradient} text-white py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all`}
+                    >
+                      <span className="flex items-center justify-center gap-2">
+                        🚀 View Live Project
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </span>
+                    </motion.a>
                   </div>
                 </div>
               </div>
@@ -191,152 +231,143 @@ const Projects = () => {
   };
 
   return (
-    <section id="projects" className="py-20 px-4 md:px-8 bg-gradient-to-b from-[#061220] to-[#0a1929]">
-      <div className="container mx-auto max-w-7xl">
+    <motion.section 
+      id="projects" 
+      ref={ref}
+      initial="hidden"
+      animate={isVisible ? "visible" : "hidden"}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.6 } }
+      }}
+      className="py-20 px-4 md:px-8 relative overflow-hidden"
+    >
+      {/* Background Elements */}
+      <div className="absolute inset-0 z-0 opacity-20">
+        <div className="absolute top-1/3 right-0 w-96 h-96 bg-[#3ECF8E] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-0 w-80 h-80 bg-[#61DAFB] rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto max-w-7xl relative z-10">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+          }}
           className="text-center mb-16"
         >
-          <motion.h2 
-            className="text-3xl md:text-5xl font-bold mb-4 relative inline-block"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            Skills Showcase
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#61DAFB] to-[#3ECF8E] rounded-full"></div>
-          </motion.h2>
-          <motion.p 
-            className="text-gray-400 max-w-2xl mx-auto text-lg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            Engineering-driven solutions to complex business challenges
-          </motion.p>
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 rounded-full border-2 border-[#D4A017]/60 bg-[#D4A017]/10 text-[#D4A017] text-sm font-semibold tracking-[0.2em] uppercase">
+              Portfolio Showcase
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            Featured{' '}
+            <span className="bg-gradient-to-r from-[#3ECF8E] via-[#61DAFB] to-[#D4A017] text-transparent bg-clip-text">
+              Projects
+            </span>
+          </h2>
+          
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            Engineering-driven solutions delivering{' '}
+            <span className="text-[#3ECF8E] font-semibold">measurable impact</span>
+            {' '}and{' '}
+            <span className="text-[#61DAFB] font-semibold">exceptional experiences</span>
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
-              className="bg-gradient-to-br from-[#0a1929] to-[#061220] backdrop-blur-sm border border-[#005792]/30 rounded-2xl overflow-hidden hover:border-[#61DAFB]/50 transition-all group"
-            >
-              <div className="h-60 relative bg-gradient-to-br from-[#0a1929] to-[#005792]">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-[#3ECF8E] to-[#2AA876] text-[#061220] px-4 py-1 rounded-full text-sm font-bold z-10">
-                  {project.category}
-                </div>
-                
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
-                    {project.category === 'Full-Stack' ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#61DAFB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#61DAFB]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    )}
-                    {project.title}
-                  </h3>
+        {/* Projects Grid - Centered single project */}
+        <motion.div 
+          layout
+          className="flex justify-center"
+        >
+          <AnimatePresence mode="popLayout">
+            {filteredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ y: -8 }}
+                onClick={() => openProjectDetails(project)}
+                className="group cursor-pointer max-w-md w-full"
+              >
+                <div className={`relative bg-gradient-to-br from-[#0a1929] to-[#061220] backdrop-blur-sm border-2 border-[#005792]/30 rounded-3xl overflow-hidden hover:border-[#61DAFB]/60 transition-all duration-300 shadow-xl hover:shadow-2xl`}>
+                  {/* Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#61DAFB]/0 to-[#61DAFB]/0 group-hover:from-[#61DAFB]/10 group-hover:to-transparent transition-all duration-300" />
                   
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies.slice(0, 3).map(tech => (
-                      <span key={tech} className="text-xs bg-[#61DAFB]/10 text-[#61DAFB] px-2 py-1 rounded-full">
-                        {tech}
+                  {/* Header */}
+                  <div className={`relative p-8 bg-gradient-to-br ${project.gradient}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <span className="text-5xl">{project.category === 'Full-Stack' ? '⚛️' : project.category === 'E-Commerce' ? '🛍️' : '💼'}</span>
+                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white">
+                        {project.category}
                       </span>
-                    ))}
-                    {project.technologies.length > 3 && (
-                      <span className="text-xs bg-[#005792]/30 text-gray-400 px-2 py-1 rounded-full">
-                        +{project.technologies.length - 3} more
-                      </span>
-                    )}
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-1">{project.title}</h3>
+                    <p className="text-white/80 text-sm">{project.tagline}</p>
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative p-6 space-y-4">
+                    <p className="text-gray-400 text-sm line-clamp-3">{project.description}</p>
+
+                    {/* Metrics */}
+                    <div className="flex gap-2">
+                      {project.metrics.slice(0, 2).map((metric) => (
+                        <div key={metric.label} className="flex-1 p-3 rounded-xl bg-[#061220]/60 border border-[#005792]/30">
+                          <div className="text-xl mb-1">{metric.icon}</div>
+                          <div className="text-sm font-bold text-white">{metric.value}</div>
+                          <div className="text-xs text-gray-500">{metric.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Tech Stack */}
+                    <div className="flex flex-wrap gap-2">
+                      {project.technologies.slice(0, 3).map((tech) => (
+                        <span 
+                          key={tech} 
+                          className="text-xs px-2 py-1 rounded-lg font-medium"
+                          style={{
+                            backgroundColor: `${project.color}15`,
+                            color: project.color
+                          }}
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                      {project.technologies.length > 3 && (
+                        <span className="text-xs px-2 py-1 rounded-lg font-medium bg-[#005792]/20 text-gray-400">
+                          +{project.technologies.length - 3}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* View Button */}
+                    <motion.div
+                      whileHover={{ x: 5 }}
+                      className="flex items-center gap-2 text-[#61DAFB] font-semibold text-sm pt-2"
+                    >
+                      View Details
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </motion.div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="p-6">
-                <p className="text-gray-400 mb-4">{project.description}</p>
-                <p className="text-sm text-[#61DAFB] mb-4">Solved: {project.impact}</p>
-                
-                <div className="flex flex-wrap gap-3 mb-6">
-                  {project.metrics.map(metric => (
-                    <div key={metric.value} className="flex items-center gap-2 text-sm bg-[#061220]/50 px-3 py-1.5 rounded-lg">
-                      {metric.icon === 'users' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                      ) : metric.icon === 'bolt' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                      ) : metric.icon === 'cogs' ? (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      ) : (
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#3ECF8E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                      )}
-                      <span className="text-gray-300">{metric.value}</span>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex gap-3">
-                  <a 
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 text-center bg-gradient-to-r from-[#005792] to-[#004274] text-white py-3 rounded-lg font-medium transition-all hover:opacity-90"
-                  >
-                    Live Demo
-                  </a>
-                  <button 
-                    onClick={() => openProjectDetails(project)}
-                    className="flex-1 text-center border border-[#005792] text-gray-300 hover:border-[#61DAFB] hover:text-white py-3 rounded-lg font-medium transition-colors"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-        
-        <motion.div 
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-gray-500 max-w-2xl mx-auto mb-6">
-            Interested in seeing more projects or discussing how I can help with your next initiative?
-          </p>
-          <a 
-            href="#contact" 
-            className="inline-block bg-gradient-to-r from-[#61DAFB] to-[#3ECF8E] text-[#061220] font-bold px-8 py-3 rounded-full transition-all hover:opacity-90"
-          >
-            Let's Connect
-          </a>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </motion.div>
       </div>
-      
+
       <ProjectModal />
-    </section>
+    </motion.section>
   );
 };
 
