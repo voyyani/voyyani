@@ -1,0 +1,27 @@
+{
+  "name": "Karisa Voyani Portfolio",
+  "short_name": "Karisa Voyani",
+  "description": "Portfolio of Karisa Voyani - Mechanical Engineer & Full-Stack Developer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061220",
+  "theme_color": "#061220",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["portfolio", "developer", "engineering"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
