@@ -1,26 +1,39 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
-// Skill data organized by category
+// Skill data organized by category with icons
 const SKILLS_DATA = {
-  'Frontend Mastery': [
-    { name: 'React', level: 95, color: '#61DAFB' },
-    { name: 'TypeScript', level: 90, color: '#3178C6' },
-    { name: 'Vite', level: 85, color: '#646CFF' },
-    { name: 'Tailwind CSS', level: 90, color: '#38B2AC' }
-  ],
-  'Backend & Database': [
-    { name: 'Supabase', level: 85, color: '#3ECF8E' },
-    { name: 'PostgreSQL', level: 80, color: '#4169E1' },
-    { name: 'Node.js', level: 90, color: '#339933' },
-    { name: 'Heroku', level: 75, color: '#430098' }
-  ],
-  'Engineering Toolkit': [
-    { name: 'MATLAB', level: 85, color: '#0076A8' },
-    { name: 'CATIA', level: 80, color: '#005386' },
-    { name: 'AutoCAD', level: 90, color: '#0696D7' },
-    { name: 'AWS', level: 75, color: '#FF9900' }
-  ] 
+  'Frontend Mastery': {
+    icon: '⚛️',
+    description: 'Modern web development with cutting-edge frameworks',
+    skills: [
+      { name: 'React', level: 95, color: '#61DAFB', icon: '⚛️' },
+      { name: 'TypeScript', level: 90, color: '#3178C6', icon: '📘' },
+      { name: 'Vite', level: 85, color: '#646CFF', icon: '⚡' },
+      { name: 'Tailwind CSS', level: 90, color: '#38B2AC', icon: '🎨' }
+    ]
+  },
+  'Backend & Database': {
+    icon: '🔧',
+    description: 'Scalable server-side solutions and data management',
+    skills: [
+      { name: 'Supabase', level: 85, color: '#3ECF8E', icon: '🗄️' },
+      { name: 'PostgreSQL', level: 80, color: '#4169E1', icon: '🐘' },
+      { name: 'Node.js', level: 90, color: '#339933', icon: '🟢' },
+      { name: 'Heroku', level: 75, color: '#430098', icon: '☁️' }
+    ]
+  },
+  'Engineering Toolkit': {
+    icon: '🛠️',
+    description: 'Professional engineering and design software',
+    skills: [
+      { name: 'MATLAB', level: 85, color: '#0076A8', icon: '📐' },
+      { name: 'CATIA', level: 80, color: '#005386', icon: '📏' },
+      { name: 'AutoCAD', level: 90, color: '#0696D7', icon: '📋' },
+      { name: 'AWS', level: 75, color: '#FF9900', icon: '☁️' }
+    ]
+  } 
 };
 
 const CATEGORY_COLORS = {
@@ -37,232 +50,300 @@ const withOpacity = (hex, opacity) => {
   return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 };
 
-const SkillCard = ({ skill, isHighlighted }) => {
-  const categoryColor = CATEGORY_COLORS[Object.keys(SKILLS_DATA).find(
-    category => SKILLS_DATA[category].some(s => s.name === skill.name)
-  )] || '#61DAFB';
 
+const SkillCard = ({ skill, index }) => {
   return (
-    <div 
-      className={`p-3 sm:p-4 rounded-xl border transition-all duration-300 ${
-        isHighlighted 
-          ? `border-[${categoryColor}] bg-[${withOpacity(categoryColor, 0.1)}]`
-          : 'border-[#005792]/30 bg-[#0a1929]/70'
-      }`}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      className="group relative p-6 rounded-2xl border border-[#005792]/40 bg-gradient-to-br from-[#0a1929]/90 to-[#061220]/90 backdrop-blur-sm hover:border-[#61DAFB]/60 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-[#61DAFB]/20"
     >
-      <div className="flex justify-between items-center mb-2">
-        <span className="font-medium text-gray-200 text-sm sm:text-base">{skill.name}</span>
-        <span className="text-[#61DAFB] font-bold text-sm sm:text-base">{skill.level}%</span>
+      {/* Glow Effect on Hover */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#61DAFB]/0 to-[#61DAFB]/0 group-hover:from-[#61DAFB]/5 group-hover:to-transparent transition-all duration-300" />
+      
+      <div className="relative">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">{skill.icon}</div>
+            <div>
+              <h4 className="font-bold text-white text-lg">{skill.name}</h4>
+              <div className="h-0.5 w-0 group-hover:w-full bg-gradient-to-r from-[#61DAFB] to-transparent transition-all duration-500" />
+            </div>
+          </div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+            className="text-2xl font-bold bg-gradient-to-br from-[#61DAFB] to-[#00BCD4] text-transparent bg-clip-text"
+          >
+            {skill.level}%
+          </motion.div>
+        </div>
+        
+        {/* Progress Bar */}
+        <div className="relative h-3 bg-[#061220] rounded-full overflow-hidden shadow-inner">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${skill.level}%` }}
+            transition={{ duration: 1.5, delay: index * 0.1, ease: "easeOut" }}
+            className="absolute h-full rounded-full"
+            style={{ 
+              background: `linear-gradient(90deg, ${skill.color}, ${skill.color}dd)`
+            }}
+          />
+          
+          {/* Shine Effect */}
+          <motion.div
+            animate={{
+              x: ['-100%', '200%'],
+            }}
+            transition={{
+              duration: 2,
+              delay: index * 0.1 + 1,
+              repeat: Infinity,
+              repeatDelay: 3,
+              ease: "easeInOut"
+            }}
+            className="absolute inset-0 w-1/3"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)'
+            }}
+          />
+        </div>
+        
+        {/* Proficiency Label */}
+        <div className="mt-3 text-xs text-gray-400 font-medium">
+          {skill.level >= 90 ? '🌟 Expert' : skill.level >= 80 ? '💪 Advanced' : '✨ Proficient'}
+        </div>
       </div>
-      <div className="h-2 bg-[#0a1929] rounded-full overflow-hidden">
-        <div 
-          className="h-full rounded-full transition-all duration-1000 ease-out"
-          style={{ 
-            width: `${skill.level}%`,
-            backgroundColor: skill.color
-          }}
-        />
-      </div>
-    </div>
+    </motion.div>
   );
 };
 
-const CategoryStats = ({ skills, average, color }) => {
+const CategoryStats = ({ categoryData, categoryName, color }) => {
+  const skills = categoryData.skills;
+  const average = Math.round(skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length);
+  
   return (
-    <div className="p-4 sm:p-6 rounded-xl border border-[#005792]/30 bg-gradient-to-br from-[#0a1929]/70 to-[#0a1929]/90 mt-4">
-      <h3 className="text-lg sm:text-xl font-bold mb-4 text-gray-200">Category Expertise</h3>
-      
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="relative" style={{ width: 100, height: 100 }}>
-          <svg className="w-full h-full" viewBox="0 0 120 120">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+      className="p-8 rounded-2xl border border-[#005792]/40 bg-gradient-to-br from-[#0a1929]/95 to-[#061220]/95 backdrop-blur-sm shadow-xl"
+    >
+      {/* Header with Icon */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="text-5xl">{categoryData.icon}</div>
+        <div className="flex-1">
+          <h3 className="text-2xl font-bold text-white mb-1">{categoryName}</h3>
+          <p className="text-gray-400 text-sm">{categoryData.description}</p>
+        </div>
+        
+        {/* Overall Score Circle */}
+        <div className="relative w-24 h-24">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
             <circle
-              cx="60"
-              cy="60"
-              r="52"
+              cx="50"
+              cy="50"
+              r="45"
               fill="none"
-              stroke="#0a1929"
+              stroke="#061220"
               strokeWidth="8"
             />
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
+            <motion.circle
+              cx="50"
+              cy="50"
+              r="45"
               fill="none"
               stroke={color}
               strokeWidth="8"
-              strokeDasharray={326.72}
-              strokeDashoffset={326.72 - (326.72 * average) / 100}
+              strokeDasharray={282.7}
+              initial={{ strokeDashoffset: 282.7 }}
+              animate={{ strokeDashoffset: 282.7 - (282.7 * average) / 100 }}
+              transition={{ duration: 1.5, ease: "easeOut", delay: 0.3 }}
               strokeLinecap="round"
-              transform="rotate(-90 60 60)"
             />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">{average}%</span>
-          </div>
-        </div>
-        
-        <div className="flex-1">
-          <p className="text-gray-400 mb-4 text-sm sm:text-base">
-            Average proficiency across technologies
-          </p>
-          <div className="flex flex-wrap gap-2 justify-center">
-            {skills.map(skill => (
-              <span 
-                key={skill.name}
-                className="text-xs px-2 py-1.5 sm:px-3 sm:py-2 rounded-full font-medium transition-all"
-                style={{ 
-                  backgroundColor: withOpacity(skill.color, 0.08),
-                  color: skill.color,
-                  border: `1px solid ${withOpacity(skill.color, 0.25)}`,
-                }}
-              >
-                {skill.name}
-              </span>
-            ))}
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-bold text-white">{average}</span>
+            <span className="text-xs text-gray-400">AVG</span>
           </div>
         </div>
       </div>
-    </div>
+      
+      {/* Skills Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {skills.map((skill, index) => (
+          <SkillCard key={skill.name} skill={skill} index={index} />
+        ))}
+      </div>
+      
+      {/* Tech Tags */}
+      <div className="flex flex-wrap gap-2 pt-4 border-t border-[#005792]/30">
+        {skills.map(skill => (
+          <motion.span
+            key={skill.name}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.1, y: -2 }}
+            className="group relative px-4 py-2 rounded-full font-medium text-sm cursor-pointer transition-all"
+            style={{ 
+              backgroundColor: withOpacity(skill.color, 0.1),
+              color: skill.color,
+              border: `1.5px solid ${withOpacity(skill.color, 0.4)}`,
+            }}
+          >
+            <span className="flex items-center gap-1.5">
+              {skill.icon} {skill.name}
+            </span>
+            <div 
+              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ 
+                background: `radial-gradient(circle at center, ${withOpacity(skill.color, 0.2)}, transparent)`,
+              }}
+            />
+          </motion.span>
+        ))}
+      </div>
+    </motion.div>
   );
 };
 
 const Skills = () => {
   const [activeCategory, setActiveCategory] = useState('Frontend Mastery');
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
   
-  // Memoized category stats
-  const categoryStats = useMemo(() => {
-    const skills = SKILLS_DATA[activeCategory];
-    const average = Math.round(skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length);
-    const color = CATEGORY_COLORS[activeCategory] || '#61DAFB';
-    
-    return { skills, average, color };
-  }, [activeCategory]);
-
-  // Animation variants for tab content
-  const tabContentVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 }
-  };
+  const currentCategoryData = SKILLS_DATA[activeCategory];
+  const categoryColor = CATEGORY_COLORS[activeCategory];
 
   return (
-    <section id="skills" className="py-16 px-4 md:px-8 relative">
-      <div className="container mx-auto max-w-6xl">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 relative inline-block">
-            Technical Expertise
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-1 bg-[#61DAFB] rounded-full" />
+    <motion.section 
+      id="skills" 
+      ref={ref}
+      initial="hidden"
+      animate={isVisible ? "visible" : "hidden"}
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.1 } }
+      }}
+      className="py-20 px-4 md:px-8 relative overflow-hidden"
+    >
+      {/* Background Elements */}
+      <div className="absolute inset-0 z-0 opacity-20">
+        <div className="absolute top-1/4 left-0 w-64 h-64 bg-[#61DAFB] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-0 w-72 h-72 bg-[#3ECF8E] rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto max-w-7xl relative z-10">
+        {/* Header */}
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+          }}
+          className="text-center mb-16"
+        >
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 rounded-full border-2 border-[#D4A017]/60 bg-[#D4A017]/10 text-[#D4A017] text-sm font-semibold tracking-[0.2em] uppercase">
+              Skills & Expertise
+            </span>
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
+            Technical{' '}
+            <span className="bg-gradient-to-r from-[#61DAFB] via-[#4FC3F7] to-[#00BCD4] text-transparent bg-clip-text">
+              Arsenal
+            </span>
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base">
-            Specialized skills and technologies I leverage to deliver robust solutions
+          
+          <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
+            A comprehensive toolkit combining{' '}
+            <span className="text-[#61DAFB] font-semibold">modern development</span>
+            {' '}and{' '}
+            <span className="text-[#3ECF8E] font-semibold">engineering excellence</span>
           </p>
-        </div>
+        </motion.div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+          }}
+          className="flex flex-wrap justify-center gap-3 mb-12"
+        >
           {Object.keys(SKILLS_DATA).map((category) => (
-            <button
+            <motion.button
               key={category}
-              className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full font-medium transition-all text-sm sm:text-base ${
-                activeCategory === category
-                  ? `bg-[${CATEGORY_COLORS[category]}] text-[#0a1929]`
-                  : 'bg-[#0a1929]/50 text-gray-300 hover:bg-[#0a1929]/70'
-              }`}
               onClick={() => setActiveCategory(category)}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className={`group relative px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm md:text-base overflow-hidden ${
+                activeCategory === category
+                  ? 'text-white shadow-xl'
+                  : 'text-gray-300 hover:text-white'
+              }`}
               style={{
-                border: activeCategory === category 
-                  ? 'none' 
-                  : `1px solid ${withOpacity(CATEGORY_COLORS[category], 0.3)}`
+                background: activeCategory === category
+                  ? `linear-gradient(135deg, ${CATEGORY_COLORS[category]}, ${CATEGORY_COLORS[category]}dd)`
+                  : 'rgba(10, 25, 41, 0.6)',
+                border: `2px solid ${activeCategory === category ? CATEGORY_COLORS[category] : 'rgba(0, 87, 146, 0.3)'}`,
               }}
             >
-              {category}
-            </button>
+              <span className="relative z-10 flex items-center gap-2">
+                {SKILLS_DATA[category].icon}
+                {category}
+              </span>
+              
+              {/* Hover Glow Effect */}
+              {activeCategory !== category && (
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(circle at center, ${withOpacity(CATEGORY_COLORS[category], 0.15)}, transparent)`
+                  }}
+                />
+              )}
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Skills Display */}
-        <div className="bg-gradient-to-br from-[#061220]/80 to-[#0a1929]/50 backdrop-blur-sm border border-[#005792]/30 rounded-2xl p-4 sm:p-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCategory}
-              variants={tabContentVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="grid grid-cols-1 gap-6"
-            >
-              {/* Skill Cards */}
-              <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                {categoryStats.skills.map((skill) => (
-                  <SkillCard 
-                    key={skill.name} 
-                    skill={skill} 
-                    isHighlighted={true}
-                  />
-                ))}
-              </div>
-              
-              {/* Visualization Area */}
-              <div className="p-4 sm:p-6 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70">
-                <div className="text-center mb-6">
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-200 mb-2">{activeCategory}</h3>
-                  <div className="flex justify-center">
-                    <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#61DAFB] to-transparent" />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                  {categoryStats.skills.map(skill => (
-                    <div 
-                      key={skill.name} 
-                      className="flex flex-col items-center"
-                    >
-                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-2">
-                        <div 
-                          className="absolute inset-0 rounded-full flex items-center justify-center"
-                          style={{
-                            backgroundColor: withOpacity(skill.color, 0.1),
-                            border: `1px solid ${withOpacity(skill.color, 0.3)}`
-                          }}
-                        >
-                          <span className="text-white font-bold text-sm sm:text-base">{skill.level}%</span>
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-300 text-center">{skill.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Skill Distribution */}
-              <div className="p-3 sm:p-4 rounded-xl border border-[#005792]/30 bg-[#0a1929]/70">
-                <h4 className="font-medium text-gray-300 mb-3">Skill Distribution</h4>
-                <div className="flex gap-1 sm:gap-2">
-                  {categoryStats.skills.map(skill => (
-                    <div 
-                      key={skill.name}
-                      className="h-2 rounded-full"
-                      style={{
-                        width: `${skill.level}%`,
-                        backgroundColor: skill.color
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Category Stats */}
-              <CategoryStats 
-                skills={categoryStats.skills} 
-                average={categoryStats.average} 
-                color={categoryStats.color} 
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeCategory}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+          >
+            <CategoryStats 
+              categoryData={currentCategoryData}
+              categoryName={activeCategory}
+              color={categoryColor}
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Fun Fact */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-12 text-center"
+        >
+          <div className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-[#061220]/80 to-[#0a1929]/80 border border-[#005792]/40 backdrop-blur-sm">
+            <p className="text-gray-400 text-sm">
+              💡 <span className="text-[#61DAFB] font-semibold">Continuously learning</span> and expanding this toolkit
+            </p>
+          </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 
