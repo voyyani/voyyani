@@ -1,9 +1,23 @@
-# https://www.robotstxt.org/robotstxt.html
+# Robots.txt for voyani.tech
+# Updated: 2026-01-20
+
+# Allow all search engines
 User-agent: *
 Allow: /
 
-# Disallow crawling of admin or private sections (if any in the future)
+# Crawl-delay for polite bots (optional)
+Crawl-delay: 1
+
+# Disallow crawling of development/test files
+Disallow: /test/
+Disallow: /*.test.js$
+Disallow: /*.test.jsx$
+
+# Disallow crawling of source maps
+Disallow: /*.map$
+
+# Disallow admin or private sections (if any in the future)
 # Disallow: /admin/
 
-# Sitemap location
+# Important: Sitemap location
 Sitemap: https://voyani.tech/sitemap.xml
