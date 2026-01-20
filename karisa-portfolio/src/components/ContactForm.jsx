@@ -5,6 +5,7 @@ import { z } from 'zod';
 import emailjs from '@emailjs/browser';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { trackFormSubmission } from '../utils/analytics';
 
 // Zod validation schema
 const contactSchema = z.object({
@@ -108,18 +109,16 @@ const ContactForm = () => {
       lastSubmitTime.current = Date.now();
       setSubmitCount((prev) => prev + 1);
 
-      // Track event (if analytics is set up)
-      if (window.gtag) {
-        window.gtag('event', 'form_submission', {
-          event_category: 'Contact',
-          event_label: 'Contact Form',
-        });
-      }
+      // Track successful form submission
+      trackFormSubmission('Contact Form', true);
 
       // Reset form
       reset();
     } catch (error) {
       console.error('EmailJS Error:', error);
+      
+      // Track failed form submission
+      trackFormSubmission('Contact Form', false);
       
       // Error handling
       if (error.text) {
