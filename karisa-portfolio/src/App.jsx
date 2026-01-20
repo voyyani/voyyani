@@ -1,5 +1,6 @@
 import React, { useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/react';
 import SEO from './components/SEO';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -136,6 +137,9 @@ function App() {
       {/* Cookie Consent Banner */}
       <CookieConsent />
       </div>
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </>
   );
 }
