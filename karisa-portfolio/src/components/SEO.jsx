@@ -4,13 +4,19 @@ import { Helmet } from 'react-helmet-async';
 const SEO = ({
   title = "Karisa Voyani - Mechanical Engineer & Full-Stack Developer",
   description = "Portfolio of Karisa Voyani, a Mechanical Engineer and Full-Stack Developer from Kenya. Specializing in React, Supabase, and engineering-driven web solutions.",
-  keywords = "mechanical engineer, full-stack developer, Kenya, React developer, Supabase, web development, engineering, portfolio",
+  keywords = "mechanical engineer Kenya, full-stack developer, React developer, Supabase, web development, software engineer Kenya, Nairobi developer, African tech, engineering portfolio",
   image = "https://voyani.tech/og-image.jpg",
   url = "https://voyani.tech",
   type = "website"
 }) => {
   const siteTitle = "Karisa Voyani - Portfolio";
   const fullTitle = title === siteTitle ? title : `${title} | ${siteTitle}`;
+
+  // Google Search Console verification (add your verification code)
+  const googleVerification = import.meta.env.VITE_GOOGLE_VERIFICATION || '';
+
+  // Bing Webmaster Tools verification (optional)
+  const bingVerification = import.meta.env.VITE_BING_VERIFICATION || '';
 
   // Structured Data - Person Schema
   const personSchema = {
@@ -21,9 +27,9 @@ const SEO = ({
     "url": "https://voyani.tech",
     "image": image,
     "description": description,
-    "alumniOf": {
-      "@type": "EducationalOrganization",
-      "name": "Your University" // Update with actual university
+    "nationality": {
+      "@type": "Country",
+      "name": "Kenya"
     },
     "knowsAbout": [
       "Mechanical Engineering",
@@ -35,15 +41,13 @@ const SEO = ({
       "PostgreSQL",
       "Node.js",
       "CAD",
-      "MATLAB"
+      "MATLAB",
+      "Full-Stack Development",
+      "Software Engineering"
     ],
-    "nationality": {
-      "@type": "Country",
-      "name": "Kenya"
-    },
     "sameAs": [
-      "https://github.com/karisavoyani", // Update with actual links
-      "https://linkedin.com/in/karisavoyani"
+      "https://github.com/voyyani",
+      "https://linkedin.com/in/karisa-voyani"
     ]
   };
 
@@ -68,6 +72,12 @@ const SEO = ({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content="Karisa Voyani" />
+      <meta name="geo.region" content="KE" />
+      <meta name="geo.placename" content="Kenya" />
+      
+      {/* Search Engine Verification */}
+      {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+      {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
       
       {/* Canonical URL */}
       <link rel="canonical" href={url} />
