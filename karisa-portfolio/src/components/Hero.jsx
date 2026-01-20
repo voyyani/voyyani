@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSmoothScroll } from '../hooks/useScrollAnimation';
+import { trackCTAClick, trackEvent } from '../utils/analytics';
 
 const Hero = () => {
   const [currentRole, setCurrentRole] = useState(0);
@@ -134,7 +135,10 @@ const Hero = () => {
           className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
         >
           <motion.button
-            onClick={() => scrollToSection('projects')}
+            onClick={() => {
+              trackCTAClick('View My Work', 'projects');
+              scrollToSection('projects');
+            }}
             whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(97, 218, 251, 0.3)" }}
             whileTap={{ scale: 0.98 }}
             className="group bg-gradient-to-r from-[#61DAFB] to-[#00BCD4] text-[#061220] px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl relative overflow-hidden"
@@ -153,7 +157,10 @@ const Hero = () => {
           </motion.button>
           
           <motion.button
-            onClick={() => scrollToSection('contact')}
+            onClick={() => {
+              trackCTAClick('Lets Talk', 'contact');
+              scrollToSection('contact');
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             className="border-2 border-[#D4A017] bg-[#D4A017]/5 text-[#D4A017] hover:bg-[#D4A017]/20 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-sm shadow-lg"
