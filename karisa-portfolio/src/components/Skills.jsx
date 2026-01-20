@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { trackEvent } from '../utils/analytics';
 
 // Skill data organized by category with icons
 const SKILLS_DATA = {
@@ -279,7 +280,10 @@ const Skills = () => {
           {Object.keys(SKILLS_DATA).map((category) => (
             <motion.button
               key={category}
-              onClick={() => setActiveCategory(category)}
+              onClick={() => {
+                setActiveCategory(category);
+                trackEvent('skills_category_switch', { category });
+              }}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className={`group relative px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm md:text-base overflow-hidden ${

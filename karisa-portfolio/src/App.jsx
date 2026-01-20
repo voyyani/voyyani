@@ -1,24 +1,73 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import SEO from './components/SEO';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import Skills from './components/Skills';
-import Projects from './components/Projects';
-import Philosophy from './components/Philosophy';
-import ContactSection from './sections/ContactSection';
-import Footer from './components/Footer';
 import ParticleBackground from './components/ParticleBackground';
 import BackToTop from './components/BackToTop';
 import ScrollProgressIndicator from './components/ScrollProgressIndicator';
+import SectionLoader from './components/SectionLoader';
+import CookieConsent from './components/CookieConsent';
+import { initGA, trackPageView } from './utils/analytics';
+import { initWebVitals } from './utils/webVitals';
+import { initSentry } from './utils/sentry';
+
+// Lazy load heavy sections for better initial load performance
+const Skills = lazy(() => import('./components/Skills'));
+const Projects = lazy(() => import('./components/Projects'));
+const Philosophy = lazy(() => import('./components/Philosophy'));
+const ContactSection = lazy(() => import('./sections/ContactSection'));
+const Footer = lazy(() => import('./components/Footer'));
 
 function App() {
-  // Track page views
+  // Initialize analytics and monitoring
   useEffect(() => {
-    // In a real app, you would use an analytics service
-    if (import.meta.env.PROD) {
-      console.log('Portfolio loaded');
-    }
+    // Check cookie consent before initializing analytics
+    const checkConsentAndInitialize = () => {
+      const consent = localStorage.getItem('cookieConsent');
+      
+      if (consent) {
+        try {
+          const preferences = JSON.parse(consent);
+          
+          // Initialize Sentry (always in production for error tracking)
+          initSentry();
+          
+          // Initialize Google Analytics if analytics cookies are enabled
+          if (preferences.analytics) {
+            initGA();
+            trackPageView(window.location.pathname, document.title);
+          }
+          
+          // Initialize Web Vitals if analytics cookies are enabled
+          if (preferences.analytics) {
+            initWebVitals();
+          }
+        } catch (error) {
+          console.error('Error parsing cookie consent:', error);
+        }
+      }
+    };
+
+    // Initial check
+    checkConsentAndInitialize();
+
+    // Listen for consent updates
+    const handleConsentUpdate = (event) => {
+      const preferences = event.detail;
+      
+      if (preferences.analytics) {
+        initGA();
+        trackPageView(window.location.pathname, document.title);
+        initWebVitals();
+      }
+    };
+
+    window.addEventListener('cookieConsentUpdated', handleConsentUpdate);
+
+    return () => {
+      window.removeEventListener('cookieConsentUpdated', handleConsentUpdate);
+    };
   }, []);
 
   return (
@@ -57,16 +106,35 @@ function App() {
         <Navbar />
         <main>
           <Hero />
-          <Skills />
-          <Projects />
-          <Philosophy />
-          <ContactSection />
+          
+          {/* Lazy-loaded sections with Suspense boundaries */}
+          <Suspense fallback={<SectionLoader />}>
+            <Skills />
+          </Suspense>
+          
+          <Suspense fallback={<SectionLoader />}>
+            <Projects />
+          </Suspense>
+          
+          <Suspense fallback={<SectionLoader />}>
+            <Philosophy />
+          </Suspense>
+          
+          <Suspense fallback={<SectionLoader />}>
+            <ContactSection />
+          </Suspense>
         </main>
-        <Footer />
+        
+        <Suspense fallback={<SectionLoader />}>
+          <Footer />
+        </Suspense>
       </div>
 
       {/* Back to Top Button */}
       <BackToTop />
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
       </div>
     </>
   );
