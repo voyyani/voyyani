@@ -3,45 +3,14 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { trackProjectView, trackEvent } from '../utils/analytics';
 
-// Types for better TypeScript support
-interface Metric {
-  icon: string;
-  label: string;
-  value: string;
-}
-
-interface Project {
-  id: number;
-  title: string;
-  tagline: string;
-  description: string;
-  technologies: string[];
-  metrics: Metric[];
-  category: string;
-  challenge: string;
-  solution: string;
-  features: string[];
-  technicalHighlights: string[];
-  architecture: string[];
-  databaseSchema: string[];
-  keyAchievements: string[];
-  adminFeatures: string[];
-  performanceMetrics: string[];
-  liveUrl: string;
-  githubUrl?: string;
-  color: string;
-  gradient: string;
-  emoji: string;
-}
-
-const Projects: React.FC = () => {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+const Projects = () => {
+  const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
   const shouldReduceMotion = useReducedMotion();
 
-  const projects: Project[] = useMemo(() => [
+  const projects = useMemo(() => [
     {
       id: 1,
       title: "Raslipwani Properties",
@@ -293,7 +262,7 @@ const Projects: React.FC = () => {
         "Mobile Performance: 95/100",
         "First Input Delay: <100ms"
       ],
-      liveUrl: "https://neemafoundation.org",
+      liveUrl: "https://neemafoundationkilifi.org",
       color: "#E67E22",
       gradient: "from-[#E67E22] to-[#D35400]",
       emoji: "💚"
@@ -309,7 +278,7 @@ const Projects: React.FC = () => {
     [projects, activeFilter]
   );
 
-  const openProjectDetails = useCallback((project: Project) => {
+  const openProjectDetails = useCallback((project) => {
     setSelectedProject(project);
     setShowModal(true);
     trackProjectView(project.title);
@@ -339,7 +308,7 @@ const Projects: React.FC = () => {
     visible: { opacity: 1, y: 0 }
   };
 
-  const ProjectModal: React.FC = () => {
+  const ProjectModal = () => {
     if (!selectedProject) return null;
     
     return (
