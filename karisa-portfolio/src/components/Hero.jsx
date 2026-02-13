@@ -198,29 +198,7 @@ const Hero = () => {
         </motion.div>
       </div>
       
-      {/* Scroll Indicator */}
-      <motion.div 
-        className="absolute bottom-8 left-0 right-0 flex justify-center"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.2 }}
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="flex flex-col items-center cursor-pointer"
-          onClick={() => scrollToSection('skills')}
-        >
-          <span className="text-xs text-gray-400 mb-2 font-medium tracking-wider">SCROLL TO EXPLORE</span>
-          <div className="w-6 h-10 border-2 border-gray-400/50 rounded-full flex justify-center p-1">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-1.5 h-1.5 bg-[#61DAFB] rounded-full"
-            />
-          </div>
-        </motion.div>
-      </motion.div>
+      
     </section>
   );
 };
