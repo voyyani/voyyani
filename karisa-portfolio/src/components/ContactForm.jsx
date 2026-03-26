@@ -83,7 +83,7 @@ const ContactForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
+          'x-csrf-token': csrfToken,
         },
         body: JSON.stringify({
           type: 'contact',
