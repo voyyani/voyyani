@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackFormSubmission } from '../utils/analytics';
 import { contactFormSchema } from '../utils/validationSchemas';
+import { getCSRFToken, clearCSRFToken } from '../utils/csrfTokens';
 
 // Honeypot validation
 const honeypotSchema = {
@@ -14,8 +15,14 @@ const honeypotSchema = {
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitCount, setSubmitCount] = useState(0);
+  const [csrfToken, setCSRFToken] = useState('');
   const lastSubmitTime = useRef(0);
   const formRef = useRef(null);
+
+  // Initialize CSRF token on mount
+  useEffect(() => {
+    setCSRFToken(getCSRFToken());
+  }, []);
 
   const {
     register,
@@ -84,6 +91,7 @@ const ContactForm = () => {
           phone: data.phone || undefined,
           subject: data.subject,
           message: data.message,
+          csrf_token: csrfToken,
         }),
       });
 
@@ -94,6 +102,10 @@ const ContactForm = () => {
 
       // Success handling
       toast.success('Message sent successfully! I\'ll get back to you soon.');
+
+      // Clear old token and generate new one
+      clearCSRFToken();
+      setCSRFToken(getCSRFToken());
 
       // Update rate limiting
       lastSubmitTime.current = Date.now();

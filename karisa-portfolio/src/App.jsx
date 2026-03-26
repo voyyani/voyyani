@@ -18,6 +18,7 @@ import { supabase } from './lib/supabase';
 import AdminLayout from './admin/layout/AdminLayout';
 import AdminDashboard from './admin/pages/AdminDashboard';
 import SubmissionsPage from './admin/pages/SubmissionsPage';
+import AnalyticsPage from './admin/pages/AnalyticsPage';
 import AdminLogin from './admin/pages/AdminLogin';
 
 // Lazy load heavy sections for better initial load performance
@@ -28,7 +29,7 @@ const ContactSection = lazy(() => import('./sections/ContactSection'));
 const Footer = lazy(() => import('./components/Footer'));
 
 // Auth Guard Component
-const ProtectedAdminRoute = ({ children, isAuthenticated, isLoading }) => {
+const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
@@ -42,6 +43,18 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isLoading }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-red-500 mb-4">Access Denied</h1>
+          <p className="text-gray-300 mb-6">You do not have admin permissions to access this area.</p>
+          <a href="/" className="text-blue-400 hover:text-blue-300">Return to homepage</a>
+        </div>
+      </div>
+    );
   }
 
   return children;
@@ -113,6 +126,7 @@ const HomePage = () => (
 function App() {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize analytics and auth
@@ -166,15 +180,26 @@ function App() {
         if (error) throw error;
 
         if (session?.user) {
-          // Verify user is admin (optional - check against admin list)
+          // Check if user has admin role in user metadata
+          const role = session.user.user_metadata?.role;
+          const allowedAdminRoles = ['admin', 'content_manager', 'owner', 'super_admin'];
+          const hasAdminAccess = allowedAdminRoles.includes(role);
+
           setUser(session.user);
           setIsAuthenticated(true);
+          setIsAdmin(hasAdminAccess);
+
+          if (!hasAdminAccess) {
+            console.warn('User authenticated but lacks admin role:', role);
+          }
         } else {
           setIsAuthenticated(false);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error('Auth check error:', error);
         setIsAuthenticated(false);
+        setIsAdmin(false);
       } finally {
         setIsLoading(false);
       }
@@ -185,11 +210,17 @@ function App() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
+        const role = session.user.user_metadata?.role;
+        const allowedAdminRoles = ['admin', 'content_manager', 'owner', 'super_admin'];
+        const hasAdminAccess = allowedAdminRoles.includes(role);
+
         setUser(session.user);
         setIsAuthenticated(true);
+        setIsAdmin(hasAdminAccess);
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setIsAuthenticated(false);
+        setIsAdmin(false);
       }
     });
 
@@ -231,6 +262,17 @@ function App() {
           <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
             <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
               <SubmissionsPage client={supabase} />
+            </AdminLayout>
+          </ProtectedAdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/analytics"
+        element={
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
+              <AnalyticsPage client={supabase} />
             </AdminLayout>
           </ProtectedAdminRoute>
         }

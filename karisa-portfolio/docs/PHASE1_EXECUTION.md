@@ -30,7 +30,7 @@ Database       Backend         Frontend        Email Templates
 [ ] Click "New secret"
 [ ] Add these 4 secrets:
     • RESEND_API_KEY = re_dzwByD7r_PwVVQ9YdbBQxgg2Ufrf4fD6U
-    • ADMIN_EMAIL = your-karisa@voyani.tech
+    • ADMIN_EMAIL = karisa@voyani.tech
     • PORTFOLIO_URL = https://voyani.tech
     • DASHBOARD_URL = https://voyani.tech/admin/submissions
 [ ] Save and verify all 4 appear in list
