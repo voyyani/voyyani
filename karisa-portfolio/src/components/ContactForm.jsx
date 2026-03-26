@@ -83,6 +83,7 @@ const ContactForm = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
         },
         body: JSON.stringify({
           type: 'contact',
@@ -91,7 +92,6 @@ const ContactForm = () => {
           phone: data.phone || undefined,
           subject: data.subject,
           message: data.message,
-          csrf_token: csrfToken,
         }),
       });
 
@@ -249,22 +249,28 @@ const ContactForm = () => {
           >
             Subject <span className="text-red-400">*</span>
           </label>
-          <input
+          <select
             id="subject"
-            type="text"
             aria-invalid={errors.subject ? 'true' : 'false'}
             aria-describedby={errors.subject ? 'subject-error' : undefined}
-            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg 
+            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg
               focus:outline-none focus:ring-2 transition-all duration-200
-              text-gray-100 placeholder-gray-500
+              text-gray-100
               ${
                 errors.subject
                   ? 'border-red-500 focus:ring-red-500/50'
                   : 'border-[#005792]/30 focus:ring-[#61DAFB]/50 focus:border-[#61DAFB]'
               }`}
-            placeholder="Project inquiry"
             {...register('subject')}
-          />
+          >
+            <option value="">Select a subject...</option>
+            <option value="Project Inquiry">Project Inquiry</option>
+            <option value="Collaboration">Collaboration Opportunity</option>
+            <option value="Job Opportunity">Job Opportunity</option>
+            <option value="Speaking Engagement">Speaking Engagement</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Other">Other</option>
+          </select>
           <AnimatePresence mode="wait">
             {errors.subject && (
               <motion.p
