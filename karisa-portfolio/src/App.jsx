@@ -1,4 +1,5 @@
-import React, { useEffect, lazy, Suspense } from 'react';
+import React, { useEffect, lazy, Suspense, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import SEO from './components/SEO';
 import Navbar from './components/Navbar';
@@ -11,6 +12,13 @@ import CookieConsent from './components/CookieConsent';
 import { initGA, trackPageView } from './utils/analytics';
 import { initWebVitals } from './utils/webVitals';
 import { initSentry } from './utils/sentry';
+import { supabase } from './lib/supabase';
+
+// Admin pages
+import AdminLayout from './admin/layout/AdminLayout';
+import AdminDashboard from './admin/pages/AdminDashboard';
+import SubmissionsPage from './admin/pages/SubmissionsPage';
+import AdminLogin from './admin/pages/AdminLogin';
 
 // Lazy load heavy sections for better initial load performance
 const Skills = lazy(() => import('./components/Skills'));
@@ -19,62 +27,31 @@ const Philosophy = lazy(() => import('./components/Philosophy'));
 const ContactSection = lazy(() => import('./sections/ContactSection'));
 const Footer = lazy(() => import('./components/Footer'));
 
-function App() {
-  // Initialize analytics and monitoring
-  useEffect(() => {
-    // Check cookie consent before initializing analytics
-    const checkConsentAndInitialize = () => {
-      const consent = localStorage.getItem('cookieConsent');
-      
-      if (consent) {
-        try {
-          const preferences = JSON.parse(consent);
-          
-          // Initialize Sentry (always in production for error tracking)
-          initSentry();
-          
-          // Initialize Google Analytics if analytics cookies are enabled
-          if (preferences.analytics) {
-            initGA();
-            trackPageView(window.location.pathname, document.title);
-          }
-          
-          // Initialize Web Vitals if analytics cookies are enabled
-          if (preferences.analytics) {
-            initWebVitals();
-          }
-        } catch (error) {
-          console.error('Error parsing cookie consent:', error);
-        }
-      }
-    };
+// Auth Guard Component
+const ProtectedAdminRoute = ({ children, isAuthenticated, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin text-4xl mb-4">⌛</div>
+          <p className="text-gray-300">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-    // Initial check
-    checkConsentAndInitialize();
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
+  }
 
-    // Listen for consent updates
-    const handleConsentUpdate = (event) => {
-      const preferences = event.detail;
-      
-      if (preferences.analytics) {
-        initGA();
-        trackPageView(window.location.pathname, document.title);
-        initWebVitals();
-      }
-    };
+  return children;
+};
 
-    window.addEventListener('cookieConsentUpdated', handleConsentUpdate);
-
-    return () => {
-      window.removeEventListener('cookieConsentUpdated', handleConsentUpdate);
-    };
-  }, []);
-
-  return (
-    <>
-      <SEO />
-      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] text-gray-100 overflow-x-hidden relative">
-      {/* Toast Notifications */}
+// Portal page for homepage
+const HomePage = () => (
+  <>
+    <SEO />
+    <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] text-gray-100 overflow-x-hidden relative">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -98,45 +75,170 @@ function App() {
         }}
       />
 
-      {/* Scroll Progress Indicator */}
       <ScrollProgressIndicator />
-
       <ParticleBackground />
       <div className="relative z-10">
         <Navbar />
         <main>
           <Hero />
-          
-          {/* Lazy-loaded sections with Suspense boundaries */}
+
           <Suspense fallback={<SectionLoader />}>
             <Skills />
           </Suspense>
-          
+
           <Suspense fallback={<SectionLoader />}>
             <Projects />
           </Suspense>
-          
+
           <Suspense fallback={<SectionLoader />}>
             <Philosophy />
           </Suspense>
-          
+
           <Suspense fallback={<SectionLoader />}>
             <ContactSection />
           </Suspense>
         </main>
-        
+
         <Suspense fallback={<SectionLoader />}>
           <Footer />
         </Suspense>
       </div>
 
-      {/* Back to Top Button */}
       <BackToTop />
-
-      {/* Cookie Consent Banner */}
       <CookieConsent />
-      </div>
-    </>
+    </div>
+  </>
+);
+
+function App() {
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize analytics and auth
+  useEffect(() => {
+    // Check cookie consent before initializing analytics
+    const checkConsentAndInitialize = () => {
+      const consent = localStorage.getItem('cookieConsent');
+
+      if (consent) {
+        try {
+          const preferences = JSON.parse(consent);
+
+          initSentry();
+
+          if (preferences.analytics) {
+            initGA();
+            trackPageView(window.location.pathname, document.title);
+            initWebVitals();
+          }
+        } catch (error) {
+          console.error('Error parsing cookie consent:', error);
+        }
+      }
+    };
+
+    checkConsentAndInitialize();
+
+    const handleConsentUpdate = (event) => {
+      const preferences = event.detail;
+
+      if (preferences.analytics) {
+        initGA();
+        trackPageView(window.location.pathname, document.title);
+        initWebVitals();
+      }
+    };
+
+    window.addEventListener('cookieConsentUpdated', handleConsentUpdate);
+
+    return () => {
+      window.removeEventListener('cookieConsentUpdated', handleConsentUpdate);
+    };
+  }, []);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        if (session?.user) {
+          // Verify user is admin (optional - check against admin list)
+          setUser(session.user);
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUser(session.user);
+        setIsAuthenticated(true);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+
+      {/* Admin Routes */}
+      <Route path="/admin/login" element={<AdminLogin />} />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
+              <AdminDashboard supabaseClient={supabase} />
+            </AdminLayout>
+          </ProtectedAdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/submissions"
+        element={
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
+              <SubmissionsPage client={supabase} />
+            </AdminLayout>
+          </ProtectedAdminRoute>
+        }
+      />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
