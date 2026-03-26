@@ -29,7 +29,7 @@ Database       Backend         Frontend        Email Templates
 [ ] Open https://app.supabase.com/project/mrqzsfcfzvejreowkykm/settings/variables
 [ ] Click "New secret"
 [ ] Add these 4 secrets:
-    • RESEND_API_KEY = re_dzwByD7r_PwVVQ9YdbBQxgg2Ufrf4fD6U
+    • RESEND_API_KEY = [your-resend-api-key]
     • ADMIN_EMAIL = karisa@voyani.tech
     • PORTFOLIO_URL = https://voyani.tech
     • DASHBOARD_URL = https://voyani.tech/admin/submissions

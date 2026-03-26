@@ -179,27 +179,11 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          {/* Demo Credentials */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-2"
-          >
-            <p className="text-sm font-medium text-blue-300">Test Credentials:</p>
-            <div className="space-y-1 text-xs text-gray-400">
-              <p>Email: <span className="text-gray-300 font-mono">admin@voyani.tech</span></p>
-              <p>Password: <span className="text-gray-300 font-mono">Demo@123456</span></p>
-            </div>
-            <p className="text-xs text-gray-500 pt-2">Set up your admin account in Supabase Auth</p>
-          </motion.div>
-        </motion.div>
-
-        {/* Back to Home */}
+          {/* Back to Home */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           className="text-center mt-6"
         >
           <a
