@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -36,9 +37,9 @@ const Navbar = () => {
             </h1>
           </div>
           
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex gap-6 items-center">
             {['Skills', 'Projects', 'Philosophy', 'Contact'].map((item) => (
-              <a 
+              <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
                 className="text-gray-300 hover:text-[#61DAFB] transition-colors font-medium"
@@ -46,6 +47,15 @@ const Navbar = () => {
                 {item}
               </a>
             ))}
+
+            {/* Admin Link */}
+            <div className="h-6 w-px bg-[#005792]/30"></div>
+            <Link
+              to="/admin"
+              className="text-gray-300 hover:text-[#61DAFB] transition-colors font-medium text-sm px-3 py-1 rounded-lg hover:bg-[#005792]/20"
+            >
+              Admin
+            </Link>
           </div>
           
           <button 
@@ -72,15 +82,24 @@ const Navbar = () => {
           >
             <div className="flex flex-col py-4 px-6">
               {['Skills', 'Projects', 'Philosophy', 'Contact'].map((item) => (
-                <a 
+                <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="text-gray-300 hover:text-[#61DAFB] py-3 px-4 rounded-lg transition-colors font-medium border-b border-[#005792]/20 last:border-0"
+                  className="text-gray-300 hover:text-[#61DAFB] py-3 px-4 rounded-lg transition-colors font-medium border-b border-[#005792]/20"
                   onClick={toggleMenu}
                 >
                   {item}
                 </a>
               ))}
+
+              {/* Mobile Admin Link */}
+              <Link
+                to="/admin"
+                className="text-gray-300 hover:text-[#61DAFB] py-3 px-4 rounded-lg transition-colors font-medium border-b border-[#005792]/20 hover:bg-[#005792]/20"
+                onClick={toggleMenu}
+              >
+                Admin
+              </Link>
             </div>
           </motion.div>
         )}
