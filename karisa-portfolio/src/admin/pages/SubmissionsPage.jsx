@@ -429,7 +429,7 @@ export const SubmissionsPage = ({ client }) => {
           submission={selectedSubmission}
           onClose={() => setSelectedSubmission(null)}
           client={client}
-          onUpdate={fetchSubmissions}
+          onRefresh={fetchSubmissions}
         />
       )}
 

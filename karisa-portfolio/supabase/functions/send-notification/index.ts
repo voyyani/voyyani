@@ -9,123 +9,33 @@ interface NotificationPayload {
   phone?: string;
   subject: string;
   message: string;
+  csrf_token?: string;
 }
 
-interface SentryEvent {
-  timestamp: string;
-  level: string;
-  message: string;
-  logger: string;
-  transaction?: string;
-  tags?: Record<string, string>;
-  extra?: Record<string, unknown>;
-}
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
-const adminEmail = Deno.env.get('ADMIN_EMAIL')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
+const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'voyanitech@gmail.com';
 const portfolioUrl = Deno.env.get('PORTFOLIO_URL') || 'https://voyani.tech';
 const dashboardUrl = Deno.env.get('DASHBOARD_URL') || `${portfolioUrl}/admin/submissions`;
-const sentryDsn = Deno.env.get('SENTRY_DSN');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token',
+// Get origin from request, fallback to portfolio URL for production
+const getOrigin = (req: Request) => {
+  const origin = req.headers.get('origin') || portfolioUrl;
+  // Allow localhost for development, production domain for production
+  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+    return origin;
+  }
+  return portfolioUrl;
 };
 
+const getCorsHeaders = (req: Request) => ({
+  'Access-Control-Allow-Origin': getOrigin(req),
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token',
+});
+
 const client = createClient(supabaseUrl, supabaseServiceKey);
-
-// Rate limiting store (in-memory, per IP)
-const rateLimitMap = new Map<string, Array<number>>();
-
-function checkFormRateLimit(clientIp: string): boolean {
-  const now = Date.now();
-  const thirtySeconds = 30 * 1000;
-  const windowStart = now - thirtySeconds;
-
-  if (!rateLimitMap.has(clientIp)) {
-    rateLimitMap.set(clientIp, []);
-  }
-
-  const timestamps = rateLimitMap.get(clientIp)!;
-  const recentRequests = timestamps.filter(t => t > windowStart);
-
-  if (recentRequests.length >= 1) {
-    return false;
-  }
-
-  recentRequests.push(now);
-  rateLimitMap.set(clientIp, recentRequests);
-  return true;
-}
-
-async function sendToSentry(event: SentryEvent) {
-  if (!sentryDsn) return;
-
-  try {
-    const dsn = new URL(sentryDsn);
-    const projectId = dsn.pathname.split('/').pop();
-    const key = dsn.username;
-
-    await fetch(`https://${dsn.hostname}/api/${projectId}/store/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Sentry-Auth': `Sentry sentry_key=${key}, sentry_version=7`,
-      },
-      body: JSON.stringify(event),
-    });
-  } catch (e) {
-    console.error('Sentry error:', e);
-  }
-}
-
-async function sendEmailViaResend(
-  to: string,
-  subject: string,
-  html: string,
-  retries = 3
-): Promise<{ id: string }> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: `Portfolio <noreply@resend.dev>`,
-          to,
-          subject,
-          html,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(
-          `Resend API error [${res.status}]: ${res.statusText}`
-        );
-      }
-
-      return await res.json();
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
-      console.error(`Email send attempt ${attempt}/${retries} failed:`, lastError.message);
-
-      if (attempt < retries) {
-        const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
-        await new Promise(resolve => setTimeout(resolve, backoffMs));
-      }
-    }
-  }
-
-  throw lastError || new Error('Failed to send email after retries');
-}
 
 function escapeHtml(text: string): string {
   const map: Record<string, string> = {
@@ -223,7 +133,7 @@ function confirmationEmailTemplate(senderName: string, subject: string): string 
       <p>Thank you for your message! I've received your inquiry and will review it carefully. I aim to respond to all inquiries within 24-48 hours.</p>
       <p><strong>Your Subject:</strong> ${escapeHtml(subject)}</p>
       <p>Looking forward to connecting with you!</p>
-      <p><strong>Warm regards</strong></p>
+      <p><strong>Warm regards,</strong><br/>Karisa</p>
     </div>
     <div class="footer">
       <p>This is an automated confirmation message</p>
@@ -234,54 +144,72 @@ function confirmationEmailTemplate(senderName: string, subject: string): string 
   `;
 }
 
+async function sendEmailViaResend(
+  to: string,
+  subject: string,
+  html: string,
+  retries = 3
+): Promise<{ id: string }> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${resendApiKey}`,
+        },
+        body: JSON.stringify({
+          from: 'Karisa <karisa@voyani.tech>',
+          to,
+          subject,
+          html,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`Resend API error [${res.status}]: ${JSON.stringify(errorData)}`);
+      }
+
+      return await res.json();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      console.error(`Email send attempt ${attempt}/${retries} failed:`, lastError.message);
+
+      if (attempt < retries) {
+        const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
+        await new Promise(resolve => setTimeout(resolve, backoffMs));
+      }
+    }
+  }
+
+  throw lastError || new Error('Failed to send email after retries');
+}
+
 serve(async (req) => {
+  // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: getCorsHeaders(req) });
   }
 
   const startTime = Date.now();
-  const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
-  let submissionId: string | null = null;
 
   try {
-    // Rate limiting check
-    if (!checkFormRateLimit(clientIp)) {
-      await sendToSentry({
-        timestamp: new Date().toISOString(),
-        level: 'warning',
-        message: 'Form submission rate limit exceeded',
-        logger: 'send-notification',
-        tags: { client_ip: clientIp, type: 'rate_limit' },
-      });
-
-      return new Response(
-        JSON.stringify({ error: 'Too many submissions. Please wait 30 seconds before trying again.' }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const payload: NotificationPayload = await req.json();
 
-    // Comprehensive validation
+    // Validation
     const validationErrors: string[] = [];
     if (!payload.name || payload.name.trim().length < 2) validationErrors.push('Name must be at least 2 characters');
     if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) validationErrors.push('Invalid email format');
-    if (!payload.subject || payload.subject.trim().length < 5) validationErrors.push('Subject must be at least 5 characters');
-    if (!payload.message || payload.message.trim().length < 20) validationErrors.push('Message must be at least 20 characters');
+    if (!payload.subject || payload.subject.trim().length < 2) validationErrors.push('Subject is required');
+    if (!payload.message || payload.message.trim().length < 10) validationErrors.push('Message must be at least 10 characters');
 
     if (validationErrors.length > 0) {
-      await sendToSentry({
-        timestamp: new Date().toISOString(),
-        level: 'info',
-        message: 'Form validation failed',
-        logger: 'send-notification',
-        tags: { type: 'validation_error' },
-        extra: { errors: validationErrors },
-      });
-
       return new Response(
         JSON.stringify({ error: 'Validation failed', details: validationErrors }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
       );
     }
 
@@ -301,102 +229,69 @@ serve(async (req) => {
       .single();
 
     if (dbError) {
+      console.error('Database error:', dbError);
       throw new Error(`Database insert failed: ${dbError.message}`);
     }
 
-    submissionId = submission.id;
-
-    // Send admin notification
-    const adminHtml = submissionEmailTemplate(
-      payload.name,
-      payload.email,
-      payload.phone,
-      payload.subject,
-      payload.message
-    );
-
-    let adminEmailId: string | null = null;
-    try {
-      const adminEmailResult = await sendEmailViaResend(
-        adminEmail,
-        `New Portfolio Inquiry: ${payload.subject}`,
-        adminHtml
+    // Send admin notification to voyanitech@gmail.com
+    if (resendApiKey) {
+      const adminHtml = submissionEmailTemplate(
+        payload.name,
+        payload.email,
+        payload.phone,
+        payload.subject,
+        payload.message
       );
-      adminEmailId = adminEmailResult.id;
-    } catch (emailError) {
-      await sendToSentry({
-        timestamp: new Date().toISOString(),
-        level: 'error',
-        message: 'Failed to send admin notification email',
-        logger: 'send-notification',
-        tags: { submission_id: submissionId },
-        extra: { error: emailError instanceof Error ? emailError.message : String(emailError) },
-      });
-      throw emailError;
+
+      try {
+        await sendEmailViaResend(
+          adminEmail,
+          `New Portfolio Inquiry: ${payload.subject}`,
+          adminHtml
+        );
+        console.log(`[send-notification] Admin email sent to ${adminEmail}`);
+      } catch (emailError) {
+        console.error('Admin email error:', emailError instanceof Error ? emailError.message : emailError);
+      }
     }
 
     // Send confirmation to user
-    const confirmationHtml = confirmationEmailTemplate(payload.name, payload.subject);
+    if (resendApiKey) {
+      const confirmationHtml = confirmationEmailTemplate(payload.name, payload.subject);
 
-    let userEmailId: string | null = null;
-    try {
-      const userEmailResult = await sendEmailViaResend(
-        payload.email,
-        `We received your message: ${payload.subject}`,
-        confirmationHtml
-      );
-      userEmailId = userEmailResult.id;
-    } catch (emailError) {
-      await sendToSentry({
-        timestamp: new Date().toISOString(),
-        level: 'warning',
-        message: 'Failed to send user confirmation email',
-        logger: 'send-notification',
-        tags: { submission_id: submissionId },
-        extra: { error: emailError instanceof Error ? emailError.message : String(emailError) },
-      });
+      try {
+        await sendEmailViaResend(
+          payload.email,
+          `We received your message: ${payload.subject}`,
+          confirmationHtml
+        );
+        console.log(`[send-notification] Confirmation email sent to ${payload.email}`);
+      } catch (emailError) {
+        console.error('User email error:', emailError instanceof Error ? emailError.message : emailError);
+      }
     }
 
     const duration = Date.now() - startTime;
-    await sendToSentry({
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      message: 'Form submission processed successfully',
-      logger: 'send-notification',
-      tags: { submission_id: submissionId, status: 'success' },
-      extra: { duration_ms: duration, admin_email_id: adminEmailId, user_email_id: userEmailId },
-    });
+    console.log(`[send-notification] Success (${duration}ms) - submission: ${submission.id}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Submission received and emails sent',
-        submission_id: submissionId,
+        message: 'Submission received',
+        submission_id: submission.id,
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 200, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : String(error);
-
-    await sendToSentry({
-      timestamp: new Date().toISOString(),
-      level: 'error',
-      message: 'Form submission handler error',
-      logger: 'send-notification',
-      transaction: 'send-notification',
-      tags: { submission_id: submissionId || 'unknown', type: 'handler_error' },
-      extra: { error: errorMessage, duration_ms: duration },
-    });
-
-    console.error('[send-notification] Error:', errorMessage);
+    console.error(`[send-notification] Error (${duration}ms):`, errorMessage);
 
     return new Response(
       JSON.stringify({
         error: 'An error occurred while processing your submission. Please try again.',
-        submission_id: submissionId,
       }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     );
   }
 });

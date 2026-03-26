@@ -123,6 +123,18 @@ const HomePage = () => (
   </>
 );
 
+const ALLOWED_ADMIN_ROLES = ['admin', 'content_manager', 'owner', 'super_admin'];
+
+const resolveUserRole = (authUser) => {
+  const role =
+    authUser?.app_metadata?.role ||
+    authUser?.user_metadata?.role ||
+    authUser?.role ||
+    '';
+
+  return typeof role === 'string' ? role.toLowerCase() : '';
+};
+
 function App() {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -180,10 +192,9 @@ function App() {
         if (error) throw error;
 
         if (session?.user) {
-          // Check if user has admin role in user metadata
-          const role = session.user.user_metadata?.role;
-          const allowedAdminRoles = ['admin', 'content_manager', 'owner', 'super_admin'];
-          const hasAdminAccess = allowedAdminRoles.includes(role);
+          // Accept admin role from app/user metadata to match RLS policies.
+          const role = resolveUserRole(session.user);
+          const hasAdminAccess = ALLOWED_ADMIN_ROLES.includes(role);
 
           setUser(session.user);
           setIsAuthenticated(true);
@@ -210,9 +221,8 @@ function App() {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        const role = session.user.user_metadata?.role;
-        const allowedAdminRoles = ['admin', 'content_manager', 'owner', 'super_admin'];
-        const hasAdminAccess = allowedAdminRoles.includes(role);
+        const role = resolveUserRole(session.user);
+        const hasAdminAccess = ALLOWED_ADMIN_ROLES.includes(role);
 
         setUser(session.user);
         setIsAuthenticated(true);

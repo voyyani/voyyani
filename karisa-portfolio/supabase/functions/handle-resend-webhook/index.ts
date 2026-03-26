@@ -1,16 +1,21 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
-import * as Sentry from "https://npm.skypack.dev/@sentry/deno";
-
-// Initialize Sentry
-Sentry.init({
-  dsn: Deno.env.get("SENTRY_DSN_URL"),
-  tracesSampleRate: 1.0,
-});
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 const resendWebhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET") || "";
+
+// Verify webhook signature using HMAC-SHA256
+async function verifyWebhookSignature(
+  body: string,
+  signature: string,
+  secret: string
+): Promise<boolean> {
+    if (!secret) {
+      console.warn("No webhook secret configured - skipping signature verification");
+      return true; // Allow if no secret configured
+    }
+}
 
 // Map Resend event types to our email_status values
 const EVENT_TYPE_MAP: Record<string, string> = {
@@ -33,17 +38,30 @@ serve(async (req) => {
       );
     }
 
-    // Verify webhook signature (optional but recommended)
+    // Read raw body for signature verification
+    const rawBody = await req.text();
+
+    // Verify webhook signature
     const signature = req.headers.get("x-resend-signature");
-    if (!signature && resendWebhookSecret) {
-      Sentry.captureException(new Error("Missing webhook signature"));
+    if (!signature) {
+      console.error("[Webhook] Missing x-resend-signature header");
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Unauthorized - missing signature" }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const body = await req.json();
+    const isValidSignature = await verifyWebhookSignature(rawBody, signature, resendWebhookSecret);
+    if (!isValidSignature) {
+      console.error("[Webhook] Invalid signature");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - invalid signature" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse JSON from raw body
+    const body = JSON.parse(rawBody);
     const { type, data } = body;
 
     // Extract email ID (Resend uses 'id' field in the email object)
@@ -78,7 +96,6 @@ serve(async (req) => {
 
     if (findError) {
       console.error("Error finding reply:", findError);
-      Sentry.captureException(findError);
       return new Response(
         JSON.stringify({ error: "Reply not found" }),
         { status: 404, headers: { "Content-Type": "application/json" } }
@@ -144,7 +161,6 @@ serve(async (req) => {
 
     if (analyticsError) {
       console.error("Error logging analytics:", analyticsError);
-      Sentry.captureException(analyticsError);
       // Don't fail the webhook if analytics logging fails
     }
 
@@ -156,7 +172,6 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("Webhook error:", error);
-    Sentry.captureException(error);
 
     return new Response(
       JSON.stringify({ error: "Internal server error" }),

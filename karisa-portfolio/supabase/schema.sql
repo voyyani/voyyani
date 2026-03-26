@@ -198,37 +198,57 @@ DROP POLICY IF EXISTS "analytics_service_role" ON public.analytics_events;
 DROP POLICY IF EXISTS "notification_settings_self" ON public.notification_settings;
 DROP POLICY IF EXISTS "notification_settings_self_update" ON public.notification_settings;
 
+-- JWT role helpers for consistent admin checks across policies.
+-- We prioritize custom claims in app_metadata/user_metadata over top-level role
+-- because Supabase top-level role is usually "authenticated" for signed-in users.
+CREATE OR REPLACE FUNCTION public.jwt_role()
+RETURNS text
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT lower(
+    coalesce(
+      auth.jwt() ->> 'user_role',
+      auth.jwt() -> 'app_metadata' ->> 'role',
+      auth.jwt() -> 'user_metadata' ->> 'role',
+      auth.jwt() ->> 'role',
+      ''
+    )
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.has_any_role(allowed_roles text[])
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
+  SELECT auth.role() = 'authenticated'
+    AND public.jwt_role() = ANY(allowed_roles);
+$$;
+
 -- Submissions: Anyone can insert (from contact form), authenticated admins can read/update
 CREATE POLICY "submissions_insert_public" ON public.submissions
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "submissions_read_admin" ON public.submissions
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "submissions_update_admin" ON public.submissions
   FOR UPDATE USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 -- Submission Replies: Only authenticated admins can access
 CREATE POLICY "replies_insert_admin" ON public.submission_replies
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "replies_read_admin" ON public.submission_replies
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 -- Quick reply templates: Public read (for form hints), admin write
@@ -237,60 +257,44 @@ CREATE POLICY "templates_read_public" ON public.quick_reply_templates
 
 CREATE POLICY "templates_insert_admin" ON public.quick_reply_templates
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "templates_update_admin" ON public.quick_reply_templates
   FOR UPDATE USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'owner', 'super_admin'])
   );
 
 -- Labels: Admin only (read and write)
 CREATE POLICY "labels_read_admin" ON public.labels
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "labels_insert_admin" ON public.labels
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "labels_update_admin" ON public.labels
   FOR UPDATE USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'owner', 'super_admin'])
   );
 
 -- Submission Labels: Admin only
 CREATE POLICY "submission_labels_read_admin" ON public.submission_labels
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "submission_labels_insert_admin" ON public.submission_labels
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "submission_labels_delete_admin" ON public.submission_labels
   FOR DELETE USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 -- Submission Types: Public read, admin write
@@ -299,24 +303,18 @@ CREATE POLICY "submission_types_read_public" ON public.submission_types
 
 CREATE POLICY "submission_types_insert_admin" ON public.submission_types
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'owner', 'super_admin'])
   );
 
 -- Submission Attachments: Admin only
 CREATE POLICY "attachments_read_admin" ON public.submission_attachments
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "attachments_insert_admin" ON public.submission_attachments
   FOR INSERT WITH CHECK (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 -- Analytics Events: Service role only
@@ -327,16 +325,12 @@ CREATE POLICY "analytics_service_role" ON public.analytics_events
 -- Notification Settings: Users can manage their own
 CREATE POLICY "notification_settings_self" ON public.notification_settings
   FOR SELECT USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 CREATE POLICY "notification_settings_self_update" ON public.notification_settings
   FOR UPDATE USING (
-    auth.role() = 'authenticated' AND (
-      auth.jwt() ->> 'role' IN ('admin', 'content_manager', 'owner', 'super_admin')
-    )
+    public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])
   );
 
 -- Insert default quick reply templates

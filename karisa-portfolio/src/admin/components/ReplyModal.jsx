@@ -39,33 +39,63 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
+      // Get session and token
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+
+      if (sessionError || !sessionData?.session?.access_token) {
+        throw new Error('Authentication failed. Please refresh and try again.');
+      }
+
+      const token = sessionData.session.access_token;
+      console.log('[ReplyModal] Token received:', {
+        length: token.length,
+        prefix: token.substring(0, 50),
+        suffix: token.substring(token.length - 20),
+        parts: token.split('.').length,
+      });
+
       // Call edge function to send reply
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const endpoint = `${supabaseUrl}/functions/v1/send-reply`;
+
+      console.log('[ReplyModal] Sending request to:', endpoint);
+      console.log('[ReplyModal] Token available:', !!token);
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await client.auth.getSession()).data?.session?.access_token}`,
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
 
+      console.log('[ReplyModal] Response status:', response.status);
+      console.log('[ReplyModal] Response headers:', Array.from(response.headers.entries()));
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send reply');
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          const text = await response.text();
+          if (text) errorMessage = text;
+        }
+        throw new Error(errorMessage);
       }
+
+      const result = await response.json();
+      console.log('[ReplyModal] Success response:', result);
 
       toast.success('Reply sent successfully!');
       reset();
       onClose();
       onReplySent();
     } catch (error) {
-      console.error('Error sending reply:', error);
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to send reply'
-      );
+      console.error('[ReplyModal] Error sending reply:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send reply. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
