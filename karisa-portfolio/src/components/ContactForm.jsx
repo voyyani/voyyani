@@ -1,29 +1,15 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import emailjs from '@emailjs/browser';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { trackFormSubmission } from '../utils/analytics';
+import { contactFormSchema } from '../utils/validationSchemas';
 
-// Zod validation schema
-const contactSchema = z.object({
-  name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters')
-    .regex(/^[a-zA-Z\s]+$/, 'Name can only contain letters and spaces'),
-  email: z.string()
-    .email('Please enter a valid email address')
-    .max(100, 'Email must be less than 100 characters'),
-  subject: z.string()
-    .min(3, 'Subject must be at least 3 characters')
-    .max(100, 'Subject must be less than 100 characters'),
-  message: z.string()
-    .min(10, 'Message must be at least 10 characters')
-    .max(1000, 'Message must be less than 1000 characters'),
-  honeypot: z.string().max(0, 'Bot detected'), // Honeypot field
-});
+// Honeypot validation
+const honeypotSchema = {
+  honeypot: ''
+};
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +24,7 @@ const ContactForm = () => {
     reset,
     watch,
   } = useForm({
-    resolver: zodResolver(contactSchema),
+    resolver: zodResolver(contactFormSchema),
     mode: 'onChange',
   });
 
@@ -57,8 +43,8 @@ const ContactForm = () => {
       return false;
     }
 
-    // Allow max 3 submissions per session
-    if (submitCount >= 3) {
+    // Allow max 5 submissions per session
+    if (submitCount >= 5) {
       toast.error('Maximum submission limit reached. Please refresh the page.');
       return false;
     }
@@ -81,30 +67,34 @@ const ContactForm = () => {
     setIsSubmitting(true);
 
     try {
-      // EmailJS Configuration
-      // Replace these with your actual EmailJS credentials
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'YOUR_SERVICE_ID';
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'YOUR_TEMPLATE_ID';
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'YOUR_PUBLIC_KEY';
+      // Get Supabase endpoint from env
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const endpoint = `${supabaseUrl}/functions/v1/send-notification`;
 
-      // Send email via EmailJS
-      await emailjs.send(
-        serviceId,
-        templateId,
-        {
-          from_name: data.name,
-          from_email: data.email,
+      // Send to Supabase Edge Function
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'contact',
+          name: data.name,
+          email: data.email,
+          phone: data.phone || undefined,
           subject: data.subject,
           message: data.message,
-          to_name: 'Karisa',
-          to_email: 'karisa@thebikecollector.info', // Your email
-        },
-        publicKey
-      );
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send message');
+      }
 
       // Success handling
       toast.success('Message sent successfully! I\'ll get back to you soon.');
-      
+
       // Update rate limiting
       lastSubmitTime.current = Date.now();
       setSubmitCount((prev) => prev + 1);
@@ -115,17 +105,16 @@ const ContactForm = () => {
       // Reset form
       reset();
     } catch (error) {
-      console.error('EmailJS Error:', error);
-      
+      console.error('Form submission error:', error);
+
       // Track failed form submission
       trackFormSubmission('Contact Form', false);
-      
+
       // Error handling
-      if (error.text) {
-        toast.error(`Failed to send message: ${error.text}`);
-      } else {
-        toast.error('Failed to send message. Please try again or email directly.');
-      }
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Failed to send message. Please try again or email directly.';
+      toast.error(errorMessage);
 
       // Track error (if error monitoring is set up)
       if (window.Sentry) {

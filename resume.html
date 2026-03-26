@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ngowa Karisa — Resume</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Raleway:wght@400;600;700;800&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:   #1a3a5c;
+      --accent2:  #2d6a9f;
+      --light:    #f4f6f8;
+      --border:   #d6dde6;
+      --text:     #2c2c2c;
+      --muted:    #5a6370;
+      --dot:      #1a3a5c;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: #e8edf2;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    /* ── PAGE ── */
+    .page {
+      width: 820px;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--accent);
+      color: #fff;
+      padding: 28px 36px 22px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .header-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 3px solid rgba(255,255,255,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .header-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 22%;
+      display: block;
+    }
+
+    .header-info { flex: 1; }
+
+    .header h1 {
+      font-family: 'Raleway', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .header-title {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      margin-top: 5px;
+    }
+
+    .header-contacts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      margin-top: 12px;
+    }
+
+    .header-contacts a,
+    .header-contacts span {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .header-contacts a:hover { color: #fff; text-decoration: underline; }
+
+    .hc-dot {
+      display: inline-block;
+      width: 5px; height: 5px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 50%;
+    }
+
+    /* ── BODY ── */
+    .body {
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--light);
+      padding: 24px 20px;
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar-section { margin-bottom: 24px; }
+
+    .sidebar-section:last-child { margin-bottom: 0; }
+
+    .sidebar-heading {
+      font-family: 'Raleway', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sidebar-heading::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .contact-item {
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: 7px;
+      line-height: 1.4;
+    }
+
+    .contact-item a {
+      color: var(--accent2);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .contact-item a:hover { text-decoration: underline; }
+
+    .contact-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: block;
+      margin-bottom: 1px;
+    }
+
+    /* Skills */
+    .skill-group-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin: 10px 0 6px;
+    }
+
+    .skill-group-label:first-of-type { margin-top: 0; }
+
+    .skill-tag {
+      display: inline-block;
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 2px;
+      margin: 2px 2px 2px 0;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      flex: 1;
+      padding: 24px 28px;
+      min-width: 0;
+    }
+
+    .section { margin-bottom: 22px; }
+    .section:last-child { margin-bottom: 0; }
+
+    .section-heading {
+      font-family: 'Raleway', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 5px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .section-heading::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--accent);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    /* Profile */
+    .profile-text {
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    /* Employment */
+    .job { margin-bottom: 16px; }
+    .job:last-child { margin-bottom: 0; }
+
+    .job-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+
+    .job-title {
+      font-family: 'Raleway', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .job-company {
+      font-size: 12px;
+      color: var(--accent2);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .job-date {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .job-stack {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 4px 0 6px;
+      font-style: italic;
+    }
+
+    .job ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .job ul li {
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--text);
+      padding-left: 14px;
+      position: relative;
+      margin-bottom: 3px;
+    }
+
+    .job ul li::before {
+      content: '◆';
+      font-size: 5px;
+      color: var(--accent2);
+      position: absolute;
+      left: 0;
+      top: 5px;
+    }
+
+    .job-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 16px 0;
+    }
+
+    /* Education */
+    .edu-title {
+      font-family: 'Raleway', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .edu-school {
+      font-size: 12px;
+      color: var(--accent2);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .edu-thesis {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .edu-coursework {
+      font-size: 11.5px;
+      color: var(--text);
+      margin-top: 5px;
+      line-height: 1.6;
+    }
+
+    
+
+    /* Philosophy quote */
+    .quote-block {
+      border-left: 3px solid var(--accent2);
+      padding: 8px 14px;
+      background: var(--light);
+      font-size: 12px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.7;
+      border-radius: 0 2px 2px 0;
+    }
+
+    /* Print */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .page { box-shadow: none; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-avatar">
+      <img src="./profile-photo.png" alt="Ngowa Karisa profile photo" />
+    </div>
+    <div class="header-info">
+      <h1>Ngowa Karisa</h1>
+      <div class="header-title">Mechanical Engineer &nbsp;·&nbsp; Full-Stack Developer</div>
+      <div class="header-contacts">
+        <a href="mailto:voyanitech@gmail.com">✉ voyanitech@gmail.com</a>
+        <span class="hc-dot"></span>
+        <a href="https://voyani.tech" target="_blank">🌐 voyani.tech</a>
+        <span class="hc-dot"></span>
+        <a href="https://github.com/voyyani" target="_blank">⌥ github.com/voyyani</a>
+        <span class="hc-dot"></span>
+        <a href="https://linkedin.com/in/karisa-ngowa-b7630111b/" target="_blank">in LinkedIn</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Details</div>
+        <div class="contact-item">
+          <span class="contact-label">Email</span>
+          <a href="mailto:voyanitech@gmail.com">voyanitech@gmail.com</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">Portfolio</span>
+          <a href="https://voyani.tech" target="_blank">voyani.tech</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">GitHub</span>
+          <a href="https://github.com/voyyani" target="_blank">github.com/voyyani</a>
+        </div>
+        <div class="contact-item">
+          <span class="contact-label">LinkedIn</span>
+          <a href="https://linkedin.com/in/karisa-ngowa-b7630111b/" target="_blank">linkedin.com/in/karisa-ngowa-b7630111b/</a>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Skills</div>
+
+        <div class="skill-group-label">Frontend</div>
+        <span class="skill-tag">React 18/19</span>
+        <span class="skill-tag">TypeScript</span>
+        <span class="skill-tag">Vite</span>
+        <span class="skill-tag">Tailwind CSS</span>
+        <span class="skill-tag">Framer Motion</span>
+        <span class="skill-tag">Three.js</span>
+        <span class="skill-tag">React Query v5</span>
+        <span class="skill-tag">Zod</span>
+        <span class="skill-tag">Vitest</span>
+
+        <div class="skill-group-label">Backend &amp; DB</div>
+        <span class="skill-tag">Node.js</span>
+        <span class="skill-tag">Express.js</span>
+        <span class="skill-tag">Supabase</span>
+        <span class="skill-tag">PostgreSQL</span>
+        <span class="skill-tag">RLS / RBAC</span>
+        <span class="skill-tag">Clerk Auth</span>
+        <span class="skill-tag">Cloudinary</span>
+
+        <div class="skill-group-label">DevOps</div>
+        <span class="skill-tag">Vercel</span>
+        <span class="skill-tag">Heroku</span>
+        <span class="skill-tag">AWS</span>
+        <span class="skill-tag">GitHub Actions</span>
+        <span class="skill-tag">CI/CD</span>
+
+        <div class="skill-group-label">Engineering</div>
+        <span class="skill-tag">MATLAB</span>
+        <span class="skill-tag">CATIA</span>
+        <span class="skill-tag">AutoCAD</span>
+        <span class="skill-tag">FEA</span>
+        <span class="skill-tag">WebGL</span>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Approach</div>
+        <div style="font-size:11.5px; line-height:1.65; color: var(--muted);">
+          Systems thinking from mechanical engineering applied to software architecture. Performance-obsessed. Ships tested, documented, zero-downtime production code.
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- PROFILE -->
+      <div class="section">
+        <div class="section-heading">Profile</div>
+        <p class="profile-text">
+          Full-Stack Developer with a foundation in Mechanical Engineering — bringing systems thinking, precision, and a performance-obsessed mindset to every product I build. I architect production-grade web applications end-to-end: from PostgreSQL schemas and Supabase backends to React 19 frontends with sub-1.2s load times, 90%+ test coverage, and enterprise RBAC systems. Three years shipping paid client software that scales; background in CAD and MATLAB-driven computational analysis. I don't just write code — I engineer solutions.
+        </p>
+      </div>
+
+      <!-- EMPLOYMENT HISTORY -->
+      <div class="section">
+        <div class="section-heading">Employment History</div>
+
+        <!-- Job 1: Freelance umbrella -->
+        <div class="job">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Full-Stack Developer — Freelance</div>
+              <div class="job-company">Independent / Client Contracts</div>
+            </div>
+            <div class="job-date">2022 — Present</div>
+          </div>
+          <ul style="margin-top:7px">
+            <li>Designed and delivered end-to-end production platforms for real estate, non-profit, and engineering clients — sole developer from schema design to deployment.</li>
+            <li>Architected PostgreSQL schemas with full indexing strategies and row-level security policies.</li>
+            <li>Implemented RBAC systems with granular permission matrices (up to 20+ permission types, 6 roles).</li>
+            <li>Achieved sub-1.2s load times and 95/100 Lighthouse mobile scores across all delivered projects.</li>
+            <li>Established 90% unit/integration test coverage using Vitest + React Testing Library.</li>
+            <li>Integrated third-party services: Clerk, Cloudinary, EmailJS, Vercel Analytics, Sentry.</li>
+            <li>Maintained 99.9% uptime on all production systems via automated CI/CD (GitHub Actions + Vercel).</li>
+          </ul>
+        </div>
+
+        <hr class="job-divider" />
+
+        <!-- Job 2: Raslipwani -->
+        <div class="job">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Full-Stack Developer — Raslipwani Properties</div>
+              <div class="job-company">Client Contract · raslipwani.co.ke</div>
+            </div>
+            <div class="job-date">2023 — 2024</div>
+          </div>
+          <div class="job-stack">React 18 · Vite · Supabase · PostgreSQL · React Query · Clerk Auth · Cloudinary · Vercel · Vitest</div>
+          <ul>
+            <li>Built an enterprise property management SaaS platform from zero — booking engine, full CRM, admin analytics dashboard — supporting 100+ concurrent users.</li>
+            <li>Reduced page load time from 3 s → <strong>1.2 s</strong> (60% improvement) via React Query caching, server-side pagination (95% data reduction), and debounced search (80% fewer API calls).</li>
+            <li>Engineered a complete CRM system — client lifecycle, property interest tracking, communication timelines, and internal notes — delivered in a single sprint.</li>
+            <li>Designed a 6-table relational schema with 40+ indexes across properties, bookings, clients, interests, communications, and admin_settings.</li>
+            <li>Achieved <strong>90% test coverage</strong> across 27 files / 5,700+ lines of code; Mobile Lighthouse <strong>95/100</strong>, Desktop <strong>98/100</strong>.</li>
+            <li>Built complex booking workflow: drag-and-drop rescheduling, multi-status pipelines (pending → confirmed → completed), automated email triggers.</li>
+          </ul>
+        </div>
+
+        <hr class="job-divider" />
+
+        <!-- Job 3: Neema Foundation -->
+        <div class="job">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Full-Stack Developer — Neema Foundation Kilifi</div>
+              <div class="job-company">Client Contract · neemafoundationkilifi.org</div>
+            </div>
+            <div class="job-date">2024 — 2025</div>
+          </div>
+          <div class="job-stack">React 19 · TypeScript 5.9 · Vite 7 · Supabase · Three.js · TipTap · DND Kit · Zod · Framer Motion 12 · Vercel</div>
+          <ul>
+            <li>Delivered a full digital transformation platform for a Kenyan non-profit managing healthcare, education, and community empowerment programs.</li>
+            <li>Architected a <strong>5-tier RBAC system</strong> (Super Admin → Viewer) from scratch with 20+ granular permission controls across 7 admin CMS pages.</li>
+            <li>Implemented DOMPurify XSS protection across all rich-text editor inputs; achieved Lighthouse Accessibility <strong>95+</strong>, SEO <strong>95+</strong>.</li>
+            <li>Optimised LCP to <strong>&lt;2.5 s</strong> on 3G Fast; CLS &lt;0.1; TBT &lt;200 ms.</li>
+            <li>Integrated Three.js animated hero with graceful prefers-reduced-motion fallback; built 10-table PostgreSQL schema with Supabase RLS.</li>
+            <li>Created a comprehensive TypeScript strict-mode type system with ESLint 9 enforcement; zero runtime type errors in production.</li>
+          </ul>
+        </div>
+
+        <hr class="job-divider" />
+
+        <!-- Job 4: CAD Web Viewer -->
+        <div class="job">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Frontend / WebGL Developer — CAD Web Viewer</div>
+              <div class="job-company">Commissioned Engineering Contract</div>
+            </div>
+            <div class="job-date">2022 — 2023</div>
+          </div>
+          <div class="job-stack">Three.js · React · Custom WebGL Shaders</div>
+          <ul>
+            <li>Designed and built a browser-based 3D model viewer for mechanical engineering components, eliminating the need for desktop CAD software in client review cycles.</li>
+            <li>Reduced client review cycles by <strong>65%</strong> by enabling direct browser-based model inspection and markup without installed software.</li>
+            <li>Authored custom WebGL shaders for real-time material and lighting simulation of engineering-grade components.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- EDUCATION -->
+      <div class="section">
+        <div class="section-heading">Education</div>
+
+        <!-- Current degree -->
+        <div class="job-header" style="margin-bottom:4px">
+          <div>
+            <div class="edu-title">B.Sc — Computer Information Systems</div>
+            <div class="edu-school">Kenya Methodist University</div>
+          </div>
+          <div class="job-date">2024 — Present</div>
+        </div>
+        <div class="edu-coursework" style="margin-bottom:14px">
+          Currently enrolled. Relevant modules: Software Engineering · Database Systems · Systems Analysis &amp; Design · Computer Networks · Web Technologies
+        </div>
+
+        <!-- Previous degree -->
+        <div class="job-header" style="margin-bottom:4px">
+          <div>
+            <div class="edu-title">B.Eng — Mechanical Engineering</div>
+            <div class="edu-school">Shenyang Agricultural University</div>
+          </div>
+          <div class="job-date">2019 — 2023</div>
+        </div>
+        <div class="edu-thesis">Thesis: "Optimization of Mechanical Systems Using Computational Methods"</div>
+        <div class="edu-coursework">
+          <strong>Relevant coursework:</strong> Computational Methods · Finite Element Analysis · Thermodynamics · Systems Engineering · MATLAB-driven Data Analysis · CATIA 3D Modelling · Structural Analysis
+        </div>
+      </div>
+
+      
+
+      <!-- PHILOSOPHY / REFERENCES -->
+      <div class="section">
+        <div class="section-heading">References</div>
+        <div class="quote-block">
+          "I apply mechanical precision to digital solutions — building web applications with the same rigour I'd engineer physical systems. Performance optimisation isn't just about faster code; it's about creating efficient, maintainable systems that withstand real-world demands."
+        </div>
+        <p style="font-size:12px; color:var(--muted); margin-top:10px;">
+          ◆ &nbsp;Full references and client testimonials available upon request.
+        </p>
+      </div>
+
+    </main>
+  </div><!-- /body -->
+
+</div><!-- /page -->
+</body>
+</html>
