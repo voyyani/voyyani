@@ -169,30 +169,20 @@ const AdminLogin = () => {
             </motion.button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-[#0a1929] text-gray-500">Demo Info</span>
-            </div>
-          </div>
-
           {/* Back to Home */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="text-center mt-6"
-        >
-          <a
-            href="/"
-            className="text-sm text-gray-400 hover:text-[#61DAFB] transition-colors"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center mt-6"
           >
-            Back to home
-          </a>
-        </motion.div>
+            <a
+              href="/"
+              className="text-sm text-gray-400 hover:text-[#61DAFB] transition-colors"
+            >
+              Back to home
+            </a>
+          </motion.div>
       </motion.div>
     </div>
   );
