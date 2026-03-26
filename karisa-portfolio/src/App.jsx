@@ -248,7 +248,7 @@ function App() {
       <Route
         path="/admin"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
             <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
               <AdminDashboard supabaseClient={supabase} />
             </AdminLayout>
@@ -259,7 +259,7 @@ function App() {
       <Route
         path="/admin/submissions"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
             <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
               <SubmissionsPage client={supabase} />
             </AdminLayout>
@@ -270,7 +270,7 @@ function App() {
       <Route
         path="/admin/analytics"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isLoading={isLoading}>
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
             <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
               <AnalyticsPage client={supabase} />
             </AdminLayout>
