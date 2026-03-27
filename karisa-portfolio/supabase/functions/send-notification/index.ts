@@ -21,19 +21,34 @@ const dashboardUrl = Deno.env.get('DASHBOARD_URL') || `${portfolioUrl}/admin/sub
 
 // Get origin from request, fallback to portfolio URL for production
 const getOrigin = (req: Request) => {
-  const origin = req.headers.get('origin') || portfolioUrl;
-  // Allow localhost for development, production domain for production
-  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-    return origin;
+  const requestOrigin = req.headers.get('origin');
+
+  if (!requestOrigin) return portfolioUrl;
+
+  // Allow localhost for development
+  if (requestOrigin.includes('localhost') || requestOrigin.includes('127.0.0.1')) {
+    return requestOrigin;
   }
+
+  // For production, verify it's a valid production domain
+  // Allow voyani.tech and www.voyani.tech
+  if (requestOrigin.includes('voyani.tech')) {
+    return requestOrigin;
+  }
+
+  // Fallback to portfolio URL
   return portfolioUrl;
 };
 
-const getCorsHeaders = (req: Request) => ({
-  'Access-Control-Allow-Origin': getOrigin(req),
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token',
-});
+const getCorsHeaders = (req: Request) => {
+  const origin = getOrigin(req);
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token',
+    'Access-Control-Max-Age': '3600',
+  };
+};
 
 const client = createClient(supabaseUrl, supabaseServiceKey);
 

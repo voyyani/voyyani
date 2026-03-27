@@ -1,7 +1,6 @@
 // supabase/functions/send-reply/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { decode as decodeBase64url } from 'https://deno.land/std@0.168.0/encoding/base64url.ts';
 
 interface ReplyPayload {
   submission_id: string;
@@ -30,11 +29,20 @@ interface DecodedJWT {
   exp?: number;
 }
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 const portfolioUrl = Deno.env.get('PORTFOLIO_URL') || 'https://voyani.tech';
 const sentryDsn = Deno.env.get('SENTRY_DSN');
+
+// Validate required env vars
+if (!supabaseUrl || !supabaseServiceKey || !resendApiKey) {
+  console.error('[send-reply] Missing required environment variables:', {
+    SUPABASE_URL: !!supabaseUrl,
+    SUPABASE_SERVICE_ROLE_KEY: !!supabaseServiceKey,
+    RESEND_API_KEY: !!resendApiKey,
+  });
+}
 
 // Get origin from request, fallback to portfolio URL for production
 const getOrigin = (req: Request) => {
@@ -53,7 +61,9 @@ const getCorsHeaders = (req: Request) => ({
   'Access-Control-Max-Age': '86400',
 });
 
-const client = createClient(supabaseUrl, supabaseServiceKey);
+const client = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 // Persistent rate limiting using database
 async function checkRateLimitDatabase(userId: string, limit = 20): Promise<{ allowed: boolean; error?: string }> {
@@ -195,7 +205,7 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
-// Decode JWT using Deno-compatible base64url decoder
+// Decode JWT using manual base64url decoder (no external imports)
 function decodeJWT(token: string): {
   valid: boolean;
   decoded?: Record<string, unknown>;
@@ -210,43 +220,44 @@ function decodeJWT(token: string): {
       return { valid: false, error: 'Invalid token structure' };
     }
 
-    // Decode payload using Deno's base64url decoder
     const payload = parts[1];
-    console.log('[JWT Decode] Payload length:', payload.length);
+    console.log('[JWT Decode] Payload part length:', payload.length);
 
-    const payloadBytes = decodeBase64url(payload);
-    const decoder = new TextDecoder();
-    const jsonString = decoder.decode(payloadBytes);
+    // Manual base64url to base64 conversion
+    let base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padding = 4 - (base64.length % 4);
+    if (padding !== 4) {
+      base64 += '='.repeat(padding);
+    }
+
+    // Decode using atob (works in Deno)
+    const jsonString = atob(base64);
+    console.log('[JWT Decode] Decoded successfully');
+
     const decoded = JSON.parse(jsonString);
 
-    console.log('[JWT Decode] Successfully decoded. Claims:', {
-      sub: decoded.sub,
-      aud: decoded.aud,
-      role: decoded.role,
-      user_role: decoded.user_role,
-      exp: decoded.exp,
-    });
+    console.log('[JWT Decode] Token claims - sub:', decoded.sub, 'role:', decoded.role || decoded.user_role);
 
     // Basic validity check
     if (!decoded.sub) {
       console.error('[JWT Decode] Missing sub claim');
-      return { valid: false, error: 'Missing user ID (sub) in token' };
+      return { valid: false, error: 'Missing user ID in token' };
     }
 
-    // Check expiration if present
+    // Check expiration
     if (decoded.exp && typeof decoded.exp === 'number') {
       const now = Math.floor(Date.now() / 1000);
       if (decoded.exp < now) {
-        console.error('[JWT Decode] Token expired. Exp:', decoded.exp, 'Now:', now);
-        return { valid: false, error: 'Token has expired' };
+        console.error('[JWT Decode] Token expired');
+        return { valid: false, error: 'Token expired' };
       }
     }
 
     return { valid: true, decoded };
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    console.error('[JWT Decode] Decode error:', errorMsg);
-    return { valid: false, error: `Decode failed: ${errorMsg}` };
+    console.error('[JWT Decode] Error:', errorMsg);
+    return { valid: false, error: `JWT decode failed: ${errorMsg}` };
   }
 }
 
@@ -316,6 +327,15 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Check environment variables
+  if (!supabaseUrl || !supabaseServiceKey || !resendApiKey || !client) {
+    console.error('[send-reply] Missing required environment variables - cannot process request');
+    return new Response(
+      JSON.stringify({ error: 'Server misconfigured. Please contact support.' }),
+      { status: 500, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     );
   }
 

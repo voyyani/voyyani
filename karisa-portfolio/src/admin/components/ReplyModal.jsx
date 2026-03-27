@@ -38,10 +38,14 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
   };
 
   const onSubmit = async (data) => {
+    console.log('[ReplyModal] onSubmit called with data:', data);
+    console.log('[ReplyModal] Form validation passed');
+
     setIsSubmitting(true);
     try {
       // Get session and token
       const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      console.log('[ReplyModal] Session fetch - error:', sessionError, 'has token:', !!sessionData?.session?.access_token);
 
       if (sessionError || !sessionData?.session?.access_token) {
         throw new Error('Authentication failed. Please refresh and try again.');
@@ -61,6 +65,7 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
 
       console.log('[ReplyModal] Sending request to:', endpoint);
       console.log('[ReplyModal] Token available:', !!token);
+      console.log('[ReplyModal] Request payload:', data);
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -78,9 +83,11 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
         let errorMessage = `HTTP ${response.status}`;
         try {
           const errorData = await response.json();
+          console.log('[ReplyModal] Error response data:', errorData);
           errorMessage = errorData.error || errorData.message || errorMessage;
         } catch (e) {
           const text = await response.text();
+          console.log('[ReplyModal] Error response text:', text);
           if (text) errorMessage = text;
         }
         throw new Error(errorMessage);
@@ -97,9 +104,19 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
       console.error('[ReplyModal] Error sending reply:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to send reply. Please try again.';
       toast.error(errorMessage);
+      // Don't close modal on error - let user try again
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleButtonClick = (e) => {
+    console.log('[ReplyModal] Button clicked');
+    console.log('[ReplyModal] Current form state:', {
+      isSubmitting,
+      errors,
+      replyMessage: replyMessage.length,
+    });
   };
 
   return (
@@ -189,6 +206,18 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
           </div>
         </motion.details>
 
+        {/* Validation Errors Summary */}
+        {Object.keys(errors).length > 0 && (
+          <div className="p-3 sm:p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+            <p className="text-xs sm:text-sm text-red-400 font-semibold mb-2">Please fix the following errors:</p>
+            <ul className="space-y-1 text-xs sm:text-sm text-red-400">
+              {Object.entries(errors).map(([field, error]) => (
+                <li key={field}>• {error.message || `Invalid ${field}`}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Buttons - Full width on mobile, responsive heights */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -205,9 +234,10 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            onClick={handleButtonClick}
+            disabled={isSubmitting || Object.keys(errors).length > 0}
             className={`w-full sm:w-auto px-6 h-10 sm:h-11 rounded-lg font-semibold transition text-sm ${
-              isSubmitting
+              isSubmitting || Object.keys(errors).length > 0
                 ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
                 : 'bg-gradient-to-r from-[#61DAFB] to-[#005792] text-white hover:from-[#61DAFB]/90 hover:to-[#005792]/90'
             }`}
