@@ -41,6 +41,11 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
     console.log('[ReplyModal] onSubmit called with data:', data);
     console.log('[ReplyModal] Form validation passed');
 
+    // Dismiss keyboard on mobile
+    if (typeof window !== 'undefined' && document.activeElement instanceof HTMLTextAreaElement) {
+      document.activeElement.blur();
+    }
+
     setIsSubmitting(true);
     try {
       // Get session and token
@@ -98,26 +103,19 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
 
       toast.success('Reply sent successfully!');
       reset();
-      onClose();
+      // Close modal and refresh on success
+      setIsSubmitting(false);
       onReplySent();
+      setTimeout(() => onClose(), 300);
     } catch (error) {
       console.error('[ReplyModal] Error sending reply:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to send reply. Please try again.';
       toast.error(errorMessage);
-      // Don't close modal on error - let user try again
-    } finally {
       setIsSubmitting(false);
+      // Don't close modal on error - let user try again
     }
   };
 
-  const handleButtonClick = (e) => {
-    console.log('[ReplyModal] Button clicked');
-    console.log('[ReplyModal] Current form state:', {
-      isSubmitting,
-      errors,
-      replyMessage: replyMessage.length,
-    });
-  };
 
   return (
     <ResponsiveModal
@@ -176,7 +174,7 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
             </span>
           </div>
           <textarea
-            {...register('reply_message')}
+            {...register('reply_message', { required: true })}
             id="reply_message"
             rows={6}
             placeholder="Type your reply here..."
@@ -234,7 +232,6 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
           </button>
           <button
             type="submit"
-            onClick={handleButtonClick}
             disabled={isSubmitting || Object.keys(errors).length > 0}
             className={`w-full sm:w-auto px-6 h-10 sm:h-11 rounded-lg font-semibold transition text-sm ${
               isSubmitting || Object.keys(errors).length > 0

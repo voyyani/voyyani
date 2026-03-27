@@ -75,47 +75,156 @@ function submissionEmailTemplate(
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
-    .content { padding: 40px 30px; }
-    .section-title { font-size: 12px; font-weight: 700; color: #667eea; text-transform: uppercase; margin: 0 0 12px 0; }
-    .sender-info { background: #f9f9f9; border-left: 4px solid #667eea; padding: 16px; border-radius: 4px; margin-bottom: 20px; }
-    .info-row { margin: 8px 0; }
-    .info-label { font-weight: 600; color: #667eea; }
-    .message-box { background: #f5f5f5; padding: 20px; border-radius: 8px; line-height: 1.6; white-space: pre-wrap; }
-    .button { display: inline-block; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; }
-    .button-primary { background: #667eea; color: white; }
-    .footer { background: #f9f9f9; border-top: 1px solid #e0e0e0; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    * { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #0a0f1a;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .wrapper { background: linear-gradient(135deg, #0a1929 0%, #061220 100%); min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, #005792 0%, #61DAFB 100%);
+      padding: 40px 30px;
+      text-align: center;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 10px 25px rgba(0, 87, 146, 0.2);
+      position: relative;
+      border-top: 3px solid #D4A017;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .content {
+      background: #0f1f35;
+      padding: 30px;
+      border-bottom: 1px solid #334155;
+    }
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #D4A017;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #D4A017;
+    }
+    .sender-info {
+      background: linear-gradient(135deg, #061220 0%, #0a2845 100%);
+      border-left: 4px solid #D4A017;
+      padding: 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .info-row {
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    .info-label {
+      font-weight: 700;
+      color: #61DAFB;
+      display: inline-block;
+      min-width: 70px;
+    }
+    .info-row a {
+      color: #61DAFB;
+      text-decoration: none;
+      border-bottom: 1px solid #61DAFB;
+    }
+    .info-row a:hover {
+      color: #ffffff;
+    }
+    .message-section {
+      background: linear-gradient(135deg, rgba(97, 218, 251, 0.05) 0%, rgba(212, 160, 23, 0.05) 100%);
+      border: 1px solid #334155;
+      border-left: 4px solid #61DAFB;
+      padding: 20px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.7;
+    }
+    .cta-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #005792 0%, #003d5c 100%);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 6px;
+      font-size: 14px;
+      border: 1px solid #61DAFB;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 87, 146, 0.3);
+    }
+    .button:hover {
+      background: linear-gradient(135deg, #61DAFB 0%, #005792 100%);
+      box-shadow: 0 6px 16px rgba(97, 218, 251, 0.4);
+    }
+    .footer {
+      background: #061220;
+      border-top: 1px solid #334155;
+      padding: 20px 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      border-radius: 0 0 12px 12px;
+    }
+    .gold-accent { color: #D4A017; }
+    @media (max-width: 600px) {
+      .container { width: 100%; }
+      .header { padding: 30px 20px; }
+      .header h1 { font-size: 24px; }
+      .content { padding: 20px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>📨 New Portfolio Inquiry</h1>
-      <p>Someone is interested in connecting with you</p>
-    </div>
-    <div class="content">
-      <div>
-        <h3 class="section-title">Sender Information</h3>
-        <div class="sender-info">
-          <div class="info-row"><span class="info-label">Name:</span> ${escapeHtml(senderName)}</div>
-          <div class="info-row"><span class="info-label">Email:</span> <a href="mailto:${escapeHtml(senderEmail)}">${escapeHtml(senderEmail)}</a></div>
-          ${phone ? `<div class="info-row"><span class="info-label">Phone:</span> <a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a></div>` : ''}
-          <div class="info-row"><span class="info-label">Subject:</span> ${escapeHtml(subject)}</div>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <h1>📨 New Portfolio Inquiry</h1>
+        <p>A connection opportunity awaits</p>
+      </div>
+      <div class="content">
+        <div class="section">
+          <div class="section-title">📋 Sender Information</div>
+          <div class="sender-info">
+            <div class="info-row"><span class="info-label">Name:</span> ${escapeHtml(senderName)}</div>
+            <div class="info-row"><span class="info-label">Email:</span> <a href="mailto:${escapeHtml(senderEmail)}">${escapeHtml(senderEmail)}</a></div>
+            ${phone ? `<div class="info-row"><span class="info-label">Phone:</span> <a href="tel:${escapeHtml(phone)}">${escapeHtml(phone)}</a></div>` : ''}
+            <div class="info-row"><span class="info-label">Subject:</span> <span class="gold-accent">${escapeHtml(subject)}</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">💬 Message</div>
+          <div class="message-section">${escapeHtml(message)}</div>
+        </div>
+        <div class="cta-container">
+          <a href="${dashboardUrl}" class="button">→ Reply in Dashboard</a>
         </div>
       </div>
-      <div>
-        <h3 class="section-title">Message</h3>
-        <div class="message-box">${escapeHtml(message)}</div>
+      <div class="footer">
+        <p>This is an automated message from your <strong>Karisa Voyani</strong> portfolio. <span class="gold-accent">Engineering Precision • African Innovation • Modern Tech</span></p>
       </div>
-      <div style="margin-top: 30px;">
-        <a href="${dashboardUrl}" class="button button-primary">Reply in Dashboard</a>
-      </div>
-    </div>
-    <div class="footer">
-      <p>This is an automated message from your portfolio website.</p>
     </div>
   </div>
 </body>
@@ -129,29 +238,115 @@ function confirmationEmailTemplate(senderName: string, subject: string): string 
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
-    .content { padding: 40px 30px; line-height: 1.6; }
-    .footer { background: #f9f9f9; border-top: 1px solid #e0e0e0; padding: 20px 30px; text-align: center; font-size: 12px; color: #666; }
+    * { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #0a0f1a;
+      color: #e2e8f0;
+      line-height: 1.6;
+    }
+    .wrapper { background: linear-gradient(135deg, #0a1929 0%, #061220 100%); min-height: 100vh; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .header {
+      background: linear-gradient(135deg, #D4A017 0%, #B8860B 100%);
+      padding: 40px 30px;
+      text-align: center;
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 10px 25px rgba(212, 160, 23, 0.2);
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0a1929;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 14px;
+      color: rgba(10, 25, 41, 0.9);
+    }
+    .content {
+      background: #0f1f35;
+      padding: 30px;
+      border-bottom: 1px solid #334155;
+    }
+    .greeting { margin-bottom: 24px; }
+    .greeting p { font-size: 16px; color: #e2e8f0; margin-bottom: 16px; }
+    .highlight {
+      background: linear-gradient(135deg, rgba(97, 218, 251, 0.1) 0%, rgba(0, 87, 146, 0.1) 100%);
+      border-left: 4px solid #61DAFB;
+      padding: 16px;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .highlight-title { color: #61DAFB; font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+    .highlight-content { color: #cbd5e1; font-size: 14px; }
+    .subject-badge {
+      display: inline-block;
+      background: #005792;
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-top: 12px;
+      border: 1px solid #61DAFB;
+    }
+    .cta-text {
+      text-align: center;
+      margin: 28px 0;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .footer {
+      background: #061220;
+      border-top: 1px solid #334155;
+      padding: 20px 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      border-radius: 0 0 12px 12px;
+    }
+    .footer-accent { color: #D4A017; font-weight: 700; }
+    @media (max-width: 600px) {
+      .container { width: 100%; }
+      .header { padding: 30px 20px; }
+      .header h1 { font-size: 24px; }
+      .content { padding: 20px; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>✓ Message Received</h1>
-      <p>Thank you for reaching out!</p>
-    </div>
-    <div class="content">
-      <p>Hi ${escapeHtml(senderName)},</p>
-      <p>Thank you for your message! I've received your inquiry and will review it carefully. I aim to respond to all inquiries within 24-48 hours.</p>
-      <p><strong>Your Subject:</strong> ${escapeHtml(subject)}</p>
-      <p>Looking forward to connecting with you!</p>
-      <p><strong>Warm regards,</strong><br/>Karisa</p>
-    </div>
-    <div class="footer">
-      <p>This is an automated confirmation message</p>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <h1>✓ Message Received</h1>
+        <p>Thank you for connecting with us</p>
+      </div>
+      <div class="content">
+        <div class="greeting">
+          <p>Hi <strong>${escapeHtml(senderName)}</strong>,</p>
+          <p>Thank you for reaching out! Your message has been successfully received and is now in our system.</p>
+        </div>
+        <div class="highlight">
+          <div class="highlight-title">📍 Your Message Details</div>
+          <div class="highlight-content">
+            We're reviewing your inquiry with care. Our response team typically replies within <strong>24-48 hours</strong>. We look forward to discussing opportunities with you!
+            <div class="subject-badge">Subject: ${escapeHtml(subject)}</div>
+          </div>
+        </div>
+        <div class="cta-text">
+          <p>In the meantime, feel free to explore more about <strong>Karisa's work</strong> and expertise on the portfolio.</p>
+        </div>
+        <div style="text-align: center; margin-top: 24px; padding: 16px; background: rgba(212, 160, 23, 0.05); border-radius: 6px; border-left: 4px solid #D4A017;">
+          <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">Engineering Precision • African Innovation • Modern Tech</p>
+          <p style="font-size: 13px; color: #61DAFB;">Thank you for your interest!</p>
+        </div>
+      </div>
+      <div class="footer">
+        <p>This is an automated confirmation from <span class="footer-accent">Karisa Voyani's Portfolio</span></p>
+        <p style="margin-top: 8px;">Questions? Reply to this email or visit the portfolio.</p>
+      </div>
     </div>
   </div>
 </body>
