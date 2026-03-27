@@ -48,7 +48,7 @@ const getOrigin = (req: Request) => {
 
 const getCorsHeaders = (req: Request) => ({
   'Access-Control-Allow-Origin': getOrigin(req),
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-csrf-token',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Max-Age': '86400',
 });
@@ -155,7 +155,7 @@ async function sendEmailViaResend(to: string, subject: string, html: string, ret
           'Authorization': `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: `Portfolio <noreply@resend.dev>`,
+          from: 'Karisa <karisa@voyani.tech>',
           to,
           subject,
           html,
@@ -311,6 +311,14 @@ serve(async (req) => {
     });
   }
 
+  // Only allow POST method
+  if (req.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      { status: 405, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+    );
+  }
+
   const startTime = Date.now();
   const clientIp = req.headers.get('x-forwarded-for') || 'unknown';
   let userId: string | null = null;
@@ -366,12 +374,24 @@ serve(async (req) => {
 
     userId = decoded.sub;
 
-    // Check role - optional for dev, but log it
-    const role = decoded.role || decoded.user_role || 'user';
+    // Check role - must be admin to send replies
+    const role = decoded.role || decoded.user_role || '';
     console.log('[send-reply] User role:', role);
-    const allowedRoles = ['admin', 'content_manager', 'owner', 'super_admin', 'user'];
-    if (!allowedRoles.includes(String(role))) {
-      console.warn('[send-reply] Role not in allowed list, but allowing. Role:', role);
+    const allowedRoles = ['admin', 'content_manager', 'owner', 'super_admin'];
+    if (!allowedRoles.includes(String(role).toLowerCase())) {
+      console.error('[send-reply] Unauthorized role:', role);
+      await sendToSentry({
+        timestamp: new Date().toISOString(),
+        level: 'warning',
+        message: `Unauthorized role attempted to send reply: ${role}`,
+        logger: 'send-reply',
+        tags: { type: 'auth_error', user_id: userId || 'unknown', role: String(role) },
+      });
+
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Admin privileges required' }),
+        { status: 403, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      );
     }
 
     // Rate limiting check (persistent database-backed)

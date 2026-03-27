@@ -4,6 +4,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import ResponsiveModal from './ResponsiveModal';
 
 interface Label {
   id: string;
@@ -130,163 +131,166 @@ export default function LabelsManager({
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-          onClick={onClose}
+    <ResponsiveModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Manage Labels"
+      size="md"
+      position="center"
+      closeButton={true}
+    >
+      <div className="px-4 sm:px-5 md:px-6 space-y-4 sm:space-y-6">
+        {/* Form Section */}
+        <motion.form
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-3 sm:space-y-4 bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 md:p-5"
         >
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#0a1929] border border-white/10 rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-          >
-            {/* Header */}
-            <div className="flex justify-between items-center p-6 border-b border-white/10">
-              <h2 className="text-2xl font-bold text-white">Manage Labels</h2>
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors text-2xl"
-              >
-                ✕
-              </button>
-            </div>
+          {/* Label Name */}
+          <div>
+            <label className="block text-xs sm:text-sm font-semibold text-gray-300 mb-2">
+              Label Name
+            </label>
+            <input
+              {...register('name')}
+              type="text"
+              placeholder="e.g., Urgent, Collaboration, Feedback"
+              className="w-full bg-white/10 border border-white/20 rounded-lg px-3 sm:px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:bg-white/20 text-sm"
+            />
+            {errors.name && (
+              <p className="text-red-400 text-xs sm:text-sm mt-1">{errors.name.message}</p>
+            )}
+          </div>
 
-            <div className="p-6 space-y-6">
-              {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Label Name
-                  </label>
-                  <input
-                    {...register('name')}
-                    type="text"
-                    placeholder="e.g., Urgent, Collaboration, Feedback"
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:bg-white/20"
-                  />
-                  {errors.name && (
-                    <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
-                      Color
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        {...register('color')}
-                        type="color"
-                        className="w-12 h-12 rounded-lg cursor-pointer border border-white/20"
-                        defaultValue="#808080"
-                      />
-                      <input
-                        type="text"
-                        value={watchColor || '#808080'}
-                        readOnly
-                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-sm"
-                      />
-                    </div>
-                    {errors.color && (
-                      <p className="text-red-400 text-sm mt-1">{errors.color.message}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-300 mb-2">
-                      Description (Optional)
-                    </label>
-                    <input
-                      {...register('description')}
-                      type="text"
-                      placeholder="What is this label for?"
-                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-semibold py-2 rounded-lg transition-colors"
-                  >
-                    {loading ? 'Saving...' : editingId ? 'Update Label' : 'Create Label'}
-                  </button>
-                  {editingId && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingId(null);
-                        reset();
-                      }}
-                      className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </form>
-
-              {/* Divider */}
-              <div className="border-t border-white/10" />
-
-              {/* Labels List */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Existing Labels ({labels.length})</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {labels.map((label) => (
-                    <motion.div
-                      key={label.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      className="bg-white/5 border border-white/10 rounded-lg p-4"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: label.color }}
-                          />
-                          <span className="font-semibold text-white">{label.name}</span>
-                        </div>
-                      </div>
-                      {label.description && (
-                        <p className="text-sm text-gray-400 mb-3">{label.description}</p>
-                      )}
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => startEdit(label)}
-                          className="flex-1 text-sm bg-blue-600/30 hover:bg-blue-600/50 text-blue-400 py-1 rounded transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteLabel(label.id)}
-                          className="flex-1 text-sm bg-red-600/30 hover:bg-red-600/50 text-red-400 py-1 rounded transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-                {labels.length === 0 && (
-                  <p className="text-gray-400 text-center py-8">No labels yet. Create your first label above!</p>
-                )}
+          {/* Color and Description - Responsive grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-300 mb-2">
+                Color
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  {...register('color')}
+                  type="color"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg cursor-pointer border border-white/20"
+                  defaultValue="#808080"
+                />
+                <input
+                  type="text"
+                  value={watchColor || '#808080'}
+                  readOnly
+                  className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-xs sm:text-sm"
+                />
               </div>
+              {errors.color && (
+                <p className="text-red-400 text-xs sm:text-sm mt-1">{errors.color.message}</p>
+              )}
             </div>
-          </motion.div>
+
+            <div>
+              <label className="block text-xs sm:text-sm font-semibold text-gray-300 mb-2">
+                Description (Optional)
+              </label>
+              <input
+                {...register('description')}
+                type="text"
+                placeholder="What is this label for?"
+                className="w-full bg-white/10 border border-white/20 rounded-lg px-3 sm:px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons - Responsive layout */}
+          <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-semibold py-2 rounded-lg transition-colors text-sm h-10"
+            >
+              {loading ? 'Saving...' : editingId ? 'Update Label' : 'Create Label'}
+            </button>
+            {editingId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  reset();
+                }}
+                className="px-4 h-10 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors text-sm"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </motion.form>
+
+        {/* Divider */}
+        <div className="border-t border-white/10" />
+
+        {/* Labels List */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <h3 className="text-sm sm:text-base font-semibold text-white mb-3">
+            Existing Labels ({labels.length})
+          </h3>
+
+          {labels.length === 0 ? (
+            <p className="text-gray-400 text-center py-6 sm:py-8 text-xs sm:text-sm">
+              No labels yet. Create your first label above!
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3">
+              <AnimatePresence>
+                {labels.map((label) => (
+                  <motion.div
+                    key={label.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className="w-3 h-3 flex-shrink-0 rounded-full"
+                          style={{ backgroundColor: label.color }}
+                        />
+                        <span className="font-semibold text-white text-xs sm:text-sm truncate">
+                          {label.name}
+                        </span>
+                      </div>
+                    </div>
+                    {label.description && (
+                      <p className="text-xs sm:text-sm text-gray-400 mb-3 line-clamp-2">
+                        {label.description}
+                      </p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => startEdit(label)}
+                        className="flex-1 text-xs sm:text-sm bg-blue-600/30 hover:bg-blue-600/50 text-blue-400 py-1 sm:py-1.5 rounded transition-colors h-8 sm:h-9"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteLabel(label.id)}
+                        className="flex-1 text-xs sm:text-sm bg-red-600/30 hover:bg-red-600/50 text-red-400 py-1 sm:py-1.5 rounded transition-colors h-8 sm:h-9"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
         </motion.div>
-      )}
-    </AnimatePresence>
+      </div>
+    </ResponsiveModal>
   );
 }
+

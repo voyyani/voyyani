@@ -222,35 +222,45 @@ export const SubmissionsPage = ({ client }) => {
   }
 
   return (
-    <div className="space-y-8 pb-24">
-      {/* Header with Labels Manager Button */}
-      <div className="flex justify-between items-start">
+    <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-24">
+      {/* Header with Labels Manager Button - responsive layout */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4"
+      >
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Submissions</h1>
-          <p className="text-gray-400">Manage and respond to contact inquiries</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Submissions</h1>
+          <p className="text-sm sm:text-base text-gray-400">Manage and respond to contact inquiries</p>
         </div>
         <button
           onClick={() => setShowLabelsManager(true)}
-          className="px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-400 rounded-lg transition-colors"
+          className="w-full sm:w-auto px-4 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-400 rounded-lg transition-colors text-sm sm:text-base font-medium flex-shrink-0"
         >
           🏷️ Manage Labels
         </button>
-      </div>
+      </motion.div>
 
-      {/* Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Controls - responsive grid: full-width mobile → stacked on small tablets → full grid on desktop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
+        className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-5 gap-2 sm:gap-3"
+      >
         <input
           type="text"
-          placeholder="Search by name, email, or subject..."
+          placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="col-span-1 md:col-span-2 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
+          className="md:col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm sm:text-base"
         />
 
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
+          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
         >
           <option value="all" className="bg-[#0a1929]">All Statuses</option>
           <option value="new" className="bg-[#0a1929]">New</option>
@@ -262,7 +272,7 @@ export const SubmissionsPage = ({ client }) => {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
+          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
         >
           <option value="newest" className="bg-[#0a1929]">Newest First</option>
           <option value="oldest" className="bg-[#0a1929]">Oldest First</option>
@@ -272,15 +282,15 @@ export const SubmissionsPage = ({ client }) => {
         <select
           value={archiveFilter}
           onChange={(e) => setArchiveFilter(e.target.value)}
-          className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
+          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
         >
           <option value="active" className="bg-[#0a1929]">Active</option>
           <option value="archived" className="bg-[#0a1929]">Archived</option>
           <option value="all" className="bg-[#0a1929]">All</option>
         </select>
-      </div>
+      </motion.div>
 
-      {/* Submissions List */}
+      {/* Submissions List - responsive: card view on mobile, table on desktop */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -292,114 +302,181 @@ export const SubmissionsPage = ({ client }) => {
             <p className="text-sm">Try adjusting your filters</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="px-4 py-4 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.size === filteredSubmissions.length && filteredSubmissions.length > 0}
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="w-4 h-4 cursor-pointer"
-                    />
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Subject</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Priority</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Labels</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Replies</th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Date</th>
-                  <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {filteredSubmissions.map((submission) => {
-                    const submissionLabels = labels.filter(
-                      l => submission.submission_labels?.some(sl => sl.label_id === l.id)
-                    );
-
-                    return (
-                      <motion.tr
-                        key={submission.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="border-b border-white/5 hover:bg-white/5 transition-colors"
+          <>
+            {/* Mobile card view */}
+            <div className="md:hidden space-y-2 p-3 sm:p-4">
+              {filteredSubmissions.map((submission) => {
+                const submissionLabels = labels.filter(
+                  l => submission.submission_labels?.some(sl => sl.label_id === l.id)
+                );
+                return (
+                  <motion.div
+                    key={submission.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="bg-white/5 border border-white/5 rounded-lg p-3 sm:p-4 hover:bg-white/10 transition-colors space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(submission.id)}
+                          onChange={(e) => handleSelectOne(submission.id, e.target.checked)}
+                          className="w-4 h-4 cursor-pointer mr-2 inline-block"
+                        />
+                        <span className="text-white font-medium text-sm">{submission.name}</span>
+                      </div>
+                      <span className={`inline-block px-2 py-1 rounded text-xs font-semibold flex-shrink-0 ${getStatusColor(submission.status)}`}>
+                        {getStatusLabel(submission.status)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">{submission.email}</p>
+                    <p className="text-sm text-gray-300 line-clamp-2">{submission.subject}</p>
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <span>📅 {new Date(submission.created_at).toLocaleDateString()}</span>
+                        <span>💬 {submission.submission_replies?.[0]?.count || 0}</span>
+                      </div>
+                      <button
+                        onClick={() => setSelectedSubmission(submission)}
+                        className="text-[#61DAFB] hover:text-[#61DAFB]/80 text-sm font-medium transition-colors"
                       >
-                        <td className="px-4 py-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedIds.has(submission.id)}
-                            onChange={(e) => handleSelectOne(submission.id, e.target.checked)}
-                            className="w-4 h-4 cursor-pointer"
-                          />
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="font-medium text-white">{submission.name}</span>
-                            <span className="text-sm text-gray-400">{submission.email}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-200 truncate max-w-xs">{submission.subject}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(submission.status)}`}>
-                            {getStatusLabel(submission.status)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                            submission.priority === 'urgent' ? 'bg-red-600/30 text-red-400' :
-                            submission.priority === 'high' ? 'bg-orange-600/30 text-orange-400' :
-                            submission.priority === 'normal' ? 'bg-blue-600/30 text-blue-400' :
-                            'bg-gray-600/30 text-gray-400'
-                          }`}>
-                            {submission.priority || 'normal'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-1 flex-wrap">
-                            {submissionLabels.slice(0, 2).map((label) => (
-                              <span
-                                key={label.id}
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-white"
-                                style={{ backgroundColor: label.color + '33' }}
-                              >
-                                <div
-                                  className="w-2 h-2 rounded-full"
-                                  style={{ backgroundColor: label.color }}
-                                />
-                                {label.name}
-                              </span>
-                            ))}
-                            {submissionLabels.length > 2 && (
-                              <span className="text-xs text-gray-400">+{submissionLabels.length - 2}</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-400">
-                          {submission.submission_replies?.[0]?.count || 0}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-400">
-                          {new Date(submission.created_at).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => setSelectedSubmission(submission)}
-                            className="text-[#61DAFB] hover:text-[#61DAFB]/80 text-sm font-medium transition-colors"
+                        View →
+                      </button>
+                    </div>
+                    {submissionLabels.length > 0 && (
+                      <div className="flex gap-1 flex-wrap pt-1">
+                        {submissionLabels.slice(0, 3).map((label) => (
+                          <span
+                            key={label.id}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs text-white"
+                            style={{ backgroundColor: label.color + '33' }}
                           >
-                            View
-                          </button>
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </AnimatePresence>
-              </tbody>
-            </table>
-          </div>
+                            <div
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: label.color }}
+                            />
+                            {label.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Desktop table view */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/10 bg-white/5">
+                    <th className="px-4 py-4 text-left">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.size === filteredSubmissions.length && filteredSubmissions.length > 0}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="w-4 h-4 cursor-pointer"
+                      />
+                    </th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Name</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Subject</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Status</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Priority</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Labels</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Replies</th>
+                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Date</th>
+                    <th className="px-4 py-4 text-right text-xs sm:text-sm font-semibold text-gray-300">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {filteredSubmissions.map((submission) => {
+                      const submissionLabels = labels.filter(
+                        l => submission.submission_labels?.some(sl => sl.label_id === l.id)
+                      );
+
+                      return (
+                        <motion.tr
+                          key={submission.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                        >
+                          <td className="px-4 py-4">
+                            <input
+                              type="checkbox"
+                              checked={selectedIds.has(submission.id)}
+                              onChange={(e) => handleSelectOne(submission.id, e.target.checked)}
+                              className="w-4 h-4 cursor-pointer"
+                            />
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white text-sm">{submission.name}</span>
+                              <span className="text-xs text-gray-400">{submission.email}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-200 truncate max-w-xs">{submission.subject}</td>
+                          <td className="px-4 py-4">
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(submission.status)}`}>
+                              {getStatusLabel(submission.status)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                              submission.priority === 'urgent' ? 'bg-red-600/30 text-red-400' :
+                              submission.priority === 'high' ? 'bg-orange-600/30 text-orange-400' :
+                              submission.priority === 'normal' ? 'bg-blue-600/30 text-blue-400' :
+                              'bg-gray-600/30 text-gray-400'
+                            }`}>
+                              {submission.priority || 'normal'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex gap-1 flex-wrap">
+                              {submissionLabels.slice(0, 2).map((label) => (
+                                <span
+                                  key={label.id}
+                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-white"
+                                  style={{ backgroundColor: label.color + '33' }}
+                                >
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ backgroundColor: label.color }}
+                                  />
+                                  {label.name}
+                                </span>
+                              ))}
+                              {submissionLabels.length > 2 && (
+                                <span className="text-xs text-gray-400">+{submissionLabels.length - 2}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-400">
+                            {submission.submission_replies?.[0]?.count || 0}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-400">
+                            {new Date(submission.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-4 text-right">
+                            <button
+                              onClick={() => setSelectedSubmission(submission)}
+                              className="text-[#61DAFB] hover:text-[#61DAFB]/80 text-sm font-medium transition-colors"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </motion.div>
 

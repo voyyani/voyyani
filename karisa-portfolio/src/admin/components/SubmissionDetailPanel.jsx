@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import ReplyModal from './ReplyModal';
 import ConversationTimeline from './ConversationTimeline';
+import ResponsiveModal from './ResponsiveModal';
 
 const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
@@ -69,81 +70,104 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto backdrop-blur"
+    <ResponsiveModal
+      isOpen={true}
+      onClose={onClose}
+      size="lg"
+      position="center"
+      closeButton={false}
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-[#0a1929] border border-white/10 rounded-lg shadow-2xl max-w-4xl w-full my-8"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 p-6">
-          <div>
-            <h2 className="text-2xl font-bold text-white">{submission.subject}</h2>
-            <p className="text-sm text-gray-400 mt-1">From: {submission.name} ({submission.email})</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-200 text-3xl font-light"
-          >
-            ✕
-          </button>
+      {/* Header - Responsive stacking */}
+      <div className="border-b border-white/10 px-4 sm:px-5 md:px-6 py-4 sm:py-5 -mx-4 sm:-mx-5 md:-mx-6 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">
+            {submission.subject}
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2 line-clamp-2">
+            From: {submission.name} ({submission.email})
+          </p>
         </div>
+        <button
+          onClick={onClose}
+          className="flex-shrink-0 -mt-2 sm:mt-0 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-200 hover:bg-white/5 transition-colors"
+          aria-label="Close panel"
+        >
+          <span className="text-2xl">✕</span>
+        </button>
+      </div>
 
-        {/* Content */}
-        <div className="grid grid-cols-3 gap-6 p-6">
-          {/* Main content */}
-          <div className="col-span-2 space-y-6">
+      {/* Content - Grid responsive layout */}
+      <div className="px-4 sm:px-5 md:px-6 pt-4 sm:pt-5 md:pt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Main content - Order 1 on mobile, 0 on desktop */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 order-2 lg:order-1">
             {/* Original Message */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <h3 className="font-semibold text-white mb-3">Original Message</h3>
-              <p className="text-gray-200 whitespace-pre-wrap text-sm leading-relaxed">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 md:p-5"
+            >
+              <h3 className="font-semibold text-white mb-2 sm:mb-3 text-sm sm:text-base">
+                Original Message
+              </h3>
+              <p className="text-gray-200 whitespace-pre-wrap text-xs sm:text-sm leading-relaxed">
                 {submission.message}
               </p>
-              <div className="mt-4 text-xs text-gray-500 space-y-1">
+              <div className="mt-3 sm:mt-4 text-xs text-gray-500 space-y-1">
                 <p>Submitted: {new Date(submission.created_at).toLocaleString()}</p>
                 {submission.phone && <p>Phone: {submission.phone}</p>}
               </div>
-            </div>
+            </motion.div>
 
             {/* Conversation Timeline */}
-            <div>
-              <h3 className="font-semibold text-white mb-3">Conversation</h3>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">
+                Conversation
+              </h3>
               {loadingReplies ? (
-                <p className="text-gray-400">Loading replies...</p>
+                <p className="text-gray-400 text-sm">Loading replies...</p>
               ) : replies.length === 0 ? (
-                <p className="text-gray-400 text-sm">No replies yet</p>
+                <p className="text-gray-400 text-xs sm:text-sm">No replies yet</p>
               ) : (
                 <ConversationTimeline
                   originalMessage={submission.message}
                   replies={replies}
                 />
               )}
-            </div>
+            </motion.div>
 
-            {/* Reply Modal Button */}
-            <button
+            {/* Reply Button - Full width on mobile */}
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
               onClick={() => setIsReplyModalOpen(true)}
-              className="w-full bg-gradient-to-r from-[#61DAFB] to-[#005792] text-white py-3 rounded-lg font-semibold hover:from-[#61DAFB]/90 hover:to-[#005792]/90 transition"
+              className="w-full bg-gradient-to-r from-[#61DAFB] to-[#005792] text-white py-3 sm:py-3 rounded-lg font-semibold hover:from-[#61DAFB]/90 hover:to-[#005792]/90 transition text-sm sm:text-base h-10 sm:h-11"
             >
               Send Reply
-            </button>
+            </motion.button>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - Repositioned below main on mobile */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="space-y-4 sm:space-y-6 order-1 lg:order-2"
+          >
             {/* Status */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Status</label>
+              <label className="block text-xs sm:text-sm font-semibold text-white mb-2">
+                Status
+              </label>
               <select
                 value={status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50"
               >
                 <option value="new" className="bg-[#0a1929]">New</option>
                 <option value="in_progress" className="bg-[#0a1929]">In Progress</option>
@@ -154,37 +178,48 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Internal Notes</label>
+              <label className="block text-xs sm:text-sm font-semibold text-white mb-2">
+                Internal Notes
+              </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add internal notes..."
                 rows={4}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 resize-none"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 resize-none"
               />
               <button
                 onClick={handleSaveNotes}
                 disabled={isSavingNotes}
-                className="mt-2 w-full text-sm bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg font-medium transition"
+                className="mt-2 w-full text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg font-medium transition h-9 sm:h-10"
               >
                 {isSavingNotes ? 'Saving...' : 'Save Notes'}
               </button>
             </div>
 
             {/* Info */}
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <h4 className="font-semibold text-white mb-3">Details</h4>
-              <div className="space-y-2 text-sm">
-                <p><span className="text-gray-400">Submitted:</span> <span className="text-gray-200">{new Date(submission.created_at).toLocaleString()}</span></p>
-                <p><span className="text-gray-400">Replies:</span> <span className="text-gray-200">{replies.length}</span></p>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 md:p-5">
+              <h4 className="font-semibold text-white mb-2 sm:mb-3 text-sm">Details</h4>
+              <div className="space-y-2 text-xs sm:text-sm">
+                <p>
+                  <span className="text-gray-400">Submitted:</span>{' '}
+                  <span className="text-gray-200">{new Date(submission.created_at).toLocaleString()}</span>
+                </p>
+                <p>
+                  <span className="text-gray-400">Replies:</span>{' '}
+                  <span className="text-gray-200">{replies.length}</span>
+                </p>
                 {submission.responded_at && (
-                  <p><span className="text-gray-400">First responded:</span> <span className="text-gray-200">{new Date(submission.responded_at).toLocaleString()}</span></p>
+                  <p>
+                    <span className="text-gray-400">First responded:</span>{' '}
+                    <span className="text-gray-200">{new Date(submission.responded_at).toLocaleString()}</span>
+                  </p>
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Reply Modal */}
       {isReplyModalOpen && (
@@ -198,7 +233,7 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
           client={client}
         />
       )}
-    </motion.div>
+    </ResponsiveModal>
   );
 };
 

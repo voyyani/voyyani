@@ -11,10 +11,63 @@ async function verifyWebhookSignature(
   signature: string,
   secret: string
 ): Promise<boolean> {
-    if (!secret) {
-      console.warn("No webhook secret configured - skipping signature verification");
-      return true; // Allow if no secret configured
+  if (!secret) {
+    console.warn("No webhook secret configured - skipping signature verification");
+    return true; // Allow if no secret configured (development mode)
+  }
+
+  try {
+    // Resend sends signature as: v1,<timestamp>:<signature_hex>
+    const parts = signature.split(',');
+    if (parts.length < 2 || !parts[1].includes(':')) {
+      console.error("[Webhook] Invalid signature format");
+      return false;
     }
+
+    const [timestamp, signatureHex] = parts[1].split(':');
+    const signedPayload = `${timestamp}.${body}`;
+
+    // Create HMAC-SHA256 using Web Crypto API
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signatureBytes = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(signedPayload)
+    );
+
+    // Convert to hex
+    const expectedHex = Array.from(new Uint8Array(signatureBytes))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    // Constant-time comparison to prevent timing attacks
+    if (expectedHex.length !== signatureHex.length) {
+      console.error("[Webhook] Signature length mismatch");
+      return false;
+    }
+
+    let result = 0;
+    for (let i = 0; i < expectedHex.length; i++) {
+      result |= expectedHex.charCodeAt(i) ^ signatureHex.charCodeAt(i);
+    }
+
+    const isValid = result === 0;
+    if (!isValid) {
+      console.error("[Webhook] Signature mismatch - possible tampering");
+    }
+    return isValid;
+  } catch (error) {
+    console.error("[Webhook] Signature verification error:", error);
+    return false;
+  }
 }
 
 // Map Resend event types to our email_status values
@@ -139,7 +192,7 @@ serve(async (req) => {
 
     if (updateError) {
       console.error("Error updating reply:", updateError);
-      Sentry.captureException(updateError);
+      // Error already logged via console.error
       return new Response(
         JSON.stringify({ error: "Failed to update reply" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
