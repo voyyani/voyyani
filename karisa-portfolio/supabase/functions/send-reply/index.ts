@@ -161,23 +161,34 @@ async function sendToSentry(event: SentryEvent) {
   }
 }
 
-async function sendEmailViaResend(to: string, subject: string, html: string, retries = 3): Promise<{ id: string }> {
+async function sendEmailViaResend(to: string, subject: string, html: string, submissionId: string, retries = 3): Promise<{ id: string }> {
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
+      // Explicitly construct payload to avoid scoping issues
+      const replyToAddress = `reply+${submissionId}@voyani.tech`;
+      const messageId = `<${submissionId}.${Date.now()}@voyani.tech>`;
+
+      const payload = {
+        from: 'Karisa <karisa@voyani.tech>',
+        reply_to: replyToAddress,
+        to,
+        subject,
+        html,
+        headers: {
+          'X-Submission-ID': submissionId,
+          'Message-ID': messageId,
+        },
+      };
+
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${resendApiKey}`,
         },
-        body: JSON.stringify({
-          from: 'Karisa <karisa@voyani.tech>',
-          to,
-          subject,
-          html,
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -862,7 +873,8 @@ serve(async (req) => {
       const emailResult = await sendEmailViaResend(
         submission.email,
         `Re: ${submission.subject}`,
-        html
+        html,
+        submissionId
       );
       emailId = emailResult.id;
     } catch (emailError) {

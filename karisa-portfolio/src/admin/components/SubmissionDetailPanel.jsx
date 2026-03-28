@@ -4,18 +4,39 @@ import { motion } from 'framer-motion';
 import ReplyModal from './ReplyModal';
 import ConversationTimeline from './ConversationTimeline';
 import ResponsiveModal from './ResponsiveModal';
+import InboundEmailCard from './InboundEmailCard';
+import { useInboundEmails, markEmailAsRead, toggleEmailImportant } from '@/hooks/useInboundEmails';
 
-const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
+const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client, userId }) => {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [status, setStatus] = useState(submission.status);
   const [notes, setNotes] = useState(submission.notes || '');
   const [replies, setReplies] = useState([]);
   const [loadingReplies, setLoadingReplies] = useState(true);
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(userId);
+
+  // Inbound emails
+  const { emails: inboundEmails, loading: loadingInbound, error: inboundError } = useInboundEmails(submission.id, client);
+  const [selectedEmailId, setSelectedEmailId] = useState(null);
 
   useEffect(() => {
     fetchReplies();
-  }, [submission.id]);
+    // Get current user ID from auth if not provided as prop
+    const getUser = async () => {
+      try {
+        const { data: { user } } = await client.auth.getUser();
+        if (user?.id) {
+          setCurrentUserId(user.id);
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+    if (!currentUserId) {
+      getUser();
+    }
+  }, [submission.id, client]);
 
   const fetchReplies = async () => {
     try {
@@ -69,6 +90,20 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
     }
   };
 
+  const handleEmailMarkAsRead = async (emailId) => {
+    const result = await markEmailAsRead(emailId, currentUserId || userId, client);
+    if (!result.success) {
+      toast.error(result.error || 'Failed to mark as read');
+    }
+  };
+
+  const handleEmailToggleImportant = async (emailId, isImportant) => {
+    const result = await toggleEmailImportant(emailId, isImportant, client);
+    if (!result.success) {
+      toast.error(result.error || 'Failed to update email');
+    }
+  };
+
   return (
     <ResponsiveModal
       isOpen={true}
@@ -119,24 +154,63 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
               </div>
             </motion.div>
 
-            {/* Conversation Timeline */}
+            {/* Outbound Conversation Timeline */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
             >
               <h3 className="font-semibold text-white mb-3 text-sm sm:text-base">
-                Conversation
+                Outbound Messages
               </h3>
               {loadingReplies ? (
                 <p className="text-gray-400 text-sm">Loading replies...</p>
               ) : replies.length === 0 ? (
-                <p className="text-gray-400 text-xs sm:text-sm">No replies yet</p>
+                <p className="text-gray-400 text-xs sm:text-sm">No outbound replies yet</p>
               ) : (
                 <ConversationTimeline
                   originalMessage={submission.message}
                   replies={replies}
                 />
+              )}
+            </motion.div>
+
+            {/* Inbound Emails */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <h3 className="font-semibold text-white mb-3 text-sm sm:text-base flex items-center gap-2">
+                📧 Customer Replies
+                {inboundEmails.length > 0 && !loadingInbound && (
+                  <span className="text-xs bg-blue-500/30 px-2 py-1 rounded-full">
+                    {inboundEmails.length}
+                  </span>
+                )}
+              </h3>
+              {loadingInbound ? (
+                <p className="text-gray-400 text-sm">Loading emails...</p>
+              ) : inboundError ? (
+                <p className="text-red-400 text-xs sm:text-sm">Error loading emails: {inboundError}</p>
+              ) : inboundEmails.length === 0 ? (
+                <p className="text-gray-400 text-xs sm:text-sm">No email replies yet</p>
+              ) : (
+                <div className="space-y-3">
+                  {inboundEmails.map((email) => (
+                    <InboundEmailCard
+                      key={email.id}
+                      email={email}
+                      attachments={email.inbound_attachments || []}
+                      isSelected={selectedEmailId === email.id}
+                      onSelect={() => setSelectedEmailId(email.id)}
+                      onMarkAsRead={handleEmailMarkAsRead}
+                      onToggleStar={handleEmailToggleImportant}
+                      client={client}
+                      userId={currentUserId || userId}
+                    />
+                  ))}
+                </div>
               )}
             </motion.div>
 

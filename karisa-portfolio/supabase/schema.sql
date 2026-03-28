@@ -143,8 +143,7 @@ DROP POLICY IF EXISTS "rate_limits_service_role" ON public.rate_limits;
 
 -- RLS Policy: Service role can access all for rate limiting checks
 CREATE POLICY "rate_limits_service_role" ON public.rate_limits
-  USING (true)
-  WITH CHECK (true);
+  FOR ALL USING (true) WITH CHECK (true);
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON public.submissions(status);
