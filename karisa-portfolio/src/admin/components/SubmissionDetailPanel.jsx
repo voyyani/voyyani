@@ -222,17 +222,16 @@ const SubmissionDetailPanel = ({ submission, onClose, onRefresh, client }) => {
       </div>
 
       {/* Reply Modal */}
-      {isReplyModalOpen && (
-        <ReplyModal
-          submission={submission}
-          onClose={() => setIsReplyModalOpen(false)}
-          onReplySent={() => {
-            fetchReplies();
-            handleStatusChange('responded');
-          }}
-          client={client}
-        />
-      )}
+      <ReplyModal
+        submission={submission}
+        isOpen={isReplyModalOpen}
+        onClose={() => setIsReplyModalOpen(false)}
+        onReplySent={() => {
+          fetchReplies();
+          handleStatusChange('responded');
+        }}
+        client={client}
+      />
     </ResponsiveModal>
   );
 };

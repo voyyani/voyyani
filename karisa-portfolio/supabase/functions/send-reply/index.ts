@@ -46,11 +46,19 @@ if (!supabaseUrl || !supabaseServiceKey || !resendApiKey) {
 
 // Get origin from request, fallback to portfolio URL for production
 const getOrigin = (req: Request) => {
-  const origin = req.headers.get('origin') || portfolioUrl;
-  // Allow localhost for development, production domain for production
-  if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+  const origin = req.headers.get('origin');
+
+  // Allow localhost for development
+  if (origin && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
     return origin;
   }
+
+  // For production, use the origin from the request or fallback to PORTFOLIO_URL
+  // Ensure we're returning the exact origin the browser sent, not a fallback
+  if (origin) {
+    return origin;
+  }
+
   return portfolioUrl;
 };
 
@@ -267,150 +275,390 @@ function replyEmailTemplate(
   originalSubject: string,
   originalMessage: string
 ): string {
+  // African pattern SVG - matches homepage design
+  const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
+
   return `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Re: ${escapeHtml(originalSubject)}</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
+  </style>
+  <![endif]-->
   <style>
-    * { margin: 0; padding: 0; }
+    /* Import Google Fonts - Rajdhani & Inter (matching homepage) */
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* CSS Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: #0a0f1a;
-      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #061220 0%, #0a1929 100%);
+      color: #f0f0f0;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    .wrapper { background: linear-gradient(135deg, #0a1929 0%, #061220 100%); min-height: 100vh; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; }
+
+    /* Typography matching homepage */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Main wrapper with African pattern background */
+    .wrapper {
+      background: linear-gradient(135deg, #061220 0%, #0a1929 100%);
+      background-image: url("${africanPattern}"), linear-gradient(135deg, #061220 0%, #0a1929 100%);
+      background-size: 60px 60px, 100%;
+      background-position: 0 0, 0 0;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      background: rgba(15, 31, 53, 0.6);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(97, 218, 251, 0.1);
+    }
+
+    /* Header - Premium gradient matching Hero component */
     .header {
       background: linear-gradient(135deg, #005792 0%, #61DAFB 100%);
-      padding: 40px 30px;
+      padding: 48px 40px;
       text-align: center;
-      border-radius: 12px 12px 0 0;
-      box-shadow: 0 10px 25px rgba(0, 87, 146, 0.2);
-      border-top: 3px solid #D4A017;
+      position: relative;
       border-bottom: 3px solid #D4A017;
+      box-shadow: 0 10px 30px rgba(0, 87, 146, 0.3);
     }
+
+    /* Premium badge (inspired by Hero badge) */
+    .badge {
+      display: inline-block;
+      padding: 8px 20px;
+      margin-bottom: 16px;
+      border: 2px solid rgba(212, 160, 23, 0.6);
+      background: rgba(212, 160, 23, 0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #D4A017;
+    }
+
     .header h1 {
-      font-size: 28px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 32px;
       font-weight: 700;
       color: #ffffff;
       margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
-    .header p {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.9);
+
+    .header-subtitle {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.95);
+      font-weight: 500;
     }
+
+    /* Content area */
     .content {
-      background: #0f1f35;
-      padding: 30px;
-      border-bottom: 1px solid #334155;
+      background: linear-gradient(135deg, rgba(10, 25, 41, 0.95) 0%, rgba(6, 18, 32, 0.95) 100%);
+      padding: 40px;
     }
-    .greeting { margin-bottom: 24px; font-size: 16px; color: #e2e8f0; }
+
+    .greeting {
+      margin-bottom: 28px;
+      font-size: 17px;
+      color: #e2e8f0;
+      font-weight: 400;
+    }
+
+    .greeting strong {
+      background: linear-gradient(135deg, #61DAFB 0%, #00BCD4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    /* Reply message section - Premium card design */
     .reply-section {
-      background: linear-gradient(135deg, rgba(97, 218, 251, 0.1) 0%, rgba(212, 160, 23, 0.05) 100%);
-      border: 1px solid #334155;
+      background: linear-gradient(135deg, rgba(97, 218, 251, 0.08) 0%, rgba(212, 160, 23, 0.03) 100%);
+      border: 1px solid rgba(97, 218, 251, 0.2);
       border-left: 4px solid #61DAFB;
-      padding: 20px;
-      border-radius: 6px;
+      padding: 24px;
+      border-radius: 12px;
       line-height: 1.8;
       white-space: pre-wrap;
       overflow-x: auto;
-      font-size: 14px;
+      font-size: 15px;
       color: #cbd5e1;
-      margin-bottom: 28px;
-      box-shadow: 0 4px 12px rgba(97, 218, 251, 0.05);
+      margin-bottom: 32px;
+      box-shadow: 0 8px 24px rgba(97, 218, 251, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
+
+    /* Premium divider with gold accent */
     .divider {
       border: 0;
       height: 2px;
-      background: linear-gradient(90deg, #D4A017 0%, transparent 50%, #D4A017 100%);
-      margin: 32px 0;
-      opacity: 0.6;
+      background: linear-gradient(90deg, transparent 0%, #D4A017 20%, #D4A017 80%, transparent 100%);
+      margin: 40px 0;
+      opacity: 0.5;
+      position: relative;
     }
-    .original-section { margin-top: 28px; }
+
+    .divider::before {
+      content: '◆';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: #D4A017;
+      font-size: 12px;
+      background: linear-gradient(135deg, #0a1929 0%, #061220 100%);
+      padding: 0 12px;
+    }
+
+    /* Original message section */
+    .original-section {
+      margin-top: 32px;
+    }
+
     .section-title {
-      font-size: 11px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 13px;
       font-weight: 700;
       color: #D4A017;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 14px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #D4A017;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(212, 160, 23, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    .section-title::before {
+      content: '📌';
+      font-size: 14px;
+    }
+
     .quoted-section {
-      background: linear-gradient(135deg, #061220 0%, #0a2845 100%);
-      border: 1px solid #334155;
+      background: linear-gradient(135deg, rgba(6, 18, 32, 0.8) 0%, rgba(10, 40, 69, 0.6) 100%);
+      border: 1px solid rgba(212, 160, 23, 0.2);
       border-left: 4px solid #D4A017;
-      padding: 16px;
-      border-radius: 6px;
+      padding: 20px;
+      border-radius: 12px;
       margin-top: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
+
     .quoted-header {
       font-size: 12px;
       color: #61DAFB;
       margin-bottom: 12px;
       font-weight: 600;
-      uppercase;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
+
     .quoted-message {
       white-space: pre-wrap;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.7;
       color: #94a3b8;
       overflow-x: auto;
     }
+
     .closing {
-      margin-top: 28px;
-      font-size: 14px;
+      margin-top: 32px;
+      font-size: 15px;
       color: #cbd5e1;
+      line-height: 1.6;
     }
-    .closing strong { color: #61DAFB; }
+
+    .closing strong {
+      color: #61DAFB;
+      font-weight: 600;
+    }
+
+    /* Footer - Matching homepage footer design */
     .footer {
-      background: #061220;
-      border-top: 1px solid #334155;
-      padding: 20px 30px;
+      background: linear-gradient(135deg, #061220 0%, #0a1929 100%);
+      border-top: 1px solid rgba(97, 218, 251, 0.1);
+      padding: 32px 40px;
       text-align: center;
+    }
+
+    .footer-brand {
+      margin-bottom: 16px;
+    }
+
+    .footer-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #D4A017 0%, #B8860B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+
+    .footer-tagline {
       font-size: 12px;
       color: #94a3b8;
-      border-radius: 0 0 12px 12px;
+      margin-top: 8px;
+      letter-spacing: 0.05em;
     }
-    .footer-accent { color: #D4A017; font-weight: 700; }
-    @media (max-width: 600px) {
-      .container { width: 100%; }
-      .header { padding: 30px 20px; }
-      .header h1 { font-size: 24px; }
-      .content { padding: 20px; }
-      .reply-section { padding: 16px; font-size: 13px; }
-      .quoted-message { font-size: 12px; }
+
+    .footer-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #D4A017, transparent);
+      margin: 20px auto;
+      opacity: 0.5;
+    }
+
+    .footer-links {
+      margin-top: 16px;
+    }
+
+    .footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #61DAFB;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: 1px solid rgba(97, 218, 251, 0.3);
+      background: rgba(97, 218, 251, 0.05);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .footer-link:hover {
+      background: rgba(97, 218, 251, 0.15);
+      border-color: rgba(97, 218, 251, 0.5);
+    }
+
+    /* Stats-like info footer */
+    .footer-stats {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-stat {
+      font-size: 11px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .footer-stat-separator {
+      color: #D4A017;
+      opacity: 0.5;
+    }
+
+    /* Responsive design */
+    @media only screen and (max-width: 640px) {
+      .wrapper { padding: 20px 16px; }
+      .container { border-radius: 12px; }
+      .header { padding: 32px 24px; }
+      .header h1 { font-size: 26px; }
+      .badge { font-size: 10px; padding: 6px 16px; }
+      .content { padding: 24px 20px; }
+      .reply-section { padding: 18px; font-size: 14px; }
+      .quoted-section { padding: 16px; }
+      .quoted-message { font-size: 13px; }
+      .footer { padding: 24px 20px; }
+      .footer-stats { gap: 16px; font-size: 10px; }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      body { background: linear-gradient(135deg, #061220 0%, #0a1929 100%); }
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <div class="container">
+      <!-- Header Section -->
       <div class="header">
-        <h1>📬 Re: ${escapeHtml(originalSubject)}</h1>
-        <p>Your message has been answered</p>
+        <div class="badge">Engineering × Development</div>
+        <h1>Re: ${escapeHtml(originalSubject)}</h1>
+        <p class="header-subtitle">Response from Karisa Voyani</p>
       </div>
+
+      <!-- Main Content -->
       <div class="content">
         <p class="greeting">Hi <strong>${escapeHtml(recipientName)}</strong>,</p>
+
         <div class="reply-section">${escapeHtml(replyMessage)}</div>
-        <div class="divider"></div>
+
+        <hr class="divider">
+
         <div class="original-section">
-          <div class="section-title">📌 Original Message</div>
+          <div class="section-title">Original Message</div>
           <div class="quoted-section">
             <div class="quoted-header">You wrote:</div>
             <div class="quoted-message">${escapeHtml(originalMessage)}</div>
           </div>
         </div>
-        <p class="closing"><strong>Looking forward to continuing our conversation!</strong></p>
+
+        <p class="closing">
+          <strong>Looking forward to continuing our conversation!</strong><br>
+          I'll get back to you as soon as possible.
+        </p>
       </div>
+
+      <!-- Footer Section -->
       <div class="footer">
-        <p><span class="footer-accent">Karisa Voyani</span> • Engineering Precision • African Innovation • Modern Tech</p>
-        <p style="margin-top: 8px;">Visit the <a href="${portfolioUrl}" style="color: #61DAFB;">portfolio</a> for more information</p>
+        <div class="footer-brand">
+          <div class="footer-name">Karisa Voyani</div>
+          <p class="footer-tagline">
+            Engineering Precision • African Innovation • Modern Tech
+          </p>
+        </div>
+
+        <div class="footer-divider"></div>
+
+        <div class="footer-links">
+          <a href="${portfolioUrl}" class="footer-link" style="color: #61DAFB; text-decoration: none;">
+            <span>🌐</span>
+            <span>Visit Portfolio</span>
+          </a>
+        </div>
+
+        <div class="footer-stats">
+          <span class="footer-stat">Mechanical Engineer</span>
+          <span class="footer-stat-separator">•</span>
+          <span class="footer-stat">Full-Stack Developer</span>
+          <span class="footer-stat-separator">•</span>
+          <span class="footer-stat">Problem Solver</span>
+        </div>
       </div>
     </div>
   </div>

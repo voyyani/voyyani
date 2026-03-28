@@ -7,7 +7,7 @@ import { replyFormSchema } from '../../utils/validationSchemas';
 import { QUICK_REPLY_TEMPLATES, interpolateTemplate } from '../../utils/replyTemplates';
 import ResponsiveModal from './ResponsiveModal';
 
-const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
+const ReplyModal = ({ submission, onClose, onReplySent, client, isOpen = true }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
@@ -119,7 +119,7 @@ const ReplyModal = ({ submission, onClose, onReplySent, client }) => {
 
   return (
     <ResponsiveModal
-      isOpen={true}
+      isOpen={isOpen}
       onClose={onClose}
       position="bottom"
       size="md"
