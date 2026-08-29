@@ -1,0 +1,28 @@
+# Repo-root ignores.
+#
+# karisa-portfolio/.gitignore only governs that subdirectory, so anything created at
+# the repo root was tracked by default — which is how a vitest cache artifact
+# (node_modules/.vite/vitest/.../results.json) ended up committed.
+
+node_modules/
+dist/
+coverage/
+
+# Environment variables — never commit these.
+.env
+.env*
+!.env.example
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
