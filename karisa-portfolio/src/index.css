@@ -1,33 +1,66 @@
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* Archivo (display + body) and JetBrains Mono (data, labels, status).
+   Replaces Rajdhani + Inter — see tailwind.config.js for the Phase 2 rationale. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --engineering-blue: #005792;
-  --precision-silver: #C0C0C0;
-  --react-cyan: #61DAFB;
-  --dark-bg: #0a1929;
-  --darker-bg: #061220;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    @apply bg-ink-950 font-sans text-ink-50 antialiased;
+    /* Flat ground, deliberately. The old body was a 135deg navy gradient. */
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: #c8ff3d;
+    color: #0b0b0c;
+  }
+
+  /* One focus treatment everywhere, in the signal colour so it is unmissable. */
+  :focus-visible {
+    outline: 2px solid #c8ff3d;
+    outline-offset: 2px;
+  }
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 100%);
-  color: #f0f0f0;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
+@layer components {
+  /* The recurring mono micro-label: "FIG. 01", "LIVE", "SELECTED WORK". */
+  .eyebrow {
+    @apply font-mono text-eyebrow uppercase text-ink-400;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-}
+  /* Hairline panel. Square, bordered, flat — the system's default container. */
+  .panel {
+    @apply border border-ink-800 bg-ink-900;
+  }
 
-.blueprint-bg {
-  background-image: 
-    linear-gradient(rgba(0, 87, 146, 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 87, 146, 0.1) 1px, transparent 1px);
-  background-size: 30px 30px;
+  .btn-signal {
+    @apply inline-flex items-center justify-center gap-2 bg-signal px-6 py-3.5 font-semibold text-ink-950
+           transition-colors duration-250 ease-signal hover:bg-signal-hover;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 border border-ink-700 px-6 py-3.5 font-medium text-ink-50
+           transition-colors duration-250 ease-signal hover:border-ink-500 hover:bg-ink-900;
+  }
 }

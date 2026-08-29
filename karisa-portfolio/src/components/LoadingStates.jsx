@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 // Spinner Loader
-export const Spinner = ({ size = 'md', color = '#61DAFB' }) => {
+export const Spinner = ({ size = 'md', color = '#C8FF3D' }) => {
   const sizes = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
@@ -29,7 +29,7 @@ export const Spinner = ({ size = 'md', color = '#61DAFB' }) => {
 // Full Page Loader
 export const PageLoader = ({ message = 'Loading...' }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
+    <div className="min-h-screen bg-ink-950 flex items-center justify-center">
       <div className="text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -37,7 +37,7 @@ export const PageLoader = ({ message = 'Loading...' }) => {
           transition={{ duration: 0.3 }}
         >
           <Spinner size="xl" />
-          <p className="text-gray-400 mt-4">{message}</p>
+          <p className="text-ink-300 mt-4">{message}</p>
         </motion.div>
       </div>
     </div>
@@ -49,7 +49,7 @@ export const SectionLoader = ({ message = 'Loading...' }) => {
   return (
     <div className="flex flex-col items-center justify-center py-20">
       <Spinner size="lg" />
-      <p className="text-gray-400 mt-4">{message}</p>
+      <p className="text-ink-300 mt-4">{message}</p>
     </div>
   );
 };
@@ -58,10 +58,10 @@ export const SectionLoader = ({ message = 'Loading...' }) => {
 export const SkeletonCard = ({ className = '' }) => {
   return (
     <div className={`animate-pulse ${className}`}>
-      <div className="bg-[#0a1929]/50 rounded-2xl p-6">
-        <div className="h-48 bg-[#061220]/50 rounded-xl mb-4" />
-        <div className="h-4 bg-[#061220]/50 rounded w-3/4 mb-2" />
-        <div className="h-4 bg-[#061220]/50 rounded w-1/2" />
+      <div className="bg-ink-900/50 p-6">
+        <div className="h-48 bg-ink-850 mb-4" />
+        <div className="h-4 bg-ink-850 rounded w-3/4 mb-2" />
+        <div className="h-4 bg-ink-850 rounded w-1/2" />
       </div>
     </div>
   );
@@ -72,7 +72,7 @@ export const InlineLoader = ({ text = 'Processing...', className = '' }) => {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Spinner size="sm" />
-      <span className="text-sm text-gray-400">{text}</span>
+      <span className="text-sm text-ink-300">{text}</span>
     </div>
   );
 };
@@ -106,9 +106,9 @@ export const ButtonLoader = () => {
 // Progress Bar
 export const ProgressBar = ({ progress = 0, className = '' }) => {
   return (
-    <div className={`w-full bg-[#061220] rounded-full h-2 overflow-hidden ${className}`}>
+    <div className={`w-full bg-ink-950 rounded-full h-2 overflow-hidden ${className}`}>
       <motion.div
-        className="h-full bg-gradient-to-r from-[#61DAFB] to-[#00BCD4]"
+        className="h-full bg-signal"
         initial={{ width: 0 }}
         animate={{ width: `${progress}%` }}
         transition={{ duration: 0.3 }}

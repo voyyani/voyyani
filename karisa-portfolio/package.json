@@ -11,7 +11,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "sync:github": "node scripts/fetch-github-activity.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

@@ -43,9 +43,9 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Fallback UI
       return (
-        <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center px-4">
+        <div className="min-h-screen bg-ink-950 flex items-center justify-center px-4">
           <div className="max-w-2xl w-full">
-            <div className="bg-[#0a1929] border-2 border-red-500/30 rounded-2xl p-8 shadow-2xl">
+            <div className="bg-ink-900 border-2 border-red-500/30 p-8 shadow-2xl">
               {/* Error Icon */}
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center">
@@ -67,27 +67,27 @@ class ErrorBoundary extends React.Component {
               </div>
 
               {/* Error Message */}
-              <h1 className="text-3xl font-bold text-white text-center mb-4">
+              <h1 className="text-3xl font-bold text-ink-50 text-center mb-4">
                 Oops! Something went wrong
               </h1>
               
-              <p className="text-gray-400 text-center mb-6">
+              <p className="text-ink-300 text-center mb-6">
                 We apologize for the inconvenience. An unexpected error has occurred.
               </p>
 
               {/* Error Details (Development only) */}
               {import.meta.env.DEV && this.state.error && (
-                <div className="mb-6 p-4 bg-[#061220] rounded-xl border border-red-500/20">
+                <div className="mb-6 p-4 bg-ink-950 border border-red-500/20">
                   <h3 className="text-sm font-semibold text-red-400 mb-2">Error Details:</h3>
-                  <pre className="text-xs text-gray-400 overflow-x-auto">
+                  <pre className="text-xs text-ink-300 overflow-x-auto">
                     {this.state.error.toString()}
                   </pre>
                   {this.state.errorInfo && (
                     <details className="mt-2">
-                      <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-400">
+                      <summary className="text-xs text-ink-400 cursor-pointer hover:text-ink-300">
                         Stack Trace
                       </summary>
-                      <pre className="text-xs text-gray-500 mt-2 overflow-x-auto">
+                      <pre className="text-xs text-ink-400 mt-2 overflow-x-auto">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -99,24 +99,24 @@ class ErrorBoundary extends React.Component {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleReset}
-                  className="px-6 py-3 bg-gradient-to-r from-[#61DAFB] to-[#00BCD4] text-[#061220] rounded-xl font-semibold hover:opacity-90 transition-opacity"
+                  className="px-6 py-3 bg-signal text-ink-950 font-semibold hover:opacity-90 transition-opacity"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={() => window.location.href = '/'}
-                  className="px-6 py-3 bg-[#061220] border-2 border-[#61DAFB] text-[#61DAFB] rounded-xl font-semibold hover:bg-[#61DAFB]/10 transition-colors"
+                  className="px-6 py-3 bg-ink-950 border-2 border-signal text-signal font-semibold hover:bg-ink-850 transition-colors"
                 >
                   Go to Homepage
                 </button>
               </div>
 
               {/* Contact Info */}
-              <p className="text-center text-gray-500 text-sm mt-6">
+              <p className="text-center text-ink-400 text-sm mt-6">
                 If this problem persists, please{' '}
                 <a 
                   href="#contact" 
-                  className="text-[#61DAFB] hover:underline"
+                  className="text-signal hover:underline"
                 >
                   contact me
                 </a>

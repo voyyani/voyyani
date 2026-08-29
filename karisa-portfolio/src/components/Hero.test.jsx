@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Hero from './Hero';
+import { SITE } from '../config/site';
 
 // Mock framer-motion to simplify animations in tests
 vi.mock('framer-motion', () => {
@@ -10,7 +11,7 @@ vi.mock('framer-motion', () => {
     motion: new Proxy({}, {
       get: (target, prop) => {
         return React.forwardRef(({ children, ...props }, ref) => {
-          const { animate, initial, exit, transition, whileHover, whileTap, ...rest } = props;
+          const { animate, initial, exit, transition, whileHover, whileTap, variants, ...rest } = props;
           return React.createElement(prop, { ref, ...rest }, children);
         });
       }
@@ -19,273 +20,115 @@ vi.mock('framer-motion', () => {
   };
 });
 
-// Mock useScrollAnimation hook
-const mockScrollToSection = vi.fn((sectionId) => {
-  console.log(`Scrolling to: ${sectionId}`);
-});
+const mockScrollToSection = vi.fn();
 
 vi.mock('../hooks/useScrollAnimation', () => ({
   useSmoothScroll: () => mockScrollToSection,
 }));
 
+vi.mock('../utils/analytics', () => ({
+  trackCTAClick: vi.fn(),
+  trackEvent: vi.fn(),
+}));
+
 describe('Hero Component', () => {
-  let intervalSpy;
-
   beforeEach(() => {
-    vi.useFakeTimers();
-    intervalSpy = vi.spyOn(global, 'setInterval');
+    vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.clearAllTimers();
-    vi.restoreAllMocks();
-    vi.useRealTimers();
-  });
+  describe('Headline', () => {
+    it('states one fixed claim rather than rotating through job titles', () => {
+      render(<Hero />);
+      expect(screen.getByText(/I build software the way I was trained to build/i)).toBeDefined();
+    });
 
-  describe('Rendering', () => {
-    it('should render the hero section', () => {
+    it('still identifies Karisa by name and location in the h1', () => {
       const { container } = render(<Hero />);
-      const heroSection = container.querySelector('section');
-      expect(heroSection).toBeDefined();
-      expect(heroSection.tagName).toBe('SECTION');
+      const h1 = container.querySelector('h1');
+      expect(h1).toBeDefined();
+      expect(h1.textContent).toContain('Karisa Voyani');
+      expect(h1.textContent).toContain(SITE.location);
     });
 
-    it('should display the name "Karisa"', () => {
-      render(<Hero />);
-      expect(screen.getByText('Karisa')).toBeDefined();
+    it('renders exactly one h1', () => {
+      const { container } = render(<Hero />);
+      expect(container.querySelectorAll('h1').length).toBe(1);
     });
 
-    it('should display the greeting "Hi, I\'m"', () => {
+    // Phase 1 replaced the rotating role badge; the story moved to the About section.
+    it('no longer renders the rotating role component', () => {
       render(<Hero />);
-      expect(screen.getByText(/Hi, I'm/i)).toBeDefined();
-    });
-
-    it('should display the badge "Engineering × Development"', () => {
-      render(<Hero />);
-      expect(screen.getByText(/Engineering × Development/i)).toBeDefined();
-    });
-
-    it('should display the tagline', () => {
-      render(<Hero />);
-      expect(screen.getByText(/high-performance solutions/i)).toBeDefined();
-      expect(screen.getByText(/African innovation/i)).toBeDefined();
+      expect(screen.queryByText('Problem Solver')).toBeNull();
+      expect(screen.queryByText(/Engineering × Development/i)).toBeNull();
+      expect(screen.queryByText(/Hi, I'm/i)).toBeNull();
     });
   });
 
-  describe('Role Rotation', () => {
-    it('should display initial role "Mechanical Engineer"', () => {
+  describe('Call to action', () => {
+    it('offers a work CTA and an unambiguous hiring CTA', () => {
       render(<Hero />);
-      expect(screen.getByText('Mechanical Engineer')).toBeDefined();
+      expect(screen.getByText(/See what I've shipped/i)).toBeDefined();
+      expect(screen.getByText(/Available for hire/i)).toBeDefined();
     });
 
-    it('should display the engineer icon ⚙️', () => {
+    it('does not use the ambiguous "Let\'s Talk" label', () => {
       render(<Hero />);
-      expect(screen.getByText('⚙️')).toBeDefined();
+      expect(screen.queryByText(/Let's Talk/i)).toBeNull();
     });
 
-    it('should rotate to "Full-Stack Developer" after 3.5 seconds', async () => {
+    it('scrolls to projects from the primary CTA', async () => {
+      const user = userEvent.setup();
       render(<Hero />);
-      
-      // Initial role
-      expect(screen.getByText('Mechanical Engineer')).toBeDefined();
-      
-      // Advance time by 3.5 seconds
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3500);
-      });
-      
-      // Should now show second role
-      expect(screen.getByText('Full-Stack Developer')).toBeDefined();
+      await user.click(screen.getByText(/See what I've shipped/i).closest('button'));
+      expect(mockScrollToSection).toHaveBeenCalledWith('projects');
     });
 
-    it('should rotate to "Problem Solver" after 7 seconds', async () => {
+    it('scrolls to contact from the hiring CTA', async () => {
+      const user = userEvent.setup();
       render(<Hero />);
-      
-      // Advance time by 7 seconds
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(7000);
-      });
-      
-      // Should now show third role
-      expect(screen.getByText('Problem Solver')).toBeDefined();
-    });
-
-    it('should cycle back to "Mechanical Engineer" after all roles', async () => {
-      render(<Hero />);
-      
-      // Complete one full cycle (3 roles × 3.5 seconds)
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(10500);
-      });
-      
-      // Should cycle back to first role
-      expect(screen.getByText('Mechanical Engineer')).toBeDefined();
-    });
-
-    it('should set up an interval for role rotation', () => {
-      render(<Hero />);
-      expect(intervalSpy).toHaveBeenCalledWith(expect.any(Function), 3500);
-    });
-
-    it('should clean up interval on unmount', () => {
-      const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
-      const { unmount } = render(<Hero />);
-      
-      unmount();
-      
-      expect(clearIntervalSpy).toHaveBeenCalled();
+      await user.click(screen.getByText(/Available for hire/i).closest('button'));
+      expect(mockScrollToSection).toHaveBeenCalledWith('contact');
     });
   });
 
-  describe('CTA Buttons', () => {
-    it('should render "View My Work" button', () => {
+  describe('Proof points', () => {
+    // The point of Phase 1: a number on this page must be checkable from this page.
+    it('claims only the number of platforms the Projects section actually shows', () => {
       render(<Hero />);
-      expect(screen.getByText(/View My Work/i)).toBeDefined();
+      expect(screen.getByText('2')).toBeDefined();
+      expect(screen.getByText(/Client platforms, shipped end to end/i)).toBeDefined();
     });
 
-    it('should render "Let\'s Talk" button', () => {
+    it('states the engineering degree', () => {
       render(<Hero />);
-      expect(screen.getByText(/Let's Talk/i)).toBeDefined();
-    });
-
-    it('should have accessible button elements', () => {
-      render(<Hero />);
-      const buttons = screen.getAllByRole('button');
-      
-      // Should have 3 buttons: View My Work, Let's Talk, and scroll indicator
-      expect(buttons.length).toBeGreaterThanOrEqual(2);
-    });
-
-    it('should call scrollToSection with "projects" when "View My Work" is clicked', async () => {
-      mockScrollToSection.mockClear();
-      render(<Hero />);
-      
-      const viewWorkButton = screen.getByText(/View My Work/i).closest('button');
-      viewWorkButton.click();
-      
-      expect(mockScrollToSection).toHaveBeenCalled();
-    });
-
-    it('should call scrollToSection with "contact" when "Let\'s Talk" is clicked', async () => {
-      mockScrollToSection.mockClear();
-      render(<Hero />);
-      
-      const contactButton = screen.getByText(/Let's Talk/i).closest('button');
-      contactButton.click();
-      
-      expect(mockScrollToSection).toHaveBeenCalled();
-    });
-  });
-
-  describe('Stats Section', () => {
-    it('should display all three stats', () => {
-      render(<Hero />);
-
-      expect(screen.getByText('Years Shipping Software')).toBeDefined();
-      expect(screen.getByText('Platforms Shipped End-to-End')).toBeDefined();
-      expect(screen.getByText('Engineering Degree')).toBeDefined();
-    });
-
-    // These values are deliberately checkable against the rest of the page:
-    // the Projects section must show as many platforms as this claims.
-    it('should display correct stat values', () => {
-      render(<Hero />);
-
-      expect(screen.getByText('3+')).toBeDefined();
-      expect(screen.getByText('3')).toBeDefined();
       expect(screen.getByText('B.Eng')).toBeDefined();
+      expect(screen.getByText('Mechanical Engineering')).toBeDefined();
     });
 
-    it('should render stats in a grid layout', () => {
+    it('drops the unverifiable round numbers it used to claim', () => {
+      render(<Hero />);
+      expect(screen.queryByText('10+')).toBeNull();
+      expect(screen.queryByText('15+')).toBeNull();
+      expect(screen.queryByText(/Projects Completed/i)).toBeNull();
+    });
+
+    it('links each proof point to its evidence', () => {
       const { container } = render(<Hero />);
-      const statsGrid = container.querySelector('.grid-cols-3');
-      
-      expect(statsGrid).toBeDefined();
-    });
-  });
-
-  describe('Scroll Indicator', () => {
-    it('should display scroll indicator text', () => {
-      render(<Hero />);
-      expect(screen.getByText('SCROLL TO EXPLORE')).toBeDefined();
-    });
-
-    it('should call scrollToSection with "skills" when clicked', async () => {
-      mockScrollToSection.mockClear();
-      render(<Hero />);
-      
-      const scrollIndicator = screen.getByText('SCROLL TO EXPLORE').closest('div');
-      scrollIndicator.click();
-      
-      expect(mockScrollToSection).toHaveBeenCalled();
-    });
-
-    it('should have cursor-pointer class for interactivity', () => {
-      render(<Hero />);
-      const scrollIndicator = screen.getByText('SCROLL TO EXPLORE').closest('div');
-      
-      expect(scrollIndicator.className).toContain('cursor-pointer');
+      const links = [...container.querySelectorAll('a')].map((a) => a.getAttribute('href'));
+      expect(links).toContain('#projects');
+      expect(links).toContain(SITE.resume.href);
     });
   });
 
   describe('Accessibility', () => {
-    it('should render as a semantic section element', () => {
+    it('renders a semantic section', () => {
       const { container } = render(<Hero />);
-      const section = container.querySelector('section');
-      expect(section.tagName).toBe('SECTION');
+      expect(container.querySelector('section')).toBeDefined();
     });
 
-    it('should have proper heading hierarchy', () => {
+    it('hides decorative background from assistive technology', () => {
       const { container } = render(<Hero />);
-      const h1 = container.querySelector('h1');
-      
-      expect(h1).toBeDefined();
-      expect(h1.textContent).toContain('Karisa');
-    });
-
-    it('should have interactive elements that are keyboard accessible', () => {
-      render(<Hero />);
-      const buttons = screen.getAllByRole('button');
-      
-      buttons.forEach(button => {
-        expect(button.tagName).toBe('BUTTON');
-      });
-    });
-  });
-
-  describe('Visual Elements', () => {
-    it('should have African pattern background', () => {
-      const { container } = render(<Hero />);
-      const section = container.querySelector('section');
-      
-      expect(section.style.backgroundImage).toContain('data:image/svg+xml');
-    });
-
-    it('should render animated background blobs', () => {
-      const { container } = render(<Hero />);
-      const blobs = container.querySelectorAll('.blur-3xl');
-      
-      // Should have 3 background blobs
-      expect(blobs.length).toBe(3);
-    });
-
-    it('should display icons for each role', async () => {
-      render(<Hero />);
-      
-      // Engineer icon
-      expect(screen.getByText('⚙️')).toBeDefined();
-      
-      // Advance to developer role
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3500);
-      });
-      expect(screen.getByText('💻')).toBeDefined();
-      
-      // Advance to problem solver role
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(3500);
-      });
-      expect(screen.getByText('🎯')).toBeDefined();
+      expect(container.querySelector('[aria-hidden="true"]')).toBeDefined();
     });
   });
 });

@@ -5,7 +5,7 @@ const ImageWithFallback = ({
   alt,
   width,
   height,
-  fallbackSrc = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%230a1929"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="16" fill="%23666"%3E📷 Image unavailable%3C/text%3E%3C/svg%3E',
+  fallbackSrc = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%2317161A"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="16" fill="%23666"%3EImage unavailable%3C/text%3E%3C/svg%3E',
   className = '',
   loading = 'lazy',
   sizes = '100vw',
@@ -59,7 +59,7 @@ const ImageWithFallback = ({
     >
       {/* Loading Skeleton */}
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-blue-800/20 animate-pulse" />
+        <div className="absolute inset-0 animate-pulse bg-ink-850" />
       )}
 
       {!hasError && sources ? (
@@ -88,11 +88,11 @@ const ImageWithFallback = ({
         </picture>
       ) : hasError ? (
         // Error Overlay
-        <div className="absolute inset-0 flex items-center justify-center bg-[#061220]/80">
+        <div className="absolute inset-0 flex items-center justify-center bg-ink-850">
           <div className="text-center">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-12 w-12 text-gray-600 mx-auto mb-2" 
+              className="mx-auto mb-2 h-10 w-10 text-ink-600" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -104,13 +104,13 @@ const ImageWithFallback = ({
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
               />
             </svg>
-            <p className="text-xs text-gray-500">Image unavailable</p>
+            <p className="eyebrow">Image unavailable</p>
           </div>
         </div>
       ) : (
         // Fallback when no sources
-        <div className="absolute inset-0 flex items-center justify-center bg-blue-900/20">
-          <span className="text-gray-400 text-sm">📷 Image unavailable</span>
+        <div className="absolute inset-0 flex items-center justify-center bg-ink-850">
+          <span className="eyebrow">Image unavailable</span>
         </div>
       )}
     </div>

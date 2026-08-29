@@ -149,7 +149,7 @@ const ContactForm = () => {
         <div className="space-y-2">
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-200"
+            className="block text-sm font-medium text-ink-50"
           >
             Name <span className="text-red-400">*</span>
           </label>
@@ -159,13 +159,13 @@ const ContactForm = () => {
             autoComplete="name"
             aria-invalid={errors.name ? 'true' : 'false'}
             aria-describedby={errors.name ? 'name-error' : undefined}
-            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg 
+            className={`w-full px-4 py-3 bg-ink-900/50 border  
               focus:outline-none focus:ring-2 transition-all duration-200
-              text-gray-100 placeholder-gray-500
+              text-ink-50 placeholder-ink-400
               ${
                 errors.name
                   ? 'border-red-500 focus:ring-red-500/50'
-                  : 'border-[#005792]/30 focus:ring-[#61DAFB]/50 focus:border-[#61DAFB]'
+                  : 'border-ink-800 focus:ring-signal/50 focus:border-signal'
               }`}
             placeholder="John Doe"
             {...register('name')}
@@ -197,7 +197,7 @@ const ContactForm = () => {
         <div className="space-y-2">
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-200"
+            className="block text-sm font-medium text-ink-50"
           >
             Email <span className="text-red-400">*</span>
           </label>
@@ -207,13 +207,13 @@ const ContactForm = () => {
             autoComplete="email"
             aria-invalid={errors.email ? 'true' : 'false'}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg 
+            className={`w-full px-4 py-3 bg-ink-900/50 border  
               focus:outline-none focus:ring-2 transition-all duration-200
-              text-gray-100 placeholder-gray-500
+              text-ink-50 placeholder-ink-400
               ${
                 errors.email
                   ? 'border-red-500 focus:ring-red-500/50'
-                  : 'border-[#005792]/30 focus:ring-[#61DAFB]/50 focus:border-[#61DAFB]'
+                  : 'border-ink-800 focus:ring-signal/50 focus:border-signal'
               }`}
             placeholder="john@example.com"
             {...register('email')}
@@ -245,7 +245,7 @@ const ContactForm = () => {
         <div className="space-y-2">
           <label
             htmlFor="subject"
-            className="block text-sm font-medium text-gray-200"
+            className="block text-sm font-medium text-ink-50"
           >
             Subject <span className="text-red-400">*</span>
           </label>
@@ -253,13 +253,13 @@ const ContactForm = () => {
             id="subject"
             aria-invalid={errors.subject ? 'true' : 'false'}
             aria-describedby={errors.subject ? 'subject-error' : undefined}
-            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg
+            className={`w-full px-4 py-3 bg-ink-900/50 border 
               focus:outline-none focus:ring-2 transition-all duration-200
-              text-gray-100
+              text-ink-50
               ${
                 errors.subject
                   ? 'border-red-500 focus:ring-red-500/50'
-                  : 'border-[#005792]/30 focus:ring-[#61DAFB]/50 focus:border-[#61DAFB]'
+                  : 'border-ink-800 focus:ring-signal/50 focus:border-signal'
               }`}
             {...register('subject')}
           >
@@ -299,11 +299,11 @@ const ContactForm = () => {
           <div className="flex justify-between items-center">
             <label
               htmlFor="message"
-              className="block text-sm font-medium text-gray-200"
+              className="block text-sm font-medium text-ink-50"
             >
               Message <span className="text-red-400">*</span>
             </label>
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-ink-300">
               {message.length}/1000
             </span>
           </div>
@@ -312,13 +312,13 @@ const ContactForm = () => {
             rows="6"
             aria-invalid={errors.message ? 'true' : 'false'}
             aria-describedby={errors.message ? 'message-error' : undefined}
-            className={`w-full px-4 py-3 bg-[#0a1929]/50 border rounded-lg 
+            className={`w-full px-4 py-3 bg-ink-900/50 border  
               focus:outline-none focus:ring-2 transition-all duration-200
-              text-gray-100 placeholder-gray-500 resize-none
+              text-ink-50 placeholder-ink-400 resize-none
               ${
                 errors.message
                   ? 'border-red-500 focus:ring-red-500/50'
-                  : 'border-[#005792]/30 focus:ring-[#61DAFB]/50 focus:border-[#61DAFB]'
+                  : 'border-ink-800 focus:ring-signal/50 focus:border-signal'
               }`}
             placeholder="Tell me about your project..."
             {...register('message')}
@@ -364,12 +364,12 @@ const ContactForm = () => {
           disabled={isSubmitting || !isValid}
           whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
           whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-          className={`w-full py-4 px-6 rounded-lg font-semibold text-white
+          className={`w-full py-4 px-6  font-semibold text-ink-50
             transition-all duration-200 flex items-center justify-center gap-2
             ${
               isSubmitting || !isValid
-                ? 'bg-gray-600 cursor-not-allowed opacity-50'
-                : 'bg-gradient-to-r from-[#61DAFB] to-[#005792] hover:shadow-lg hover:shadow-[#61DAFB]/20'
+                ? 'bg-ink-700 cursor-not-allowed opacity-50'
+                : 'bg-signal text-ink-950 hover:bg-signal-hover'
             }`}
           aria-label={isSubmitting ? 'Sending message' : 'Send message'}
         >
@@ -418,7 +418,7 @@ const ContactForm = () => {
         </motion.button>
 
         {/* Info Text */}
-        <p className="text-sm text-gray-400 text-center">
+        <p className="text-sm text-ink-300 text-center">
           I typically respond within 24 hours
         </p>
       </form>

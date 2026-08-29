@@ -10,12 +10,12 @@ const SectionLoader = () => {
       <div className="flex flex-col items-center gap-4">
         {/* Animated spinner */}
         <div className="relative w-16 h-16">
-          <div className="absolute inset-0 border-4 border-[#005792]/20 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-t-[#61DAFB] border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+          <div className="absolute inset-0 border-4 border-ink-800 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-t-signal border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
         </div>
         
         {/* Loading text with fade animation */}
-        <p className="text-gray-400 text-sm font-mono animate-pulse">
+        <p className="text-ink-300 text-sm font-mono animate-pulse">
           Loading...
         </p>
       </div>

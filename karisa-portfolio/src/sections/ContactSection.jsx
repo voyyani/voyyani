@@ -7,20 +7,18 @@ const ContactSection = () => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
 
   // African-inspired pattern
-  const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 
   return (
     <section
       ref={ref}
       id="contact"
       className="relative py-20 px-4 overflow-hidden"
-      style={{ backgroundImage: `url("${africanPattern}")` }}
     >
       {/* Background decorations */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#005792] rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-[#61DAFB] rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute top-10 right-10 w-32 h-32 bg-[#D4A017] rounded-full mix-blend-multiply blur-xl opacity-10"></div>
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-ink-700 rounded-full blur-3xl opacity-10"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-signal rounded-full blur-3xl opacity-10"></div>
+        <div className="absolute top-10 right-10 w-32 h-32 bg-signal rounded-full mix-blend-multiply blur-xl opacity-10"></div>
       </div>
 
       <div className="container mx-auto max-w-4xl relative z-10">
@@ -37,16 +35,16 @@ const ContactSection = () => {
             transition={{ duration: 0.5 }}
             className="inline-block mb-4"
           >
-            <span className="px-4 py-2 rounded-full border-2 border-[#D4A017]/60 text-[#D4A017] text-sm font-medium tracking-widest">
+            <span className="px-4 py-2 rounded-full border-2 border-signal text-signal text-sm font-medium tracking-widest">
               LET'S CONNECT
             </span>
           </motion.div>
 
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
-            Get In <span className="text-[#61DAFB]">Touch</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-ink-50">
+            Get In <span className="text-signal">Touch</span>
           </h2>
           
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-ink-200 max-w-2xl mx-auto">
             Have a project in mind? Let's work together to bring your ideas to life with engineering precision.
           </p>
         </motion.div>
@@ -56,7 +54,7 @@ const ContactSection = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-[#0a1929]/50 backdrop-blur-sm rounded-2xl p-8 md:p-12 border border-[#005792]/30 shadow-2xl"
+          className="bg-ink-900/50 backdrop-blur-sm p-8 md:p-12 border border-ink-800 shadow-2xl"
         >
           <ContactForm />
         </motion.div>
@@ -68,8 +66,8 @@ const ContactSection = () => {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center"
         >
-          <div className="p-6 rounded-xl bg-[#0a1929]/30 border border-[#005792]/20">
-            <div className="text-[#61DAFB] mb-3 flex justify-center">
+          <div className="p-6 bg-ink-900/30 border border-ink-800">
+            <div className="text-signal mb-3 flex justify-center">
               <svg
                 className="w-8 h-8"
                 fill="none"
@@ -84,12 +82,12 @@ const ContactSection = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-2">Email Response</h3>
-            <p className="text-gray-400 text-sm">Within 24 hours</p>
+            <h3 className="text-ink-50 font-semibold mb-2">Email Response</h3>
+            <p className="text-ink-300 text-sm">Within 24 hours</p>
           </div>
 
-          <div className="p-6 rounded-xl bg-[#0a1929]/30 border border-[#005792]/20">
-            <div className="text-[#61DAFB] mb-3 flex justify-center">
+          <div className="p-6 bg-ink-900/30 border border-ink-800">
+            <div className="text-signal mb-3 flex justify-center">
               <svg
                 className="w-8 h-8"
                 fill="none"
@@ -110,12 +108,12 @@ const ContactSection = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-2">Based In</h3>
-            <p className="text-gray-400 text-sm">Nairobi, Kenya</p>
+            <h3 className="text-ink-50 font-semibold mb-2">Based In</h3>
+            <p className="text-ink-300 text-sm">Nairobi, Kenya</p>
           </div>
 
-          <div className="p-6 rounded-xl bg-[#0a1929]/30 border border-[#005792]/20">
-            <div className="text-[#61DAFB] mb-3 flex justify-center">
+          <div className="p-6 bg-ink-900/30 border border-ink-800">
+            <div className="text-signal mb-3 flex justify-center">
               <svg
                 className="w-8 h-8"
                 fill="none"
@@ -130,8 +128,8 @@ const ContactSection = () => {
                 />
               </svg>
             </div>
-            <h3 className="text-white font-semibold mb-2">Availability</h3>
-            <p className="text-gray-400 text-sm">Open for projects</p>
+            <h3 className="text-ink-50 font-semibold mb-2">Availability</h3>
+            <p className="text-ink-300 text-sm">Open for projects</p>
           </div>
         </motion.div>
       </div>

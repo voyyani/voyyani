@@ -14,12 +14,15 @@
  * A records but NO MX record. Every address the site published was undeliverable —
  * anyone who emailed Karisa got a bounce.
  *
- * The only inbox that actually receives portfolio mail today is the one the deployed
- * notification function forwards to (supabase/functions/send-notification/index.ts:18).
+ * Karisa confirmed voyanitech@gmail.com as the address to publish (2026-08-29). It is
+ * also what resume.html and the links embedded in resume.pdf already use, and what the
+ * deployed notification function forwards to
+ * (supabase/functions/send-notification/index.ts:18) — so site, resume and backend now
+ * agree for the first time.
  *
- * TODO(karisa): a custom-domain address reads better than a gmail on a portfolio.
- * Add an MX record for voyani.tech (a forwarding service is enough) and switch
- * `email` below to karisa@voyani.tech. Change it here only — everything imports it.
+ * Optional later: a custom-domain address reads better on a portfolio. Adding an MX
+ * record to voyani.tech (a forwarding service is enough) would let this become
+ * karisa@voyani.tech. Change it here only — every component imports from this file.
  */
 
 export const SITE = {
@@ -32,7 +35,7 @@ export const SITE = {
 
   url: 'https://voyani.tech',
 
-  // Deliverable today. See the note above before changing.
+  // Confirmed by Karisa, 2026-08-29. See the note above before changing.
   email: 'voyanitech@gmail.com',
 
   social: {

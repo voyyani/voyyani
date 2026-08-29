@@ -1,203 +1,150 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { useSmoothScroll } from '../hooks/useScrollAnimation';
-import { trackCTAClick, trackEvent } from '../utils/analytics';
+import { trackCTAClick } from '../utils/analytics';
+import ImageWithFallback from './ImageWithFallback';
+import { SITE } from '../config/site';
 
+/**
+ * Phase 2, "Product-Led" direction.
+ *
+ * The claim sits in a narrow left rail and a real, live client platform fills the rest
+ * of the screen inside a browser frame. The argument is the point: a visitor sees
+ * shipped software in the first second rather than reading an assertion about it.
+ *
+ * Phase 1's content rules still hold — one fixed headline, and every number links to
+ * the thing that proves it.
+ */
 const Hero = () => {
-  const [currentRole, setCurrentRole] = useState(0);
   const scrollToSection = useSmoothScroll();
-  
-  const roles = [
-    { title: 'Mechanical Engineer', color: 'from-[#005792] to-[#003056]', icon: '⚙️' },
-    { title: 'Full-Stack Developer', color: 'from-[#61DAFB] to-[#4A9FBF]', icon: '💻' },
-    { title: 'Problem Solver', color: 'from-[#D4A017] to-[#B8860B]', icon: '🎯' }
-  ];
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentRole((prev) => (prev + 1) % roles.length);
-    }, 3500);
-    
-    return () => clearInterval(interval);
-  }, []);
 
-  const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
-  
-  // Phase 0 (docs/roadmapupdated.md): every number here must be checkable against
-  // something visible on this page. "10+ Projects Completed" was not — the site
-  // shows 3 — so it now states what the Projects section actually backs up.
-  const stats = [
-    { label: 'Years Shipping Software', value: '3+' },
-    { label: 'Platforms Shipped End-to-End', value: '3' },
-    { label: 'Engineering Degree', value: 'B.Eng' }
+  const proofPoints = [
+    { value: '3s→1.2s', label: 'Page load, Raslipwani', href: '#projects', onClick: () => scrollToSection('projects') },
+    { value: '2', label: 'Client platforms, shipped end to end', href: '#projects', onClick: () => scrollToSection('projects') },
+    { value: 'B.Eng', label: 'Mechanical Engineering', href: SITE.resume.href },
   ];
-  
+
+  const ease = [0.22, 1, 0.36, 1];
+
   return (
-    <section 
-      className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden px-4 py-20"
-      style={{ backgroundImage: `url("${africanPattern}")` }}
-    >
-      {/* Animated Background Blobs */}
-      <div className="absolute inset-0 z-0">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#005792] rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.15, 0.2, 0.15],
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute bottom-1/3 right-1/4 w-72 h-72 bg-[#61DAFB] rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.1, 0.15, 0.1],
-          }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute top-20 right-20 w-64 h-64 bg-[#D4A017] rounded-full blur-3xl"
-        />
-      </div>
-      
-      <div className="text-center relative z-10 max-w-5xl w-full">
-        {/* Badge */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="inline-block mb-6"
-        >
-          <div className="px-5 py-2.5 rounded-full border-2 border-[#D4A017]/60 bg-[#D4A017]/10 backdrop-blur-sm">
-            <span className="text-sm tracking-[0.2em] text-[#D4A017] font-semibold uppercase">
-              Engineering × Development
-            </span>
-          </div>
-        </motion.div>
-        
-        {/* Main Heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-        >
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-3 text-white leading-tight">
-            Hi, I'm{' '}
-            <span className="bg-gradient-to-r from-[#61DAFB] via-[#4FC3F7] to-[#00BCD4] text-transparent bg-clip-text">
-              Karisa
-            </span>
-          </h1>
-        </motion.div>
-        
-        {/* Rotating Role Display */}
-        <div className="h-32 md:h-36 flex items-center justify-center mb-4">
-          <AnimatePresence mode="wait">
+    <section className="relative min-h-screen border-b border-ink-800 pt-[57px]">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-1 lg:min-h-[calc(100vh-57px)] lg:grid-cols-[minmax(0,420px)_1fr]">
+        {/* Left rail — the claim */}
+        <div className="flex flex-col justify-between border-ink-800 px-5 py-14 md:px-10 lg:border-r lg:py-16">
+          <div>
             <motion.div
-              key={currentRole}
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30, scale: 0.9 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="w-full max-w-md mx-auto"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease }}
+              className="eyebrow mb-6 text-signal"
             >
-              <div className={`px-8 py-5 rounded-2xl backdrop-blur-md bg-gradient-to-r ${roles[currentRole].color} shadow-2xl border border-white/10`}>
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-3xl">{roles[currentRole].icon}</span>
-                  <span className="text-2xl md:text-3xl font-bold text-white">
-                    {roles[currentRole].title}
-                  </span>
-                </div>
-              </div>
+              {SITE.location} — B.Eng Mech
             </motion.div>
-          </AnimatePresence>
-        </div>
-        
-        {/* Tagline */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-300 leading-relaxed px-4"
-        >
-          Crafting{' '}
-          <span className="text-[#61DAFB] font-semibold">high-performance solutions</span>
-          {' '}with engineering precision, inspired by{' '}
-          <span className="text-[#D4A017] font-semibold">African innovation</span>
-        </motion.p>
-        
-        {/* CTA Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
-        >
-          <motion.button
-            onClick={() => {
-              trackCTAClick('View My Work', 'projects');
-              scrollToSection('projects');
-            }}
-            whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(97, 218, 251, 0.3)" }}
-            whileTap={{ scale: 0.98 }}
-            className="group bg-gradient-to-r from-[#61DAFB] to-[#00BCD4] text-[#061220] px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl relative overflow-hidden"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              View My Work
-              <motion.span
-                className="group-hover:translate-x-1 transition-transform"
-              >
-                →
-              </motion.span>
-            </span>
-          </motion.button>
-          
-          <motion.button
-            onClick={() => {
-              trackCTAClick('Lets Talk', 'contact');
-              scrollToSection('contact');
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            className="border-2 border-[#D4A017] bg-[#D4A017]/5 text-[#D4A017] hover:bg-[#D4A017]/20 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-sm shadow-lg"
-          >
-            <svg xmlns="" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            Let's Talk
-          </motion.button>
-        </motion.div>
 
-        {/* Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto"
-        >
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-              className="p-4 rounded-xl bg-[#0a1929]/40 backdrop-blur-sm border border-[#005792]/30"
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease, delay: 0.05 }}
+              className="mb-6 text-display-xl font-bold text-ink-50 lg:text-display"
             >
-              <div className="text-2xl md:text-3xl font-bold text-[#61DAFB] mb-1">
-                {stat.value}
-              </div>
-              <div className="text-xs md:text-sm text-gray-400 font-medium">
-                {stat.label}
-              </div>
+              <span className="sr-only">{SITE.name} — {SITE.location}. </span>
+              I build software the way I was trained to build machines.
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease, delay: 0.12 }}
+              className="mb-9 max-w-prose text-base leading-relaxed text-ink-200"
+            >
+              Mechanical engineer turned full-stack developer. I ship production platforms
+              end to end — database schema through deployed frontend — for clients who need
+              the thing to still work at 11pm on a slow connection.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease, delay: 0.19 }}
+              className="flex flex-col gap-3 sm:flex-row lg:flex-col"
+            >
+              <button
+                onClick={() => {
+                  trackCTAClick('See what I have shipped', 'projects');
+                  scrollToSection('projects');
+                }}
+                className="btn-signal"
+              >
+                See what I&apos;ve shipped
+                <span aria-hidden="true">→</span>
+              </button>
+              <button
+                onClick={() => {
+                  trackCTAClick('Available for hire', 'contact');
+                  scrollToSection('contact');
+                }}
+                className="btn-ghost"
+              >
+                Available for hire
+              </button>
             </motion.div>
-          ))}
+          </div>
+
+          {/* Proof strip — each figure links to its evidence */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease, delay: 0.3 }}
+            className="mt-14 grid grid-cols-3 gap-4 border-t border-ink-800 pt-6"
+          >
+            {proofPoints.map((point) => (
+              <a
+                key={point.label}
+                href={point.href}
+                onClick={point.onClick ? (e) => { e.preventDefault(); point.onClick(); } : undefined}
+                className="group block"
+              >
+                <div className="text-stat font-bold text-ink-50 transition-colors duration-250 ease-signal group-hover:text-signal">
+                  {point.value}
+                </div>
+                <div className="eyebrow mt-1.5 leading-snug">{point.label}</div>
+              </a>
+            ))}
+          </motion.div>
+        </div>
+
+        {/* Right — the shipped product, in a browser frame */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.7, ease, delay: 0.15 }}
+          className="flex flex-col gap-4 border-t border-ink-800 bg-ink-900 px-5 py-10 md:px-10 lg:border-t-0 lg:py-16"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="h-1.5 w-1.5 shrink-0 bg-signal" aria-hidden="true" />
+            <span className="eyebrow text-ink-200">Live — neemafoundationkilifi.org</span>
+          </div>
+
+          <figure className="m-0 border border-ink-700 bg-ink-850">
+            <div className="flex items-center gap-2 border-b border-ink-700 px-3.5 py-2.5" aria-hidden="true">
+              <span className="h-2 w-2 rounded-full bg-ink-600" />
+              <span className="h-2 w-2 rounded-full bg-ink-600" />
+              <span className="h-2 w-2 rounded-full bg-ink-600" />
+              <span className="ml-3 font-mono text-[10px] text-ink-400">neemafoundationkilifi.org</span>
+            </div>
+            <ImageWithFallback
+              src="/images/projects/neema/home.jpg"
+              alt="The Neema Foundation home page, built and maintained by Karisa: a full-bleed hero over a dark red gradient with donate and programmes calls to action"
+              width={1600}
+              height={1000}
+              sizes="(max-width: 1024px) 100vw, 900px"
+              priority
+            />
+            <figcaption className="border-t border-ink-700 px-3.5 py-3 text-sm text-ink-300">
+              A non-profit CMS their own staff run — programmes, stories, events and donations,
+              with no developer in the loop.
+            </figcaption>
+          </figure>
         </motion.div>
       </div>
     </section>

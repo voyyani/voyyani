@@ -80,7 +80,7 @@ const BackToTop = () => {
                 cy="28"
                 r="24"
                 fill="none"
-                stroke="#61DAFB"
+                stroke="#C8FF3D"
                 strokeWidth="3"
                 strokeDasharray={`${2 * Math.PI * 24}`}
                 strokeDashoffset={`${2 * Math.PI * 24 * (1 - scrollProgress / 100)}`}
@@ -91,13 +91,10 @@ const BackToTop = () => {
 
             {/* Button content */}
             <div
-              className="absolute inset-0 flex items-center justify-center 
-              bg-gradient-to-br from-[#005792] to-[#003056] rounded-full
-              shadow-lg group-hover:shadow-xl group-hover:shadow-[#61DAFB]/20
-              transition-all duration-200 group-hover:scale-110"
+              className="absolute inset-0 flex items-center justify-center border border-ink-700 bg-ink-900 transition-all duration-200 group-hover:scale-110"
             >
               <svg
-                className="w-6 h-6 text-[#61DAFB] group-hover:translate-y-[-2px] transition-transform"
+                className="w-6 h-6 text-signal group-hover:translate-y-[-2px] transition-transform"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

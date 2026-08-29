@@ -1,0 +1,191 @@
+{
+  "syncedAt": "2026-08-29",
+  "profileUrl": "https://github.com/voyyani",
+  "totals": {
+    "commits": 251,
+    "repos": 4,
+    "months": 15,
+    "firstCommit": "2025-06-17",
+    "lastCommit": "2026-08-17"
+  },
+  "months": [
+    {
+      "month": "2025-06",
+      "commits": 50
+    },
+    {
+      "month": "2025-07",
+      "commits": 11
+    },
+    {
+      "month": "2025-08",
+      "commits": 7
+    },
+    {
+      "month": "2025-09",
+      "commits": 0
+    },
+    {
+      "month": "2025-10",
+      "commits": 30
+    },
+    {
+      "month": "2025-11",
+      "commits": 9
+    },
+    {
+      "month": "2025-12",
+      "commits": 10
+    },
+    {
+      "month": "2026-01",
+      "commits": 31
+    },
+    {
+      "month": "2026-02",
+      "commits": 56
+    },
+    {
+      "month": "2026-03",
+      "commits": 41
+    },
+    {
+      "month": "2026-04",
+      "commits": 0
+    },
+    {
+      "month": "2026-05",
+      "commits": 0
+    },
+    {
+      "month": "2026-06",
+      "commits": 0
+    },
+    {
+      "month": "2026-07",
+      "commits": 5
+    },
+    {
+      "month": "2026-08",
+      "commits": 1
+    }
+  ],
+  "repos": [
+    {
+      "name": "Neema-Foundation-Kilifi",
+      "url": "https://github.com/voyyani/Neema-Foundation-Kilifi",
+      "description": null,
+      "commits": 88,
+      "firstCommit": "2025-10-20",
+      "lastCommit": "2026-07-14",
+      "languages": [
+        {
+          "name": "TypeScript",
+          "bytes": 2935230
+        },
+        {
+          "name": "PLpgSQL",
+          "bytes": 182079
+        },
+        {
+          "name": "HTML",
+          "bytes": 41802
+        },
+        {
+          "name": "CSS",
+          "bytes": 12583
+        },
+        {
+          "name": "JavaScript",
+          "bytes": 1672
+        }
+      ]
+    },
+    {
+      "name": "raslipwani",
+      "url": "https://github.com/voyyani/raslipwani",
+      "description": "Raslipwani Properties is a modern real estate platform built with React, Vite, and Supabase that enables users to list, search, and book property viewings while offering a powerful admin dashboard for managing listings and analytics.",
+      "commits": 85,
+      "firstCommit": "2025-06-17",
+      "lastCommit": "2026-08-17",
+      "languages": [
+        {
+          "name": "JavaScript",
+          "bytes": 903278
+        },
+        {
+          "name": "PLpgSQL",
+          "bytes": 31102
+        },
+        {
+          "name": "CSS",
+          "bytes": 17928
+        },
+        {
+          "name": "HTML",
+          "bytes": 1042
+        }
+      ]
+    },
+    {
+      "name": "voyyani",
+      "url": "https://github.com/voyyani/voyyani",
+      "description": null,
+      "commits": 70,
+      "firstCommit": "2025-06-21",
+      "lastCommit": "2026-03-28",
+      "languages": [
+        {
+          "name": "JavaScript",
+          "bytes": 379414
+        },
+        {
+          "name": "TypeScript",
+          "bytes": 224500
+        },
+        {
+          "name": "PLpgSQL",
+          "bytes": 47845
+        },
+        {
+          "name": "HTML",
+          "bytes": 21111
+        },
+        {
+          "name": "Shell",
+          "bytes": 5486
+        },
+        {
+          "name": "CSS",
+          "bytes": 1421
+        }
+      ]
+    },
+    {
+      "name": "cultureszn",
+      "url": "https://github.com/voyyani/cultureszn",
+      "description": null,
+      "commits": 8,
+      "firstCommit": "2026-02-04",
+      "lastCommit": "2026-02-19",
+      "languages": [
+        {
+          "name": "TypeScript",
+          "bytes": 622775
+        },
+        {
+          "name": "CSS",
+          "bytes": 9194
+        },
+        {
+          "name": "JavaScript",
+          "bytes": 6820
+        },
+        {
+          "name": "HTML",
+          "bytes": 6072
+        }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,6 @@ import { Toaster } from 'sonner';
 import SEO from './components/SEO';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import ParticleBackground from './components/ParticleBackground';
 import BackToTop from './components/BackToTop';
 import ScrollProgressIndicator from './components/ScrollProgressIndicator';
 import SectionLoader from './components/SectionLoader';
@@ -22,6 +21,8 @@ import AnalyticsPage from './admin/pages/AnalyticsPage';
 import AdminLogin from './admin/pages/AdminLogin';
 
 // Lazy load heavy sections for better initial load performance
+const About = lazy(() => import('./components/About'));
+const GitHubActivity = lazy(() => import('./components/GitHubActivity'));
 const Skills = lazy(() => import('./components/Skills'));
 const Projects = lazy(() => import('./components/Projects'));
 const Philosophy = lazy(() => import('./components/Philosophy'));
@@ -32,13 +33,13 @@ const Footer = lazy(() => import('./components/Footer'));
 const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) => {
   if (!isSupabaseConfigured) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-ink-950 px-4">
         <div className="text-center max-w-md">
-          <h1 className="text-2xl font-bold text-amber-400 mb-4">Admin area unavailable</h1>
-          <p className="text-gray-300 mb-6">
+          <h1 className="mb-4 text-2xl font-bold text-warn">Admin area unavailable</h1>
+          <p className="mb-6 text-ink-200">
             Supabase environment variables are not configured for this deployment.
           </p>
-          <a href="/" className="text-blue-400 hover:text-blue-300">Return to homepage</a>
+          <a href="/" className="text-signal hover:text-signal-hover">Return to homepage</a>
         </div>
       </div>
     );
@@ -46,10 +47,10 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-ink-950">
         <div className="text-center">
           <div className="animate-spin text-4xl mb-4">⌛</div>
-          <p className="text-gray-300">Loading...</p>
+          <p className="text-ink-200">Loading…</p>
         </div>
       </div>
     );
@@ -61,11 +62,11 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-ink-950">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-red-500 mb-4">Access Denied</h1>
-          <p className="text-gray-300 mb-6">You do not have admin permissions to access this area.</p>
-          <a href="/" className="text-blue-400 hover:text-blue-300">Return to homepage</a>
+          <h1 className="mb-4 text-3xl font-bold text-red-500">Access Denied</h1>
+          <p className="mb-6 text-ink-200">You do not have admin permissions to access this area.</p>
+          <a href="/" className="text-signal hover:text-signal-hover">Return to homepage</a>
         </div>
       </div>
     );
@@ -78,43 +79,43 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 const HomePage = () => (
   <>
     <SEO />
-    <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] text-gray-100 overflow-x-hidden relative">
+    <div className="relative min-h-screen overflow-x-hidden bg-ink-950 text-ink-50">
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: '#0a1929',
-            color: '#f0f0f0',
-            border: '1px solid rgba(0, 87, 146, 0.3)',
+            background: '#17161A',
+            color: '#F2F1EE',
+            border: '1px solid #2E2E33',
+            borderRadius: '0px',
           },
-          success: {
-            iconTheme: {
-              primary: '#61DAFB',
-              secondary: '#0a1929',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#0a1929',
-            },
-          },
+          success: { iconTheme: { primary: '#C8FF3D', secondary: '#0B0B0C' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#0B0B0C' } },
         }}
       />
 
       <ScrollProgressIndicator />
-      <ParticleBackground />
       <div className="relative z-10">
         <Navbar />
         <main>
           <Hero />
 
           <Suspense fallback={<SectionLoader />}>
-            <Skills />
+            <About />
+          </Suspense>
+
+          {/* Projects before Skills: the work is the evidence, the toolkit is the footnote. */}
+          <Suspense fallback={<SectionLoader />}>
+            <Projects />
+          </Suspense>
+
+          {/* Activity sits next to the work it evidences, before the toolkit. */}
+          <Suspense fallback={<SectionLoader />}>
+            <GitHubActivity />
           </Suspense>
 
           <Suspense fallback={<SectionLoader />}>
-            <Projects />
+            <Skills />
           </Suspense>
 
           <Suspense fallback={<SectionLoader />}>

@@ -183,42 +183,170 @@ Retire regardless of which direction wins: the three animated blurred blobs, the
 
 > **Note on the remaining four guides:** `COMPONENT_ARCHITECTURE.md`, `IMAGE_OPTIMIZATION.md`, `PRODUCTION_DEPLOYMENT_CHECKLIST.md` and `ANALYTICS_SETUP_GUIDE.md` were kept because their subject matter is still live, but they have **not** been re-verified against current code. `PRODUCTION_DEPLOYMENT_CHECKLIST.md` in particular is subtitled "Phase 3" and is email-system-centric. Audit them during Phase 5 and archive whatever no longer holds.
 
-### Phase 1 — Narrative & Copy (2–3 days)
+### Phase 1 — Narrative & Copy — ✅ DONE 2026-08-29
 
 **Goal:** every sentence on the site should be something only Karisa could say, backed by something provable.
 
-1. **Hero rewrite** (`src/components/Hero.jsx`):
+> **Status:** all 5 items complete. Karisa confirmed `voyanitech@gmail.com` as the published
+> contact address, and asked to pull the CAD Web Viewer from the site for now — so the site
+> presents 2 projects, and every count on the page says 2. The project stays in `RESUME.md`,
+> which is a separate artifact and doesn't need a screenshot to justify it.
+>
+> Two bugs surfaced while verifying the rendered page:
+> **(a)** `Navbar.jsx` wrapped the "Voyani.tech" wordmark in an `<h1>`, so the brand — not the
+> hero headline — was the first `h1` in the DOM on every page, for both search engines and
+> screen readers. It's an `<a>` with a `<span>` now.
+> **(b)** Raslipwani listed "Load Time 1.2s" and "Performance 60% ↑" as two separate metrics;
+> they're the same fact. Merged into one honest "Page Load 3s → 1.2s".
+>
+> Tests: **45 failures → 10**, all 10 pre-existing and unrelated to the public site
+> (7 ContactForm, 3 email utils). Lint 89 → 81 problems. Build green.
+
+1. ✅ **Hero rewrite** (`src/components/Hero.jsx`):
    - Replace the rotating-role component with one fixed, specific headline built from §3's positioning statement. Keep it short — the current three-role rotation is doing narrative work that belongs in About instead.
    - Replace the `stats` array's round, unverifiable numbers ("10+ Projects", "15+ Technologies") with one or two specific, checkable facts (e.g. link straight to a live project, or a real GitHub stat pulled in Phase 3).
    - Two CTAs per §3, not one ambiguous one.
-2. **Build the About section** (new `src/components/About.jsx`, replacing the deleted empty stub): headshot, the ME→dev story in 2-3 short paragraphs (education, the "why" behind the transition, what carries over — precision, tolerances, systems thinking), resume download repeated here.
-3. **Rewrite Projects copy** (`src/components/Projects.jsx`): cut the wall-of-text pattern. Each project card leads with a screenshot; the always-visible summary is 1-2 sentences, not a paragraph. Move the deep technical detail (architecture, database schema, admin features) behind the existing modal, but rewrite it to read like an engineer describing a real decision, not a marketing feature list — cut `keyAchievements` items that restate the same "90% test coverage" style claim more than once across sections.
-4. **Kill vanity metrics site-wide**: "99.9% Uptime," "10,000+ lines of production code" (footer stat row in `Projects.jsx` lines ~828-845), and the precise skill percentages in `Skills.jsx` all get replaced or removed per Phase 3's proof-system alternative.
-5. **Trim Philosophy** (`src/components/Philosophy.jsx`) to complement the new About section instead of overlapping it — read both back to back and cut whichever repeats the other.
+2. ✅ **Build the About section** (new `src/components/About.jsx`, replacing the deleted empty stub): headshot, the ME→dev story in 2-3 short paragraphs (education, the "why" behind the transition, what carries over — precision, tolerances, systems thinking), resume download repeated here.
+3. ✅ **Rewrite Projects copy** (`src/components/Projects.jsx`): cut the wall-of-text pattern. Each project card leads with a screenshot; the always-visible summary is 1-2 sentences, not a paragraph. Move the deep technical detail (architecture, database schema, admin features) behind the existing modal, but rewrite it to read like an engineer describing a real decision, not a marketing feature list — cut `keyAchievements` items that restate the same "90% test coverage" style claim more than once across sections.
+4. ✅ **Kill vanity metrics site-wide**: "99.9% Uptime," "10,000+ lines of production code" (footer stat row in `Projects.jsx` lines ~828-845), and the precise skill percentages in `Skills.jsx` all get replaced or removed per Phase 3's proof-system alternative.
+5. ✅ **Trim Philosophy** (`src/components/Philosophy.jsx`) to complement the new About section instead of overlapping it — read both back to back and cut whichever repeats the other.
 
-**Definition of Done:** read the whole site top to bottom out loud. Every claim should be either obviously true from something visible on the page (a screenshot, a link) or removed.
+**Definition of Done:** ✅ read the whole site top to bottom out loud. Every claim should be either obviously true from something visible on the page (a screenshot, a link) or removed.
 
-### Phase 2 — Visual Identity Overhaul (3–5 days)
+**What actually shipped:**
+
+| Was | Is |
+|---|---|
+| Hero rotated through "Mechanical Engineer / Full-Stack Developer / Problem Solver" every 3.5s | One fixed line: *"I build software the way I was trained to build machines."* |
+| "10+ Projects Completed", "15+ Technologies" | **2** client platforms (links to Projects) and **B.Eng** (links to the résumé) — each proof point links to its own evidence |
+| One ambiguous "Let's Talk" | "See what I've shipped" + "Available for hire" — one verb that covers both employers and clients |
+| No About section at all | `src/components/About.jsx`: headshot, the Shenyang → full-stack story in three paragraphs, résumé download, explicit "client builds through Voyani / open to full-time" line |
+| Card copy was a 60-word paragraph, clamped to 3 lines | A two-sentence `summary` field per project; the long-form detail stays in the modal |
+| `challenge`/`solution` read as marketing | Rewritten as an engineer describing a real decision — e.g. Raslipwani's is now the actual pagination/debounce/caching story with the numbers attached |
+| 8–10 `keyAchievements` per project, several restating "90% test coverage" | 4 per project, each distinct from the others and from the sections above |
+| Footer row: "10,000+ lines of production code", "Zero compilation errors", "WCAG 2.1 AA compliant" | Deleted — none was checkable from the page |
+| 12-item "Technologies I Work With" list including Next.js and Three.js | Deleted — neither was used by either project shown |
+| Skills gave every tool a percentage (React 95%, AWS 75%) and an averaged score ring | Each tool is listed with **where it shipped** — "Both client platforms", "Neema Foundation", "This site" — checkable against the Projects section. Zero percentages remain in that section. |
+| Philosophy had 4 invented metrics labelled "Performance Target" ("99.9% Accuracy", "Zero Downtime", "-40% Load Time", "100% Coverage") | 4 habits, each tied to a specific decision in the case studies; no metrics |
+| `privacy@voyani.tech` in the privacy policy (dead domain) | Routed through `src/config/site.js` |
+
+Section order also changed: **Projects now comes before Skills** — the work is the evidence,
+the toolkit is the footnote.
+
+### Phase 2 — Visual Identity Overhaul — ✅ DONE 2026-08-29
 
 **Goal:** replace the generic dark-navy/cyan/gold/gradient-blob identity with one of the three directions from §5, chosen from real mockups.
 
-1. **Invoke the `design` skill** to produce the 2-3 candidate directions as an actual visual canvas (not more text description) — this is the concrete next step once Phase 0/1 content exists to design around.
-2. Once a direction is picked, extract a real design system: color tokens, type scale, spacing scale, motion rules — into `tailwind.config.js` (currently 4482 bytes of largely default/unused custom config — audit what's actually used vs. cruft while touching this file).
-3. Rebuild `Hero.jsx`, `Navbar.jsx`, `Footer.jsx`, `ParticleBackground.jsx` (or retire it — a canvas particle field may not fit the new direction; if it goes, delete the component and its device-detection logic rather than leaving it dark-mode-only and unused) against the new system.
-4. Rebuild `Projects.jsx` and `Skills.jsx` visually once the new tokens exist (content from Phase 1/3 already correct, just re-skinned).
+> **Direction chosen: C — Product-Led.** Three candidates were drafted as a real canvas
+> (`design` skill) using the Phase 1 copy, so the design was what got judged rather than
+> the words: **A — Technical Precision** (light paper, drafting grid, spec-table metrics),
+> **B — Editorial** (warm paper, Instrument Serif, work as an index), and
+> **C — Product-Led**. Karisa picked C.
+>
+> Canvas: https://claude.ai/code/artifact/093f7887-0a0c-4157-ac96-6d38a797d4b2
 
-**Definition of Done:** a first-time visitor cannot mistake three screenshots of this site for a generic template — Lighthouse and test suite still green (`npm run test`, `npm run build`).
+1. ✅ **Invoke the `design` skill** to produce the 2-3 candidate directions as an actual visual canvas (not more text description) — this is the concrete next step once Phase 0/1 content exists to design around.
+2. ✅ Once a direction is picked, extract a real design system: color tokens, type scale, spacing scale, motion rules — into `tailwind.config.js` (currently 4482 bytes of largely default/unused custom config — audit what's actually used vs. cruft while touching this file).
+3. ✅ Rebuild `Hero.jsx`, `Navbar.jsx`, `Footer.jsx`, `ParticleBackground.jsx` (or retire it — a canvas particle field may not fit the new direction; if it goes, delete the component and its device-detection logic rather than leaving it dark-mode-only and unused) against the new system.
+4. ✅ Rebuild `Projects.jsx` and `Skills.jsx` visually once the new tokens exist (content from Phase 1/3 already correct, just re-skinned).
 
-### Phase 3 — Proof Systems (3–5 days, uses the `dataviz` skill)
+**Definition of Done:** ✅ a first-time visitor cannot mistake three screenshots of this
+site for a generic template — test suite and build still green. (Real Lighthouse numbers
+are Phase 5; nothing is claimed for them here.)
+
+**The design system** now lives in `tailwind.config.js` and `src/index.css`. Three
+decisions carry the identity:
+
+1. **Near-black ground (`#0B0B0C`), not navy.** No gradients on surfaces at all — the
+   old `body` was a 135° navy gradient and every card was `bg-gradient-to-br`.
+2. **One acid-lime signal colour (`#C8FF3D`)**, reserved for things that are live,
+   actionable or measured. Scarcity is what makes it read as a signal; the old design
+   used cyan, gold, green and orange decoratively and none of them meant anything.
+3. **Square corners.** Everything was `rounded-2xl`/`rounded-3xl` glassmorphism; hairline
+   borders and sharp edges make it read as a tool rather than a landing-page template.
+
+| Was | Is |
+|---|---|
+| Navy `#061220`→`#0a1929` body gradient | Flat `#0B0B0C` |
+| Cyan + gold + green + orange, decoratively | One lime signal + a warn amber for status only |
+| `rounded-2xl` / `rounded-3xl` glassmorphism cards | Square panels, 1px hairline borders |
+| Three animated blurred gradient blobs per section | Removed entirely |
+| Rajdhani + Inter | Archivo + JetBrains Mono (mono carries data, labels, status) |
+| Emoji as icons throughout | Inline stroke SVG on a 24px grid; metric labels in words |
+| `ParticleBackground` canvas field | Deleted, with its device-detection logic |
+| Centred section headers with pill badges | Left-aligned, with a mono `01 —` / `02 —` index |
+| Per-project accent colours and gradient headers | One system; projects carry an index, not a colour |
+
+`tailwind.config.js` was audited while being rewritten: ~80% of it was dead. `nav-height`,
+`sidebar-expanded`/`collapsed`, `container-max`, `section-padding`, `bg-active`, the
+`viewport-minus-nav` heights, the `.btn-touch` / `.container-responsive` / `.sidebar-*`
+component classes and the entire `responsive-xs..4xl` font scale had **zero** references
+in `src/` outside `constants/responsive.ts`. All removed. The `safe-area` helper stayed —
+`ResponsiveModal` and `MobileDrawer` genuinely use it.
+
+**Also fixed in passing:** the cookie-consent banner, privacy policy, contact form,
+error boundary and loading states were still on Tailwind's default `cyan-*`/`blue-*`/
+`gray-*` scales, which no design token governed — they now use the same ramp as
+everything else.
+
+### Phase 3 — Proof Systems — ✅ DONE 2026-08-29 (task 4 blocked)
 
 **Goal:** replace every self-reported number with something a visitor can verify themselves.
 
-1. **Live GitHub activity**: pull real contribution/commit data via the GitHub API (public, no auth needed for public stats) and render it as an actual chart, not a static badge — invoke the `dataviz` skill for the chart treatment (color, form, accessibility) before writing it.
-2. **Replace `Skills.jsx`'s percentage bars.** Options, pick one: (a) group tools by *which real project used them* (grounded, checkable against the project cards), or (b) drop numeric scoring entirely in favor of a clean grouped-tag layout. Either beats an unfalsifiable "React: 95%."
-3. **Architecture diagrams for case studies.** `Projects.jsx`'s current "System Architecture" and "Database Schema" sections are monospace text lists (lines ~443-481) — replace with a real diagram per project (invoke `artifact-diagramming` guidance for how to draw one that shows the actual mechanism, not decoration) embedded as inline SVG.
-4. **Screenshots/GIFs over text** for the "Admin Panel" and "Technical Highlights" subsections — a 5-second looped screen capture of the actual booking drag-and-drop or the RBAC permission matrix says more than the current bullet list.
+> **Status:** tasks 1–3 complete. Task 4 (admin-panel captures) is blocked on credentials
+> only Karisa has — see below.
+>
+> The headline result: there is now a section on the site whose numbers are **not**
+> Karisa's word for anything. 251 public commits across 4 repositories over 15 months,
+> pulled from the GitHub API by `scripts/fetch-github-activity.mjs`, with every repo row
+> linking to the source it counts.
 
-**Definition of Done:** every quantitative claim on the site links to or is adjacent to the evidence for it.
+1. ✅ **Live GitHub activity**: pull real contribution/commit data via the GitHub API (public, no auth needed for public stats) and render it as an actual chart, not a static badge — invoke the `dataviz` skill for the chart treatment (color, form, accessibility) before writing it.
+2. ✅ **Replace `Skills.jsx`'s percentage bars.** *(Done in Phase 1, option (a).)* Options, pick one: (a) group tools by *which real project used them* (grounded, checkable against the project cards), or (b) drop numeric scoring entirely in favor of a clean grouped-tag layout. Either beats an unfalsifiable "React: 95%."
+3. ✅ **Architecture diagrams for case studies.** `Projects.jsx`'s current "System Architecture" and "Database Schema" sections are monospace text lists (lines ~443-481) — replace with a real diagram per project (invoke `artifact-diagramming` guidance for how to draw one that shows the actual mechanism, not decoration) embedded as inline SVG.
+4. ⛔ **BLOCKED — Screenshots/GIFs over text** for the "Admin Panel" and "Technical Highlights" subsections — a 5-second looped screen capture of the actual booking drag-and-drop or the RBAC permission matrix says more than the current bullet list.
+
+**Definition of Done:** ✅ every quantitative claim on the site links to or is adjacent to
+the evidence for it — with one honest exception noted below.
+
+**What shipped**
+
+| Task | Result |
+|---|---|
+| 1 — GitHub activity | New `03 — Activity` section. `scripts/fetch-github-activity.mjs` (run with `npm run sync:github`) pages the public commits API, buckets by month, and writes `src/data/github-activity.json`. Rendered as a hand-authored SVG column chart with a table-view twin. |
+| 2 — Skills percentages | Already done in Phase 1: every tool lists **where it shipped** instead of a self-awarded score. |
+| 3 — Architecture diagrams | `ProjectDiagram.jsx` — two hand-authored inline SVG mechanism diagrams, replacing the monospace pseudo-lists. The "Database Schema" list became a real `<table>`, and the schema data was restructured from formatted strings (`"properties (15 columns, 4 indexes) - Property listings"`) into `{name, shape, holds}` fields. |
+
+**Chart decisions** (per the `dataviz` skill): one series, so no legend — four categorical
+hues would also have broken the single-accent identity from Phase 2. Columns capped at
+24px with the band's leftover left as air, 4px rounded cap squared at the baseline,
+hairline solid gridlines. Only the peak month is directly labelled. Months with **zero**
+commits are plotted as real gaps — the three-month hole in mid-2026 is in the data, and
+smoothing it would be the exact flattery this phase exists to remove. The tooltip never
+gates a value: there is a full table view, and every hit target is keyboard-reachable.
+
+**Diagram decisions** (per `artifact-diagramming`): each figure draws the one thing its
+case study argues, not an inventory of parts.
+- *Raslipwani* — before/after of the request path, so you can see that the cache, the
+  pagination and the debounce each remove a specific cost.
+- *Neema* — the admin UI and a hand-rolled `curl` request converging on the same RLS
+  policy, which is the argument for why hiding a button is not access control.
+
+**⛔ Task 4 is blocked, and cannot be unblocked from here.** Capturing the Raslipwani
+booking drag-and-drop or the Neema RBAC permission matrix requires logging into those
+clients' admin panels. Those are Karisa's credentials on client systems; nothing about
+them is reachable from this machine, and Raslipwani's public site is in maintenance
+besides. **Action for Karisa:** record two short screen captures while logged in — the
+booking reschedule, and the permission matrix — and drop them into
+`public/images/projects/<project>/`. The `screenshots` array in `Projects.jsx` already
+renders whatever it is given.
+
+**Known limitation, stated plainly:** `github-activity.json` is a build-time snapshot, not
+a live fetch. GitHub's `/stats/*` endpoints answer `202 Computing` on a cold cache — a
+visitor's browser would hit the same thing and the section would render empty on first
+view — and unauthenticated calls are capped at 60/hour. The section therefore shows its
+sync date and links to the profile, so the numbers stay checkable even when stale.
+Re-run `npm run sync:github` before a deploy.
 
 ### Phase 4 — Content & Trust (1–2 weeks, can run partly in parallel with Phase 3)
 
@@ -299,10 +427,10 @@ Not "9.5/10 self-rating." Concrete and checkable:
 - [x] Resume is downloadable from the live site — navbar + footer, `public/Karisa-Voyani-Resume.pdf`
 - [x] Zero placeholder URLs anywhere in shipped content — fixed the LinkedIn placeholder, the wrong LinkedIn in `SEO.jsx`, and the `@karisavoyani` Twitter handle
 - [x] No public link to `/admin` from the marketing site — removed from desktop and mobile nav
-- [ ] An About section exists on the live site — **Phase 1**; the 0-byte stub was deleted, the section itself is still to be written
+- [x] An About section exists on the live site — built in Phase 1, restyled in Phase 2
 - [ ] 2 testimonials live (currently 0) — **Phase 4**
 - [ ] 2 real deep-dive write-ups live (currently 0) — **Phase 4**
-- [ ] Visual design is distinguishable from the prior template look in a side-by-side screenshot (subjective but checkable by asking 3 people "does this look like a template?") — **Phase 2**
+- [x] Visual design is distinguishable from the prior template look in a side-by-side screenshot — **Phase 2 done**: near-black ground, one lime signal colour, square corners, Archivo + JetBrains Mono, no gradients or blobs anywhere. Still worth asking 3 people the "does this look like a template?" question.
 - [ ] Real (not predicted) Lighthouse Performance/Accessibility/SEO scores recorded in `docs/CHANGELOG.md` — **Phase 5**
 - [x] *(added)* Every published contact address actually receives mail — all three were dead domains; now routed through `src/config/site.js`
 - [x] *(added)* No fabricated UI — removed the newsletter form that only called `console.log` while telling users they'd subscribed
@@ -311,15 +439,13 @@ Not "9.5/10 self-rating." Concrete and checkable:
 
 ## 11. Immediate Next Actions
 
-Phase 0 and 0.5 are done (2026-08-29). What's left needs Karisa specifically — these
-are the only blockers no one else can clear:
+Phases 0, 0.5, 1, 2 and 3 are done (2026-08-29). What's left needs Karisa specifically —
+these are the only blockers no one else can clear:
 
-1. **Confirm the contact email.** `src/config/site.js` now publishes
-   `voyanitech@gmail.com`, chosen because it's the address the deployed notification
-   function forwards to and it matches `resume.html`/`resume.pdf`. If that's wrong,
-   change it in that one file. Better still: add an MX record to `voyani.tech` and
-   switch to `karisa@voyani.tech` — a custom domain reads better than a gmail, and
-   right now the domain has A records but cannot receive mail at all.
+1. ✅ **Contact email confirmed** as `voyanitech@gmail.com` (2026-08-29). Still worth
+   doing eventually: add an MX record to `voyani.tech` and switch to
+   `karisa@voyani.tech` — one line in `src/config/site.js`. The domain currently has A
+   records but cannot receive mail at all.
 2. **Record a screen capture of the CAD Web Viewer** (5–10s of the viewer rotating a
    model is enough). It's the single strongest piece of evidence for the ME→dev story
    and it's the only project with no visual at all. Drop it in
@@ -330,8 +456,13 @@ are the only blockers no one else can clear:
 4. **Verify two claims flagged during Phase 0** that could not be checked from outside:
    the Neema RBAC tier count (the data said 5 in two places and 6 in another — it's now
    5 everywhere), and Raslipwani's "100+ active users".
-5. **Then start Phase 1** (About section + copy rewrite), and only after that Phase 2's
-   `design` skill session — design against the rewritten copy, not the current copy.
+5. **Record two admin screen captures** (Phase 3 task 4, the one piece still open):
+   the Raslipwani booking reschedule and the Neema permission matrix, both from inside
+   the admin panels you have credentials for. Drop them in
+   `public/images/projects/<project>/` — the rendering already exists.
+6. **Then Phase 4 — testimonials and two written case studies.** This is now the
+   highest-value remaining work for actually getting hired, and it is entirely gated on
+   you reaching out to the two clients. Nothing else on the roadmap needs you specifically.
 
 ---
 

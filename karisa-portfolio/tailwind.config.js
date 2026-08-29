@@ -1,131 +1,109 @@
 /** @type {import('tailwindcss').Config} */
+
+/**
+ * Design system — Phase 2, "Product-Led" direction (docs/roadmapupdated.md §5, direction C).
+ *
+ * Replaces the navy/cyan/gold + gradient-blob + glassmorphism identity, which was a
+ * competent execution of the most common AI-scaffolded portfolio look of the era.
+ *
+ * The three decisions that carry this identity:
+ *   1. Near-black ground (#0B0B0C), NOT navy-blue. No gradients on surfaces.
+ *   2. A single acid-lime signal colour, used only for things that are live, actionable
+ *      or measured. Scarcity is what makes it read as a signal rather than decoration.
+ *   3. Square corners. The old design rounded everything to 2xl/3xl; sharp edges plus
+ *      hairline borders make it read as a tool, not a landing-page template.
+ *
+ * Audited while rewriting: the previous config carried ~80% dead tokens — nav-height,
+ * sidebar-expanded/collapsed, container-max, section-padding, bg-active, the
+ * viewport-minus-nav heights, the .btn-touch / .container-responsive / .sidebar-*
+ * component classes, and the whole responsive-xs..4xl font scale. Every one had zero
+ * references in src/ outside constants/responsive.ts. They are gone. The safe-area
+ * helper stayed — two admin components genuinely use it.
+ */
 module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}"
-  ],
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     screens: {
-      'xs': '320px',   // Mobile first
-      'sm': '640px',   // Small devices
-      'md': '768px',   // Tablets
-      'lg': '1024px',  // Small laptops
-      'xl': '1280px',  // Desktops
-      '2xl': '1536px', // Large desktops
+      xs: '320px',
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
     },
     extend: {
-      spacing: {
-        // Layout spacing
-        'nav-height': '64px',
-        'sidebar-expanded': '256px',
-        'sidebar-collapsed': '80px',
-        'section-padding': 'clamp(1rem, 5vw, 3rem)',
-        'container-max': '1200px',
+      colors: {
+        // Neutral ramp. Warm-shifted near-black, deliberately not blue.
+        ink: {
+          950: '#0B0B0C', // page ground
+          900: '#100F12', // raised panel
+          850: '#17161A', // card
+          800: '#1E1E21', // hairline
+          700: '#2E2E33', // border
+          600: '#34333A',
+          500: '#55545A',
+          400: '#6E6C74', // muted / mono labels
+          300: '#8B8890', // tertiary copy
+          200: '#A5A29B', // secondary copy
+          50: '#F2F1EE', // primary copy
+        },
+        // The one accent. Reserve it for live, actionable or measured things.
+        signal: {
+          DEFAULT: '#C8FF3D',
+          hover: '#A9DD23',
+          dim: '#7A9E28',
+        },
+        // Status only — a client site in maintenance, a pending capture.
+        warn: '#D99A2B',
       },
-      height: {
-        'nav': '64px',
-        'viewport-minus-nav': 'calc(100vh - 64px)',
+      fontFamily: {
+        sans: ['Archivo', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       fontSize: {
-        // Fluid typography - scales with viewport
-        'responsive-xs': ['clamp(0.75rem, 1.5vw, 0.875rem)', { lineHeight: '1.5' }],
-        'responsive-sm': ['clamp(0.875rem, 2vw, 1rem)', { lineHeight: '1.5' }],
-        'responsive-base': ['clamp(1rem, 2.5vw, 1.125rem)', { lineHeight: '1.6' }],
-        'responsive-lg': ['clamp(1.125rem, 3vw, 1.25rem)', { lineHeight: '1.6' }],
-        'responsive-xl': ['clamp(1.25rem, 3.5vw, 1.5rem)', { lineHeight: '1.7' }],
-        'responsive-2xl': ['clamp(1.5rem, 4vw, 1.875rem)', { lineHeight: '1.8' }],
-        'responsive-3xl': ['clamp(1.875rem, 5vw, 2.25rem)', { lineHeight: '1.8' }],
-        'responsive-4xl': ['clamp(2.25rem, 6vw, 3rem)', { lineHeight: '1.8' }],
+        // Mono micro-label. The recurring "FIG 01" device across the site.
+        eyebrow: ['0.6875rem', { lineHeight: '1.2', letterSpacing: '0.14em' }],
+        stat: ['1.75rem', { lineHeight: '1', letterSpacing: '-0.02em' }],
+        title: ['clamp(1.5rem, 3vw, 2rem)', { lineHeight: '1.15', letterSpacing: '-0.02em' }],
+        display: ['clamp(2rem, 4.5vw, 2.875rem)', { lineHeight: '1.06', letterSpacing: '-0.03em' }],
+        'display-xl': ['clamp(2.25rem, 5.5vw, 3.75rem)', { lineHeight: '1.03', letterSpacing: '-0.035em' }],
       },
-      inset: {
-        // Safe area insets for notched devices
-        'safe-top': 'env(safe-area-inset-top)',
-        'safe-right': 'env(safe-area-inset-right)',
-        'safe-bottom': 'env(safe-area-inset-bottom)',
-        'safe-left': 'env(safe-area-inset-left)',
+      spacing: {
+        section: 'clamp(4rem, 9vw, 7rem)',
       },
-      padding: {
-        // Safe area insets for padding
-        'safe-x': 'env(safe-area-inset-left) env(safe-area-inset-right)',
-        'safe-y': 'env(safe-area-inset-top) env(safe-area-inset-bottom)',
+      borderRadius: {
+        // Square by default; 2px is the largest curve in this system.
+        DEFAULT: '0px',
+        sm: '2px',
+        md: '2px',
+        lg: '2px',
+      },
+      transitionTimingFunction: {
+        // One easing curve for the whole site.
+        signal: 'cubic-bezier(0.22, 1, 0.36, 1)',
       },
       transitionDuration: {
-        'fast': '150ms',
-        'normal': '300ms',
-        'slow': '500ms',
+        250: '250ms',
       },
-      animation: {
-        'fade-in': 'fadeIn 300ms ease-in-out',
-        'slide-in-right': 'slideInRight 300ms ease-out',
-        'slide-in-left': 'slideInLeft 300ms ease-out',
-        'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        slideInRight: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0)' },
-        },
-        slideInLeft: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(0)' },
-        },
-        pulseSoft: {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '.7' },
-        },
-      },
-      minHeight: {
-        'nav': '64px',
-        'screen-minus-nav': 'calc(100vh - 64px)',
-      },
-      backgroundColor: {
-        'active': 'rgba(255, 255, 255, 0.08)',
+      maxWidth: {
+        prose: '68ch',
       },
     },
   },
   plugins: [
-    function ({ addComponents, theme, e }) {
+    function ({ addComponents }) {
       addComponents({
-        // Touch-friendly button sizing
-        '.btn-touch': {
-          '@apply min-h-12 min-w-12 px-4 py-2': {},
-        },
-        // Disable tap highlight on mobile devices
-        '@supports (selector(:focus-visible))': {
-          'button, a, input, textarea, select, [role="button"]': {
-            WebkitTapHighlightColor: 'transparent',
-          },
-        },
-        // Safe area utilities
+        // Kept: ResponsiveModal and MobileDrawer both use this.
         '.safe-area': {
           paddingTop: 'env(safe-area-inset-top)',
           paddingRight: 'env(safe-area-inset-right)',
           paddingBottom: 'env(safe-area-inset-bottom)',
           paddingLeft: 'env(safe-area-inset-left)',
         },
-        // Container utilities
-        '.container-responsive': {
-          '@apply w-full max-w-container-max mx-auto px-4 sm:px-6 lg:px-8': {},
-        },
-        // Sidebar utilities
-        '.sidebar-base': {
-          '@apply fixed inset-y-0 left-0 z-40 bg-white dark:bg-gray-900 shadow-lg transition-all duration-300': {},
-        },
-        '.sidebar-expanded': {
-          '@apply w-sidebar-expanded': {},
-        },
-        '.sidebar-collapsed': {
-          '@apply w-sidebar-collapsed': {},
-        },
-        // Touch-friendly interactive elements
         'button, a, input, textarea, select': {
           WebkitTapHighlightColor: 'transparent',
         },
-      })
+      });
     },
   ],
-}
+};

@@ -108,7 +108,7 @@ const SEO = ({
       <meta name="robots" content="index, follow" />
       <meta name="language" content="English" />
       <meta name="revisit-after" content="7 days" />
-      <meta name="theme-color" content="#061220" />
+      <meta name="theme-color" content="#0B0B0C" />
       
       {/* Mobile Optimization */}
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />

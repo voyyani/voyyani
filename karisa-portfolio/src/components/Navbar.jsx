@@ -2,108 +2,99 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SITE } from '../config/site';
 
+const LINKS = ['About', 'Projects', 'Activity', 'Skills', 'Philosophy', 'Contact'];
+
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => setIsMenuOpen((open) => !open);
 
   return (
     <>
-      <motion.nav 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className={`fixed w-full z-50 py-3 transition-all duration-300 ${
-          scrolled 
-            ? 'bg-[#061220]/90 backdrop-blur-md border-b border-[#005792]/30' 
-            : 'bg-transparent'
+      <nav
+        className={`fixed z-50 w-full border-b transition-colors duration-250 ease-signal ${
+          scrolled ? 'border-ink-800 bg-ink-950/95 backdrop-blur' : 'border-transparent bg-transparent'
         }`}
       >
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#61DAFB] animate-pulse"></div>
-            <h1 className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#61DAFB] to-[#005792]">
-              Voyani.tech
-            </h1>
-          </div>
-          
-          <div className="hidden md:flex gap-6 items-center">
-            {['Skills', 'Projects', 'Philosophy', 'Contact'].map((item) => (
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-4 md:px-10">
+          {/* A wordmark, not a heading — this was an <h1>, which outranked the hero
+              headline for search engines and screen readers. */}
+          <a href="#" className="flex items-center gap-2.5" aria-label={`${SITE.brand} — back to top`}>
+            <span className="flex h-6 w-6 items-center justify-center bg-signal" aria-hidden="true">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0B0B0C" strokeWidth="2.4">
+                <path d="M4 15a8 8 0 0116 0" />
+                <path d="M2 15h20" />
+              </svg>
+            </span>
+            <span className="font-semibold tracking-tight text-ink-50">{SITE.name}</span>
+          </a>
+
+          <div className="hidden items-center gap-7 md:flex">
+            {LINKS.map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
-                className="text-gray-300 hover:text-[#61DAFB] transition-colors font-medium"
+                className="text-sm text-ink-200 transition-colors duration-250 ease-signal hover:text-ink-50"
               >
                 {item}
               </a>
             ))}
-
             <a
               href={SITE.resume.href}
               download={SITE.resume.downloadAs}
-              className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border border-[#61DAFB]/50 text-[#61DAFB] hover:bg-[#61DAFB]/10 hover:border-[#61DAFB] transition-colors focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#061220]"
+              className="bg-signal px-4 py-2 text-sm font-semibold text-ink-950 transition-colors duration-250 ease-signal hover:bg-signal-hover"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Resume
+              Résumé
             </a>
           </div>
-          
-          <button 
+
+          <button
             onClick={toggleMenu}
-            className="md:hidden text-gray-300 z-50"
-            aria-label="Toggle menu"
+            className="z-50 p-1 text-ink-50 md:hidden"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16m-7 6h7"} />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+              <path strokeLinecap="round" strokeLinejoin="round" d={isMenuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 7h16M4 12h16M4 17h16'} />
             </svg>
           </button>
         </div>
-      </motion.nav>
+      </nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isMenuOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="md:hidden fixed top-16 left-0 right-0 bg-[#061220] backdrop-blur-lg border-b border-[#005792]/30 z-40 overflow-hidden"
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed left-0 right-0 top-[57px] z-40 overflow-hidden border-b border-ink-800 bg-ink-950 md:hidden"
           >
-            <div className="flex flex-col py-4 px-6">
-              {['Skills', 'Projects', 'Philosophy', 'Contact'].map((item) => (
+            <div className="flex flex-col px-5 py-2">
+              {LINKS.map((item) => (
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="text-gray-300 hover:text-[#61DAFB] py-3 px-4 rounded-lg transition-colors font-medium border-b border-[#005792]/20"
                   onClick={toggleMenu}
+                  className="border-b border-ink-800 py-4 text-ink-200 transition-colors hover:text-ink-50"
                 >
                   {item}
                 </a>
               ))}
-
               <a
                 href={SITE.resume.href}
                 download={SITE.resume.downloadAs}
                 onClick={toggleMenu}
-                className="mt-3 flex items-center justify-center gap-2 text-[#61DAFB] font-semibold py-3 px-4 rounded-lg border border-[#61DAFB]/50 hover:bg-[#61DAFB]/10 transition-colors"
+                className="mt-4 mb-2 bg-signal py-3.5 text-center font-semibold text-ink-950"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download Resume
+                Download Résumé
               </a>
             </div>
           </motion.div>

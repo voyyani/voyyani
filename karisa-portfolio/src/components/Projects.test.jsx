@@ -46,18 +46,18 @@ describe('Projects Component', () => {
 
     it('should display the section heading', () => {
       render(<Projects />);
-      expect(screen.getByText(/Production-Ready/i)).toBeDefined();
+      expect(screen.getByText(/Two platforms,/i)).toBeDefined();
     });
 
     it('should display "Full-Stack Platform" text', () => {
       render(<Projects />);
-      expect(screen.getByText(/Full-Stack Platform/i)).toBeDefined();
+      expect(screen.getByText(/both in daily use/i)).toBeDefined();
     });
 
     it('should display the section description', () => {
       render(<Projects />);
-      expect(screen.getByText(/Enterprise-grade applications/i)).toBeDefined();
-      expect(screen.getByText(/modern architecture/i)).toBeDefined();
+      expect(screen.getByText(/Real client work, not demos/i)).toBeDefined();
+      expect(screen.getByText(/schema, permissions/i)).toBeDefined();
     });
   });
 
@@ -69,7 +69,7 @@ describe('Projects Component', () => {
 
     it('should display project tagline', () => {
       render(<Projects />);
-      expect(screen.getByText('Enterprise Real Estate Management Platform')).toBeDefined();
+      expect(screen.getByText('Real estate booking & client management')).toBeDefined();
     });
 
     it('should display project category badge', () => {
@@ -80,27 +80,32 @@ describe('Projects Component', () => {
 
     it('should display project description', () => {
       render(<Projects />);
-      expect(screen.getByText(/comprehensive full-stack property management/i)).toBeDefined();
+      expect(screen.getByText(/staff run the whole pipeline/i)).toBeDefined();
     });
 
-    it('should display project emoji icon 🏢', () => {
+    // Phase 2 removed decorative emoji: they render differently on every platform,
+    // can't take the accent colour, and are one of the clearest template tells.
+    it('should number each project rather than badge it with an emoji', () => {
       render(<Projects />);
-      const emojis = screen.getAllByText('🏢');
-      expect(emojis.length).toBeGreaterThan(0);
+      expect(screen.getByText('01')).toBeDefined();
+      expect(screen.getByText('02')).toBeDefined();
+      expect(screen.queryByText('🏢')).toBeNull();
+      expect(screen.queryByText('💚')).toBeNull();
     });
 
     it('should display first 3 metrics', () => {
       render(<Projects />);
+      expect(screen.getByText('3s → 1.2s')).toBeDefined(); // Page Load
       expect(screen.getByText('100+')).toBeDefined(); // Active Users
-      expect(screen.getByText('1.2s')).toBeDefined(); // Load Time
-      expect(screen.getByText('60% ↑')).toBeDefined(); // Performance
+      expect(screen.getByText('95/100')).toBeDefined(); // Mobile Lighthouse
     });
 
-    it('should display metric icons', () => {
+    it('should label metrics in words rather than emoji', () => {
       render(<Projects />);
-      expect(screen.getByText('👥')).toBeDefined(); // Users icon
-      expect(screen.getAllByText('⚡').length).toBeGreaterThan(0); // Speed icon
-      expect(screen.getByText('📊')).toBeDefined(); // Performance icon
+      expect(screen.getByText('Page Load')).toBeDefined();
+      expect(screen.getByText('Active Users')).toBeDefined();
+      expect(screen.queryByText('👥')).toBeNull();
+      expect(screen.queryByText('⚡')).toBeNull();
     });
 
     it('should display first 4 technologies', () => {
@@ -119,7 +124,7 @@ describe('Projects Component', () => {
 
     it('should display "Explore Full Details" CTA', () => {
       render(<Projects />);
-      expect(screen.getAllByText('Explore Full Details').length).toBe(3);
+      expect(screen.getAllByText('Explore Full Details').length).toBe(2);
     });
 
     it('should have cursor-pointer class for interactivity', () => {
@@ -210,13 +215,13 @@ describe('Projects Component', () => {
 
     it('should display project challenge in modal', async () => {
       await waitFor(() => {
-        expect(screen.getByText(/Building a scalable real estate platform/i)).toBeDefined();
+        expect(screen.getByText(/loaded every property and every booking/i)).toBeDefined();
       });
     });
 
     it('should display solution details', async () => {
       await waitFor(() => {
-        expect(screen.getByText(/Implemented React Query for intelligent caching/i)).toBeDefined();
+        expect(screen.getByText(/Server-side pagination so a page fetches 20 rows/i)).toBeDefined();
       });
     });
 
@@ -246,11 +251,12 @@ describe('Projects Component', () => {
   });
 
   describe('Additional Info', () => {
-    it('should display project stats footer', () => {
+    // Phase 1 deleted the vanity stat row: none of it was checkable from this page.
+    it('should not display unverifiable vanity stats', () => {
       render(<Projects />);
-      expect(screen.getByText(/10,000\+ lines of production code/i)).toBeDefined();
-      expect(screen.getByText(/90% test coverage/i)).toBeDefined();
-      expect(screen.getByText(/Zero compilation errors/i)).toBeDefined();
+      expect(screen.queryByText(/10,000\+ lines of production code/i)).toBeNull();
+      expect(screen.queryByText(/Zero compilation errors/i)).toBeNull();
+      expect(screen.queryByText(/WCAG 2.1 AA compliant/i)).toBeNull();
     });
   });
 
@@ -265,7 +271,7 @@ describe('Projects Component', () => {
       const { container } = render(<Projects />);
       const h2 = container.querySelector('h2');
       expect(h2).toBeDefined();
-      expect(h2.textContent).toContain('Production-Ready');
+      expect(h2.textContent).toContain('Two platforms');
     });
 
     it('should have clickable card elements', () => {
@@ -314,7 +320,7 @@ describe('Projects Component', () => {
       
       // Verify core project data is present
       expect(screen.getByText('Raslipwani Properties')).toBeDefined();
-      expect(screen.getByText('Enterprise Real Estate Management Platform')).toBeDefined();
+      expect(screen.getByText('Real estate booking & client management')).toBeDefined();
       expect(screen.getByText('100+')).toBeDefined();
       expect(screen.getByText('React 18.3')).toBeDefined();
     });

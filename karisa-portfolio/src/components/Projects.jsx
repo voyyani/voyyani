@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { trackProjectView, trackEvent } from '../utils/analytics';
 import ImageWithFallback from './ImageWithFallback';
+import ProjectDiagram from './ProjectDiagram';
 
 /**
  * Shown instead of a screenshot when a project genuinely has no capture available.
@@ -11,14 +12,16 @@ import ImageWithFallback from './ImageWithFallback';
  */
 const NoCaptureNotice = ({ project }) => (
   <div
-    className="w-full h-full flex items-center justify-center bg-[#061220] border-b border-[#005792]/30"
+    className="flex h-full w-full items-center justify-center border-b border-ink-800 bg-ink-850"
     style={{ aspectRatio: '16 / 10' }}
   >
-    <div className="text-center px-6">
-      <div className="text-4xl mb-3 opacity-40" role="img" aria-hidden="true">
-        {project.emoji}
-      </div>
-      <p className="text-gray-500 text-xs uppercase tracking-[0.15em]">
+    <div className="px-6 text-center">
+      <svg className="mx-auto mb-3 h-7 w-7 text-ink-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="14" rx="1" />
+        <path d="M3 16l5-5 4 4 3-3 6 6" />
+        <path d="M4 4l16 16" />
+      </svg>
+      <p className="eyebrow text-ink-500">
         {project.liveStatus?.state === 'maintenance'
           ? 'Capture pending — client site in maintenance'
           : 'Capture pending — private client deployment'}
@@ -38,8 +41,10 @@ const Projects = () => {
     {
       id: 1,
       title: "Raslipwani Properties",
-      tagline: "Enterprise Real Estate Management Platform",
-      description: "A comprehensive full-stack property management platform featuring intelligent booking systems, CRM with client tracking, real-time availability management, advanced admin dashboard with analytics, and automated communication workflows. Built to handle 100+ concurrent users with optimized performance and scalability.",
+      tagline: "Real estate booking & client management",
+      // Shown on the card. Two sentences, plain language, no adjectives I can't defend.
+      summary: "A property platform where buyers book viewings and staff run the whole pipeline — listings, bookings and client history — from one dashboard.",
+      description: "A property management platform for a Kenyan real-estate agency. The public side lets buyers search listings and book viewings; the admin side is where the agency actually works — managing properties, rescheduling bookings, tracking which client asked about which property, and keeping a record of every conversation.",
       technologies: [
         "React 18.3",
         "Vite 6.3",
@@ -56,16 +61,17 @@ const Projects = () => {
         "Vitest",
         "React Testing Library"
       ],
+      // "Load Time 1.2s" and "Performance 60% ↑" were the same fact stated twice.
+      // Merged into one metric that shows the before-and-after the case study explains.
       metrics: [
-        { icon: "👥", label: "Active Users", value: "100+" },
-        { icon: "⚡", label: "Load Time", value: "1.2s" },
-        { icon: "📊", label: "Performance", value: "60% ↑" },
-        { icon: "🎯", label: "Coverage", value: "90%" },
-        { icon: "📱", label: "Mobile Score", value: "95/100" }
+        { label: "Page Load", value: "3s → 1.2s" },
+        { label: "Active Users", value: "100+" },
+        { label: "Mobile Lighthouse", value: "95/100" },
+        { label: "Test Coverage", value: "90%" }
       ],
       category: "Full-Stack",
-      challenge: "Building a scalable real estate platform that handles complex booking workflows, client relationship management, property tracking, and admin operations while maintaining exceptional performance with real-time updates for concurrent users.",
-      solution: "Implemented React Query for intelligent caching with 5-minute stale time, Supabase real-time subscriptions for live updates, optimistic UI patterns for instant feedback, server-side pagination reducing data transfer by 95%, and debounced search cutting API calls by 80%. Used Vercel edge functions for optimal delivery.",
+      challenge: "The first version loaded every property and every booking on page load. That was fine with 40 listings and painful by 400 — around 3 seconds to first paint, and the agency's staff were the ones paying for it, all day, on slow connections.",
+      solution: "Three changes did most of the work. Server-side pagination so a page fetches 20 rows instead of the whole table. A 500ms debounce on search, which stopped firing a query per keystroke. And React Query with a 5-minute stale time, so navigating back to a list you just left is instant instead of a refetch. Load time went to roughly 1.2s. Optimistic updates with rollback came later, once the data layer was predictable enough to trust.",
       features: [
         "Advanced property search & filtering system",
         "Intelligent appointment scheduling with calendar views",
@@ -107,23 +113,22 @@ const Projects = () => {
         "Testing: Vitest + React Testing Library + jsdom",
         "CI/CD: GitHub Actions for automated deployments"
       ],
+      // Structured rather than pre-formatted strings: this is tabular data and the modal
+      // now renders it as a table, so the shape belongs in the data, not in punctuation.
       databaseSchema: [
-        "properties (15 columns, 4 indexes) - Property listings",
-        "bookings (25 columns, 7 indexes) - Appointments & viewings",
-        "clients (28 columns, 6 indexes) - CRM profiles",
-        "client_property_interests (7 columns, 3 indexes) - Interest tracking",
-        "client_communications (10 columns, 4 indexes) - Timeline & notes",
-        "admin_settings (20+ columns) - Configuration management"
+        { name: "properties", shape: "15 cols · 4 idx", holds: "Listings and their availability" },
+        { name: "bookings", shape: "25 cols · 7 idx", holds: "Viewings, reschedules, status history" },
+        { name: "clients", shape: "28 cols · 6 idx", holds: "CRM profiles" },
+        { name: "client_property_interests", shape: "7 cols · 3 idx", holds: "Which client asked about which property" },
+        { name: "client_communications", shape: "10 cols · 4 idx", holds: "Conversation timeline and internal notes" },
+        { name: "admin_settings", shape: "20+ cols", holds: "Business hours, email templates, config" }
       ],
+      // Kept to things that are distinct from each other and from the sections above.
       keyAchievements: [
-        "Reduced page load time from 3s to 1.2s (60% improvement)",
-        "Implemented full CRM system in single sprint",
-        "Achieved 99.9% uptime on Vercel infrastructure",
-        "Zero compilation errors with ESLint enforcement",
-        "Built 16+ production-ready React components",
-        "Created 27 files with 5,700+ lines of tested code",
-        "Established 90% test coverage standard",
-        "Optimized mobile performance to 95/100 score"
+        "Cut page load from ~3s to ~1.2s via pagination, debounced search and query caching",
+        "Replaced the agency's spreadsheet-based client tracking with a real CRM",
+        "Booking pipeline handles reschedules and status changes without losing history",
+        "Full-text search over listings using PostgreSQL indexes rather than client-side filtering"
       ],
       adminFeatures: [
         "Comprehensive dashboard with 8+ real-time metrics",
@@ -162,15 +167,14 @@ const Projects = () => {
       // No product screenshots yet — the live site is behind the maintenance page and
       // the admin dashboard needs Karisa's own login to capture. See docs/CHANGELOG.md.
       screenshots: [],
-      color: "#3ECF8E",
-      gradient: "from-[#3ECF8E] to-[#2AA876]",
-      emoji: "🏢"
+      index: "01"
     },
     {
       id: 2,
       title: "Neema Foundation Kilifi",
-      tagline: "Non-Profit Digital Transformation Platform",
-      description: "A modern, performant web platform for Neema Foundation Kilifi, a non-profit organization focused on community transformation in Kenya through healthcare, education, and empowerment programs. Features a comprehensive CMS, role-based admin portal, dynamic content management, and donation/volunteer workflows designed to increase impact and transparency.",
+      tagline: "Non-profit site with a CMS their team actually runs",
+      summary: "A public site and content system for a Kilifi non-profit, built so their staff can publish programmes, stories and events themselves — without calling a developer.",
+      description: "The public website and admin system for a faith-based non-profit in Ganze, Kilifi County, working in healthcare, education and youth empowerment. The brief was less about the website and more about who maintains it: everything a visitor sees — hero copy, programmes, stories, events, gallery albums, donation routes — is editable by their own staff, none of whom write code.",
       technologies: [
         "React 19",
         "TypeScript 5.9",
@@ -194,16 +198,16 @@ const Projects = () => {
       // was not backed by anything the client publishes, and "RBAC Roles 6"
       // contradicted this same object's own "5-tier RBAC" description.
       metrics: [
-        { icon: "🏥", label: "Active Programs", value: "4" },
-        { icon: "⚡", label: "LCP Score", value: "<2.5s" },
-        { icon: "♿", label: "A11y Score", value: "95+" },
-        { icon: "🔐", label: "RBAC Tiers", value: "5" },
-        { icon: "📱", label: "Mobile First", value: "100%" },
-        { icon: "🌍", label: "Lives Touched", value: "10K+" }
+        { label: "Active Programs", value: "4" },
+        { label: "LCP Score", value: "<2.5s" },
+        { label: "A11y Score", value: "95+" },
+        { label: "RBAC Tiers", value: "5" },
+        { label: "Mobile First", value: "100%" },
+        { label: "Lives Touched", value: "10K+" }
       ],
       category: "Full-Stack",
-      challenge: "Creating a digital platform for a non-profit that effectively communicates impact, drives donations and volunteer registrations, manages diverse programs, and provides transparent governance—all while maintaining exceptional accessibility, performance, and a world-class admin experience for non-technical staff.",
-      solution: "Built a React 19 + TypeScript architecture with Supabase backend featuring a 5-tier RBAC system (Super Admin → Viewer), comprehensive CMS with TipTap rich-text editing, drag-and-drop content ordering, real-time metrics dashboard, Three.js animated hero, and automated workflows. Implemented granular permissions matrix with 20+ distinct permission types across 5 user roles.",
+      challenge: "A non-profit's site goes stale the moment it needs a developer to change anything. This one had to be editable by staff with no technical background — while still not letting a volunteer with gallery access accidentally edit the donation details.",
+      solution: "A 5-tier role system, from Super Admin down to Viewer, with permissions granular enough that someone can be trusted with stories and events but not with site settings or user management. Content editing is TipTap with DOMPurify sanitising everything on the way in, and ordering is drag-and-drop rather than a number field nobody understands. The permission checks live in PostgreSQL Row-Level Security, not just the UI — hiding a button is not access control.",
       features: [
         "Dynamic Programs showcase with category filtering",
         "Interactive Impact metrics with animated counters",
@@ -249,28 +253,22 @@ const Projects = () => {
         "Validation: Zod + React Hook Form"
       ],
       databaseSchema: [
-        "profiles (8 columns, 3 indexes) - User accounts & roles",
-        "programs (18 columns, 5 indexes) - Program content & metadata",
-        "events (20 columns, 6 indexes) - Events with registration",
-        "impact_metrics (12 columns, 4 indexes) - Impact statistics",
-        "stories (15 columns, 5 indexes) - Testimonials & success stories",
-        "board_members (12 columns, 3 indexes) - Governance team",
-        "hero_content (10 columns, 2 indexes) - Dynamic hero slides",
-        "site_settings (15 columns, 2 indexes) - Configuration",
-        "contact_info (8 columns) - Organization contacts",
-        "partners (10 columns, 3 indexes) - Partner organizations"
+        { name: "profiles", shape: "8 cols · 3 idx", holds: "Accounts and their role tier" },
+        { name: "programs", shape: "18 cols · 5 idx", holds: "Programme content, editable by staff" },
+        { name: "events", shape: "20 cols · 6 idx", holds: "Events and registrations" },
+        { name: "impact_metrics", shape: "12 cols · 4 idx", holds: "The counters shown on the public site" },
+        { name: "stories", shape: "15 cols · 5 idx", holds: "Testimonials and success stories" },
+        { name: "board_members", shape: "12 cols · 3 idx", holds: "Governance profiles" },
+        { name: "hero_content", shape: "10 cols · 2 idx", holds: "Hero slides, CMS-managed" },
+        { name: "site_settings", shape: "15 cols · 2 idx", holds: "Branding and configuration" },
+        { name: "contact_info", shape: "8 cols", holds: "Organisation contact details" },
+        { name: "partners", shape: "10 cols · 3 idx", holds: "Partner organisations" }
       ],
       keyAchievements: [
-        "Built comprehensive 5-tier RBAC system from scratch",
-        "Implemented 20+ granular permission controls",
-        "Created 7 distinct admin content management pages",
-        "Achieved Lighthouse accessibility score 95+",
-        "Optimized LCP to <2.5s on 3G Fast networks",
-        "Designed mobile-first with 100% responsive coverage",
-        "Integrated Three.js with graceful degradation",
-        "Built real-time metrics dashboard with 8+ KPIs",
-        "Implemented DOMPurify for XSS protection",
-        "Created comprehensive TypeScript type system"
+        "Staff publish programmes, stories and events without developer involvement",
+        "Permissions enforced in PostgreSQL RLS, so the API can't be talked around",
+        "Rich-text input sanitised with DOMPurify before it ever reaches the database",
+        "Three.js hero degrades to a static image under prefers-reduced-motion"
       ],
       adminFeatures: [
         "Real-time dashboard with donation & volunteer metrics",
@@ -331,52 +329,7 @@ const Projects = () => {
           caption: "Volunteer — registration workflow with role matching"
         }
       ],
-      color: "#E67E22",
-      gradient: "from-[#E67E22] to-[#D35400]",
-      emoji: "💚"
-    },
-    {
-      id: 3,
-      title: "CAD Web Viewer",
-      tagline: "Browser-Based 3D Engineering Visualisation",
-      description: "A commissioned browser-based 3D model viewer for mechanical engineering components, built so clients could inspect and mark up CAD geometry without a desktop CAD licence. Custom WebGL shaders handle sectioning and material shading; the viewer streams geometry progressively so large assemblies stay interactive on ordinary hardware.",
-      technologies: ["Three.js", "React", "WebGL", "Custom GLSL Shaders"],
-      metrics: [
-        { icon: "⏱️", label: "Review Cycle", value: "65% ↓" },
-        { icon: "🖥️", label: "CAD Licence Needed", value: "None" },
-        { icon: "🧩", label: "Runs In", value: "Browser" }
-      ],
-      category: "Engineering",
-      challenge: "Client review of mechanical designs required every reviewer to have desktop CAD software installed and licensed. That gated feedback behind software procurement, so review cycles stretched out and non-engineer stakeholders were effectively excluded from the conversation.",
-      solution: "Built a WebGL viewer that renders the same geometry in any browser. Custom shaders provide section cuts and material shading; progressive geometry streaming keeps large assemblies responsive without requiring a workstation GPU.",
-      features: [
-        "Browser-based 3D model inspection — no CAD licence required",
-        "Custom GLSL shaders for sectioning and material shading",
-        "Progressive geometry streaming for large assemblies",
-        "Orbit, pan and zoom navigation with model-fit framing",
-        "Direct markup on the model for review feedback"
-      ],
-      technicalHighlights: [
-        "Custom WebGL shader pipeline rather than off-the-shelf material presets",
-        "Progressive geometry loading to keep large assemblies interactive",
-        "Three.js scene graph driven from React state",
-        "Runs on integrated graphics — no workstation GPU assumed"
-      ],
-      keyAchievements: [
-        "Cut client review cycles by 65% by removing the CAD-licence prerequisite",
-        "Opened design review to non-engineer stakeholders for the first time",
-        "Bridged the mechanical-engineering and web-development toolchains directly"
-      ],
-      // Commissioned client work: source is not public and the deployment sits behind
-      // the client's environment, so there is no live URL and no capture yet.
-      // Recording a short screen capture of the viewer is the open action item.
-      liveUrl: null,
-      githubUrl: null,
-      liveStatus: { state: "private", label: "Commissioned client work — source and deployment are private" },
-      screenshots: [],
-      color: "#D4A017",
-      gradient: "from-[#D4A017] to-[#B8860B]",
-      emoji: "📐"
+      index: "02"
     }
   ], []);
 
@@ -429,7 +382,7 @@ const Projects = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink-950/92 p-4 backdrop-blur-sm"
             onClick={closeProjectDetails}
             role="dialog"
             aria-modal="true"
@@ -440,7 +393,7 @@ const Projects = () => {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: shouldReduceMotion ? 1 : 0.9, opacity: 0, y: shouldReduceMotion ? 0 : 50 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
-              className="relative bg-gradient-to-br from-[#0a1929] to-[#061220] rounded-3xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border-2 border-[#005792]/40 shadow-2xl my-8 scrollbar-thin scrollbar-thumb-[#005792]/50 scrollbar-track-transparent"
+              className="relative my-8 max-h-[90vh] w-full max-w-5xl overflow-y-auto border border-ink-700 bg-ink-900"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
@@ -448,7 +401,7 @@ const Projects = () => {
                 onClick={closeProjectDetails}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
-                className="sticky top-6 right-6 float-right z-10 text-gray-400 hover:text-white p-3 rounded-full bg-[#061220]/80 backdrop-blur-sm border border-[#005792]/40 focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#061220]"
+                className="sticky right-4 top-4 z-10 float-right border border-ink-700 bg-ink-950/90 p-2.5 text-ink-300 backdrop-blur transition-colors hover:border-ink-500 hover:text-ink-50"
                 aria-label="Close modal"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -456,29 +409,20 @@ const Projects = () => {
                 </svg>
               </motion.button>
               
-              <div className="p-8 md:p-10">
+              <div className="p-6 md:p-10">
                 {/* Header with Gradient */}
-                <div className={`p-8 rounded-2xl bg-gradient-to-r ${selectedProject.gradient} mb-8`}>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-4xl" role="img" aria-hidden="true">{selectedProject.emoji}</span>
-                        <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-bold text-white">
-                          {selectedProject.category}
-                        </span>
-                      </div>
-                      <h2 id="modal-title" className="text-4xl font-bold text-white mb-2">{selectedProject.title}</h2>
-                      <p className="text-white/80 text-lg">{selectedProject.tagline}</p>
-                    </div>
+                <div className="mb-8 border-b border-ink-800 pb-7">
+                  <div className="eyebrow mb-4 text-signal">
+                    {selectedProject.index} — {selectedProject.category}
                   </div>
+                  <h2 id="modal-title" className="mb-2 text-display font-bold text-ink-50">{selectedProject.title}</h2>
+                  <p className="text-lg text-ink-300">{selectedProject.tagline}</p>
                 </div>
 
                 {/* Screenshots — real captures of the shipped product, taken from the live site */}
                 {selectedProject.screenshots?.length > 0 && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                      <span className="text-2xl" role="img" aria-hidden="true">🖼️</span> The Shipped Product
-                    </h3>
+                    <h3 className="mb-4 text-lg font-bold text-ink-50">The Shipped Product</h3>
                     <div className="grid sm:grid-cols-2 gap-4">
                       {selectedProject.screenshots.map((shot, idx) => (
                         <motion.figure
@@ -494,9 +438,9 @@ const Projects = () => {
                             width={1600}
                             height={1000}
                             sizes="(max-width: 640px) 100vw, 640px"
-                            className="rounded-xl border border-[#005792]/40"
+                            className="border border-ink-700"
                           />
-                          <figcaption className="mt-2 text-xs text-gray-400">{shot.caption}</figcaption>
+                          <figcaption className="mt-2 text-xs text-ink-400">{shot.caption}</figcaption>
                         </motion.figure>
                       ))}
                     </div>
@@ -508,34 +452,26 @@ const Projects = () => {
                   {/* Main Content */}
                   <div className="md:col-span-2 space-y-6">
                     {/* Description */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
-                      <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">📝</span> Project Overview
-                      </h3>
-                      <p className="text-gray-300 leading-relaxed">{selectedProject.description}</p>
+                    <div className="panel p-6">
+                      <h3 className="mb-3 text-lg font-bold text-ink-50">Project Overview</h3>
+                      <p className="leading-relaxed text-ink-200">{selectedProject.description}</p>
                     </div>
 
                     {/* Challenge & Solution */}
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div className="p-6 rounded-2xl bg-[#061220]/60 border border-orange-500/30">
-                        <h4 className="text-lg font-bold text-orange-400 mb-3 flex items-center gap-2">
-                          <span role="img" aria-hidden="true">⚠️</span> Technical Challenge
-                        </h4>
-                        <p className="text-gray-300 text-sm leading-relaxed">{selectedProject.challenge}</p>
+                      <div className="panel p-6">
+                        <h4 className="mb-3 text-base font-bold text-ink-50">Technical Challenge</h4>
+                        <p className="text-sm leading-relaxed text-ink-200">{selectedProject.challenge}</p>
                       </div>
-                      <div className="p-6 rounded-2xl bg-[#061220]/60 border border-green-500/30">
-                        <h4 className="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
-                          <span role="img" aria-hidden="true">✅</span> Engineering Solution
-                        </h4>
-                        <p className="text-gray-300 text-sm leading-relaxed">{selectedProject.solution}</p>
+                      <div className="panel p-6">
+                        <h4 className="mb-3 text-base font-bold text-ink-50">Engineering Solution</h4>
+                        <p className="text-sm leading-relaxed text-ink-200">{selectedProject.solution}</p>
                       </div>
                     </div>
 
                     {/* Key Features */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">⚡</span> Core Features ({selectedProject.features.length})
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Core Features ({selectedProject.features.length})</h3>
                       <div className="grid md:grid-cols-2 gap-3">
                         {selectedProject.features.map((feature, idx) => (
                           <motion.div
@@ -543,9 +479,9 @@ const Projects = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.02 }}
-                            className="flex items-start gap-2 text-gray-300 text-sm"
+                            className="flex items-start gap-2 text-sm text-ink-200"
                           >
-                            <div className="mt-1 text-[#61DAFB] flex-shrink-0">
+                            <div className="mt-0.5 flex-shrink-0 text-signal">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
@@ -557,10 +493,8 @@ const Projects = () => {
                     </div>
 
                     {/* Technical Highlights */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-purple-500/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">🔧</span> Technical Highlights
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Technical Highlights</h3>
                       <div className="grid md:grid-cols-2 gap-3">
                         {selectedProject.technicalHighlights.map((highlight, idx) => (
                           <motion.div
@@ -568,9 +502,9 @@ const Projects = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.03 }}
-                            className="flex items-start gap-2 text-gray-300 text-sm"
+                            className="flex items-start gap-2 text-sm text-ink-200"
                           >
-                            <div className="mt-1 text-purple-400 flex-shrink-0">
+                            <div className="mt-0.5 flex-shrink-0 text-signal">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
@@ -583,54 +517,52 @@ const Projects = () => {
 
                     {/* Architecture */}
                     {selectedProject.architecture?.length > 0 && (
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-blue-500/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">🏗️</span> System Architecture
-                      </h3>
-                      <div className="space-y-2">
-                        {selectedProject.architecture.map((arch, idx) => (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: shouldReduceMotion ? 0 : idx * 0.04 }}
-                            className="p-3 rounded-lg bg-[#0a1929] border border-blue-500/20 text-gray-300 text-sm font-mono"
-                          >
-                            {arch}
-                          </motion.div>
-                        ))}
-                      </div>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">How it works</h3>
+                      <ProjectDiagram projectId={selectedProject.id} />
+                      <details className="mt-5 border-t border-ink-800 pt-4">
+                        <summary className="cursor-pointer font-mono text-[11px] uppercase tracking-[0.1em] text-ink-400 transition-colors hover:text-ink-200">
+                          Full stack breakdown
+                        </summary>
+                        <ul className="mt-3 space-y-1.5">
+                          {selectedProject.architecture.map((arch) => (
+                            <li key={arch} className="font-mono text-xs text-ink-300">{arch}</li>
+                          ))}
+                        </ul>
+                      </details>
                     </div>
                     )}
 
                     {/* Database Schema */}
                     {selectedProject.databaseSchema?.length > 0 && (
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#3ECF8E]/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">🗄️</span> Database Schema
-                      </h3>
-                      <div className="space-y-2">
-                        {selectedProject.databaseSchema.map((table, idx) => (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: shouldReduceMotion ? 0 : idx * 0.05 }}
-                            className="p-3 rounded-lg bg-[#0a1929] border border-[#3ECF8E]/20 text-gray-300 text-sm font-mono"
-                          >
-                            {table}
-                          </motion.div>
-                        ))}
-                      </div>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Database Schema</h3>
+                      <table className="w-full text-left">
+                        <caption className="sr-only">Tables in the {selectedProject.title} schema</caption>
+                        <thead>
+                          <tr className="border-b border-ink-700">
+                            <th scope="col" className="pb-2 font-mono text-eyebrow uppercase text-ink-400">Table</th>
+                            <th scope="col" className="pb-2 font-mono text-eyebrow uppercase text-ink-400">Shape</th>
+                            <th scope="col" className="pb-2 font-mono text-eyebrow uppercase text-ink-400">Holds</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {selectedProject.databaseSchema.map((row) => (
+                            <tr key={row.name} className="border-b border-ink-800">
+                              <td className="py-2 pr-3 font-mono text-xs text-signal">{row.name}</td>
+                              <td className="py-2 pr-3 font-mono text-xs text-ink-400 whitespace-nowrap">{row.shape}</td>
+                              <td className="py-2 text-xs text-ink-200">{row.holds}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                     )}
 
                     {/* Performance Metrics */}
                     {selectedProject.performanceMetrics?.length > 0 && (
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-yellow-500/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">⚡</span> Performance Metrics
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Performance Metrics</h3>
                       <div className="grid md:grid-cols-2 gap-3">
                         {selectedProject.performanceMetrics.map((metric, idx) => (
                           <motion.div
@@ -638,7 +570,7 @@ const Projects = () => {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.04 }}
-                            className="p-3 rounded-lg bg-[#0a1929] border border-yellow-500/20 text-gray-300 text-sm"
+                            className="border border-ink-800 bg-ink-850 p-3 text-sm text-ink-200"
                           >
                             {metric}
                           </motion.div>
@@ -648,10 +580,8 @@ const Projects = () => {
                     )}
 
                     {/* Key Achievements */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#D4A017]/30">
-                      <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">🏆</span> Key Achievements
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Key Achievements</h3>
                       <div className="grid md:grid-cols-2 gap-3">
                         {selectedProject.keyAchievements.map((achievement, idx) => (
                           <motion.div
@@ -659,9 +589,9 @@ const Projects = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.03 }}
-                            className="flex items-start gap-2 text-gray-300 text-sm"
+                            className="flex items-start gap-2 text-sm text-ink-200"
                           >
-                            <div className="mt-1 text-[#D4A017] flex-shrink-0">
+                            <div className="mt-0.5 flex-shrink-0 text-signal">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                               </svg>
@@ -676,10 +606,8 @@ const Projects = () => {
                   {/* Sidebar */}
                   <div className="space-y-6">
                     {/* Impact Metrics */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
-                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">📊</span> Impact Metrics
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Impact Metrics</h3>
                       <div className="space-y-4">
                         {selectedProject.metrics.map((metric, idx) => (
                           <motion.div
@@ -687,21 +615,18 @@ const Projects = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.1 }}
-                            className="p-4 rounded-xl bg-gradient-to-br from-[#0a1929] to-[#061220] border border-[#005792]/40"
+                            className="border border-ink-800 bg-ink-850 p-4"
                           >
-                            <div className="text-2xl mb-2" role="img" aria-hidden="true">{metric.icon}</div>
-                            <div className="text-2xl font-bold text-white mb-1">{metric.value}</div>
-                            <div className="text-xs text-gray-400 uppercase tracking-wider">{metric.label}</div>
+                            <div className="text-stat font-bold text-ink-50">{metric.value}</div>
+                            <div className="eyebrow mt-1.5">{metric.label}</div>
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
                     {/* Technologies */}
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#005792]/30">
-                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">🛠️</span> Tech Stack
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Tech Stack</h3>
                       <div className="flex flex-wrap gap-2">
                         {selectedProject.technologies.map((tech, idx) => (
                           <motion.span
@@ -709,12 +634,7 @@ const Projects = () => {
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.03 }}
-                            className="text-xs px-3 py-2 rounded-lg font-medium"
-                            style={{
-                              backgroundColor: `${selectedProject.color}15`,
-                              color: selectedProject.color,
-                              border: `1px solid ${selectedProject.color}40`
-                            }}
+                            className="border border-ink-700 px-2.5 py-1.5 font-mono text-[11px] text-ink-200"
                           >
                             {tech}
                           </motion.span>
@@ -724,10 +644,8 @@ const Projects = () => {
 
                     {/* Admin Features */}
                     {selectedProject.adminFeatures?.length > 0 && (
-                    <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#61DAFB]/30">
-                      <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-hidden="true">👨‍💼</span> Admin Panel
-                      </h3>
+                    <div className="panel p-6">
+                      <h3 className="mb-4 text-lg font-bold text-ink-50">Admin Panel</h3>
                       <div className="space-y-2">
                         {selectedProject.adminFeatures.slice(0, 8).map((feature, idx) => (
                           <motion.div
@@ -735,9 +653,9 @@ const Projects = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: shouldReduceMotion ? 0 : idx * 0.04 }}
-                            className="flex items-start gap-2 text-gray-300 text-xs"
+                            className="flex items-start gap-2 text-xs text-ink-200"
                           >
-                            <div className="mt-0.5 text-[#61DAFB] flex-shrink-0">
+                            <div className="mt-0.5 flex-shrink-0 text-signal">
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
@@ -746,7 +664,7 @@ const Projects = () => {
                           </motion.div>
                         ))}
                         {selectedProject.adminFeatures.length > 8 && (
-                          <p className="text-xs text-gray-500 mt-2 italic">
+                          <p className="mt-2 text-xs italic text-ink-400">
                             +{selectedProject.adminFeatures.length - 8} more admin features
                           </p>
                         )}
@@ -757,15 +675,14 @@ const Projects = () => {
                     {/* CTA Buttons */}
                     <div className="space-y-3">
                       {selectedProject.liveStatus?.state === 'maintenance' && (
-                        <p className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs leading-relaxed">
-                          <span role="img" aria-hidden="true">🛠️</span>{' '}
+                        <p className="border-l-2 border-warn bg-ink-850 p-3 text-xs leading-relaxed text-warn">
                           {selectedProject.liveStatus.label} (checked {selectedProject.liveStatus.checkedOn}),
                           so the live link currently shows the client&apos;s maintenance page.
                         </p>
                       )}
                       {selectedProject.liveStatus?.state === 'private' && (
-                        <p className="p-3 rounded-xl bg-[#0a1929] border border-[#005792]/40 text-gray-400 text-xs leading-relaxed">
-                          <span role="img" aria-hidden="true">🔒</span> {selectedProject.liveStatus.label}.
+                        <p className="border-l-2 border-ink-600 bg-ink-850 p-3 text-xs leading-relaxed text-ink-300">
+{selectedProject.liveStatus.label}.
                         </p>
                       )}
                       {selectedProject.liveUrl && (
@@ -775,7 +692,7 @@ const Projects = () => {
                         rel="noopener noreferrer"
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`block w-full text-center bg-gradient-to-r ${selectedProject.gradient} text-white py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#061220]`}
+                        className="block w-full bg-signal py-3.5 text-center font-semibold text-ink-950 transition-colors duration-250 ease-signal hover:bg-signal-hover"
                       >
                         <span className="flex items-center justify-center gap-2">
                           {selectedProject.liveStatus?.state === 'maintenance'
@@ -794,7 +711,7 @@ const Projects = () => {
                           rel="noopener noreferrer"
                           whileHover={{ scale: 1.02, y: -2 }}
                           whileTap={{ scale: 0.98 }}
-                          className="block w-full text-center bg-[#0a1929] border-2 border-[#005792]/50 text-white py-4 rounded-xl font-bold hover:border-[#61DAFB]/70 transition-all focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#061220]"
+                          className="block w-full border border-ink-700 py-3.5 text-center font-semibold text-ink-50 transition-colors duration-250 ease-signal hover:border-ink-500 hover:bg-ink-850"
                         >
                           <span className="flex items-center justify-center gap-2">
                             <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -822,40 +739,24 @@ const Projects = () => {
       initial="hidden"
       animate={isVisible ? "visible" : "hidden"}
       variants={containerVariants}
-      className="py-20 px-4 md:px-8 relative overflow-hidden"
+      className="relative border-b border-ink-800 px-5 py-section md:px-10"
       aria-labelledby="projects-heading"
     >
-      {/* Background Elements */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" aria-hidden="true">
-        <div className="absolute top-1/4 right-0 w-96 h-96 bg-[#3ECF8E] rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 left-0 w-80 h-80 bg-[#61DAFB] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#E67E22] rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      <div className="container mx-auto max-w-7xl relative z-10">
+      <div className="mx-auto max-w-[1400px]">
         {/* Header */}
         <motion.div
           variants={itemVariants}
-          className="text-center mb-16"
+          className="mb-12"
         >
-          <div className="inline-block mb-4">
-            <span className="px-4 py-2 rounded-full border-2 border-[#D4A017]/60 bg-[#D4A017]/10 text-[#D4A017] text-sm font-semibold tracking-[0.2em] uppercase">
-              Featured Work
-            </span>
-          </div>
-          
-          <h2 id="projects-heading" className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white">
-            Production-Ready{' '}
-            <span className="bg-gradient-to-r from-[#3ECF8E] via-[#61DAFB] to-[#E67E22] text-transparent bg-clip-text">
-              Full-Stack Platforms
-            </span>
+          <div className="eyebrow mb-5 text-signal">02 — Selected work</div>
+
+          <h2 id="projects-heading" className="mb-5 max-w-[18ch] text-display font-bold text-ink-50">
+            Two platforms, both in daily use
           </h2>
-          
-          <p className="text-gray-400 max-w-3xl mx-auto text-lg leading-relaxed">
-            Enterprise-grade applications built with{' '}
-            <span className="text-[#3ECF8E] font-semibold">modern architecture</span>,{' '}
-            <span className="text-[#61DAFB] font-semibold">scalable infrastructure</span>, and{' '}
-            <span className="text-[#E67E22] font-semibold">production best practices</span>
+
+          <p className="max-w-prose text-lg leading-relaxed text-ink-300">
+            Real client work, not demos. Each one I built end to end — schema, permissions,
+            API, frontend, deploy — and still maintain.
           </p>
         </motion.div>
 
@@ -863,7 +764,7 @@ const Projects = () => {
         {categories.length > 2 && (
           <motion.div 
             variants={itemVariants}
-            className="flex justify-center gap-3 mb-12 flex-wrap"
+            className="mb-8 flex flex-wrap gap-2"
             role="tablist"
             aria-label="Filter projects by category"
           >
@@ -879,10 +780,10 @@ const Projects = () => {
                 role="tab"
                 aria-selected={activeFilter === category}
                 aria-controls="projects-grid"
-                className={`px-6 py-3 rounded-full font-semibold text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#0a1929] ${
+                className={`border px-4 py-2.5 text-sm font-medium transition-colors duration-250 ease-signal ${
                   activeFilter === category
-                    ? 'bg-gradient-to-r from-[#3ECF8E] to-[#61DAFB] text-white shadow-lg'
-                    : 'bg-[#0a1929] text-gray-400 border border-[#005792]/40 hover:border-[#61DAFB]/60 hover:text-white'
+                    ? 'border-signal bg-signal text-ink-950'
+                    : 'border-ink-700 text-ink-200 hover:border-ink-500 hover:text-ink-50'
                 }`}
               >
                 {category}
@@ -896,7 +797,7 @@ const Projects = () => {
           layout
           id="projects-grid"
           role="tabpanel"
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
+          className="grid gap-6 md:grid-cols-2"
         >
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project, index) => (
@@ -913,11 +814,9 @@ const Projects = () => {
                 tabIndex={0}
                 role="button"
                 aria-label={`View details for ${project.title}`}
-                className="group cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-4 focus:ring-offset-[#0a1929] rounded-3xl"
+                className="group cursor-pointer"
               >
-                <div className="relative bg-gradient-to-br from-[#0a1929] to-[#061220] backdrop-blur-sm border-2 border-[#005792]/30 rounded-3xl overflow-hidden hover:border-[#61DAFB]/60 transition-all duration-300 shadow-xl hover:shadow-2xl h-full">
-                  {/* Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#61DAFB]/0 to-[#61DAFB]/0 group-hover:from-[#61DAFB]/10 group-hover:to-transparent transition-all duration-300 pointer-events-none" aria-hidden="true" />
+                <div className="h-full border border-ink-800 bg-ink-900 transition-colors duration-250 ease-signal group-hover:border-ink-600">
                   
                   {/* Lead visual: a real screenshot where one exists, an honest notice where it doesn't */}
                   <div className="relative">
@@ -928,33 +827,35 @@ const Projects = () => {
                         width={1600}
                         height={1000}
                         sizes="(max-width: 768px) 100vw, 560px"
-                        className="border-b border-[#005792]/30"
+                        className="border-b border-ink-800"
                       />
                     ) : (
                       <NoCaptureNotice project={project} />
                     )}
-                    <span className="absolute top-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-bold text-white">
-                      {project.category}
-                    </span>
                   </div>
 
                   {/* Header */}
-                  <div className={`relative px-6 py-5 bg-gradient-to-br ${project.gradient}`}>
-                    <h3 className="text-2xl font-bold text-white mb-1">{project.title}</h3>
-                    <p className="text-white/80 text-sm">{project.tagline}</p>
+                  <div className="border-b border-ink-800 px-6 py-5">
+                    <div className="mb-2 flex items-baseline gap-3">
+                      <span className="font-mono text-[11px] text-signal">{project.index}</span>
+                      <h3 className="text-title font-bold text-ink-50">{project.title}</h3>
+                      <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.1em] text-ink-400">
+                        {project.category}
+                      </span>
+                    </div>
+                    <p className="text-sm text-ink-300">{project.tagline}</p>
                   </div>
 
                   {/* Content */}
-                  <div className="relative p-6 space-y-4">
-                    <p className="text-gray-400 text-sm line-clamp-3">{project.description}</p>
+                  <div className="space-y-5 p-6">
+                    <p className="text-sm leading-relaxed text-ink-200">{project.summary}</p>
 
                     {/* Metrics */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-px bg-ink-800">
                       {project.metrics.slice(0, 3).map((metric) => (
-                        <div key={metric.label} className="p-3 rounded-xl bg-[#061220]/60 border border-[#005792]/30">
-                          <div className="text-xl mb-1" role="img" aria-hidden="true">{metric.icon}</div>
-                          <div className="text-sm font-bold text-white">{metric.value}</div>
-                          <div className="text-xs text-gray-500">{metric.label}</div>
+                        <div key={metric.label} className="bg-ink-850 p-3">
+                          <div className="font-bold text-ink-50">{metric.value}</div>
+                          <div className="eyebrow mt-1 leading-snug">{metric.label}</div>
                         </div>
                       ))}
                     </div>
@@ -962,19 +863,12 @@ const Projects = () => {
                     {/* Tech Stack Preview */}
                     <div className="flex flex-wrap gap-2">
                       {project.technologies.slice(0, 4).map((tech) => (
-                        <span 
-                          key={tech} 
-                          className="text-xs px-2 py-1 rounded-lg font-medium"
-                          style={{
-                            backgroundColor: `${project.color}15`,
-                            color: project.color
-                          }}
-                        >
+                        <span key={tech} className="border border-ink-700 px-2 py-1 font-mono text-[11px] text-ink-300">
                           {tech}
                         </span>
                       ))}
                       {project.technologies.length > 4 && (
-                        <span className="text-xs px-2 py-1 rounded-lg font-medium bg-[#005792]/20 text-gray-400">
+                        <span className="border border-ink-800 px-2 py-1 font-mono text-[11px] text-ink-400">
                           +{project.technologies.length - 4} more
                         </span>
                       )}
@@ -983,7 +877,7 @@ const Projects = () => {
                     {/* View Button */}
                     <motion.div
                       whileHover={shouldReduceMotion ? {} : { x: 5 }}
-                      className="flex items-center gap-2 text-[#61DAFB] font-semibold text-sm pt-2"
+                      className="flex items-center gap-2 pt-1 text-sm font-semibold text-signal"
                     >
                       Explore Full Details
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -997,52 +891,14 @@ const Projects = () => {
           </AnimatePresence>
         </motion.div>
 
-        {/* Additional Info */}
-        <motion.div 
-          variants={itemVariants}
-          className="mt-16 text-center"
-        >
-          <div className="inline-flex flex-wrap justify-center gap-4 md:gap-8 text-sm">
-            <div className="flex items-center gap-2 text-gray-400">
-              <span className="text-[#3ECF8E]">✓</span>
-              <span>10,000+ lines of production code</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-400">
-              <span className="text-[#61DAFB]">✓</span>
-              <span>90%+ test coverage</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-400">
-              <span className="text-[#E67E22]">✓</span>
-              <span>Zero compilation errors</span>
-            </div>
-            <div className="flex items-center gap-2 text-gray-400">
-              <span className="text-[#D4A017]">✓</span>
-              <span>WCAG 2.1 AA compliant</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tech Stack Summary */}
-        <motion.div
-          variants={itemVariants}
-          className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-[#0a1929]/80 to-[#061220]/80 border border-[#005792]/30 backdrop-blur-sm"
-        >
-          <h3 className="text-xl font-bold text-white text-center mb-6">
-            Technologies I Work With
-          </h3>
-          <div className="flex flex-wrap justify-center gap-3">
-            {['React', 'TypeScript', 'Next.js', 'Node.js', 'PostgreSQL', 'Supabase', 'Tailwind CSS', 'Framer Motion', 'Three.js', 'Vite', 'React Query', 'Zod'].map((tech, idx) => (
-              <motion.span
-                key={tech}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: shouldReduceMotion ? 0 : 0.5 + idx * 0.05 }}
-                className="px-4 py-2 rounded-xl bg-[#005792]/20 text-[#61DAFB] text-sm font-medium border border-[#005792]/40 hover:border-[#61DAFB]/60 hover:bg-[#61DAFB]/10 transition-all cursor-default"
-              >
-                {tech}
-              </motion.span>
-            ))}
-          </div>
+        {/* Vanity stat row ("10,000+ lines of production code", "Zero compilation errors",
+            "WCAG 2.1 AA compliant") and the 12-item tech-soup list were removed in Phase 1:
+            none of it was checkable from this page, and two entries (Next.js, Three.js)
+            weren't used by either project shown. What a stack is used for is on each card. */}
+        <motion.div variants={itemVariants} className="mt-16 text-center">
+          <p className="text-sm text-ink-400">
+            Both platforms are still maintained. The technical detail behind each one is in its case study above.
+          </p>
         </motion.div>
       </div>
 

@@ -102,21 +102,21 @@ const CookieConsent = () => {
         className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gray-900 border border-cyan-500/30 rounded-lg shadow-2xl shadow-cyan-500/10 p-6">
+          <div className="bg-ink-950 border border-signal/30 p-6">
             {!showSettings ? (
               // Main Banner
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-2">
+                  <h3 className="text-lg font-semibold text-ink-50 mb-2">
                     🍪 We Value Your Privacy
                   </h3>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-ink-200 text-sm">
                     We use cookies to enhance your browsing experience, analyze site traffic, and understand where our visitors are coming from. 
                     By clicking "Accept All", you consent to our use of cookies.
                   </p>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="text-cyan-400 hover:text-cyan-300 text-sm underline mt-2"
+                    className="text-signal hover:text-signal text-sm underline mt-2"
                   >
                     Customize Preferences
                   </button>
@@ -125,13 +125,13 @@ const CookieConsent = () => {
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={handleRejectAll}
-                    className="px-6 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors"
+                    className="px-6 py-2 border border-ink-700 text-ink-200 rounded-md hover:bg-ink-900 transition-colors"
                   >
                     Reject All
                   </button>
                   <button
                     onClick={handleAcceptAll}
-                    className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition-colors font-medium"
+                    className="px-6 py-2 bg-signal text-ink-50 rounded-md transition-colors font-medium"
                   >
                     Accept All
                   </button>
@@ -141,12 +141,12 @@ const CookieConsent = () => {
               // Settings Panel
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-ink-50">
                     Cookie Preferences
                   </h3>
                   <button
                     onClick={() => setShowSettings(false)}
-                    className="text-gray-400 hover:text-white"
+                    className="text-ink-300 hover:text-ink-50"
                     aria-label="Close settings"
                   >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -157,28 +157,28 @@ const CookieConsent = () => {
 
                 <div className="space-y-3">
                   {/* Necessary Cookies */}
-                  <div className="flex items-start justify-between p-4 bg-gray-800/50 rounded-lg">
+                  <div className="flex items-start justify-between p-4 bg-ink-900/50">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-white">Necessary Cookies</h4>
-                        <span className="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded">Required</span>
+                        <h4 className="font-medium text-ink-50">Necessary Cookies</h4>
+                        <span className="text-xs bg-signal/20 text-signal px-2 py-0.5 rounded">Required</span>
                       </div>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-ink-300 mt-1">
                         Essential for the website to function properly. Cannot be disabled.
                       </p>
                     </div>
                     <div className="ml-4">
-                      <div className="w-12 h-6 bg-cyan-500 rounded-full flex items-center justify-end p-1">
+                      <div className="w-12 h-6 bg-signal rounded-full flex items-center justify-end p-1">
                         <div className="w-4 h-4 bg-white rounded-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Analytics Cookies */}
-                  <div className="flex items-start justify-between p-4 bg-gray-800/50 rounded-lg">
+                  <div className="flex items-start justify-between p-4 bg-ink-900/50">
                     <div className="flex-1">
-                      <h4 className="font-medium text-white">Analytics Cookies</h4>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <h4 className="font-medium text-ink-50">Analytics Cookies</h4>
+                      <p className="text-sm text-ink-300 mt-1">
                         Help us understand how visitors interact with the website (Google Analytics).
                       </p>
                     </div>
@@ -189,7 +189,7 @@ const CookieConsent = () => {
                     >
                       <div
                         className={`w-12 h-6 rounded-full transition-colors flex items-center p-1 ${
-                          preferences.analytics ? 'bg-cyan-500 justify-end' : 'bg-gray-600 justify-start'
+                          preferences.analytics ? 'bg-signal justify-end' : 'bg-ink-700 justify-start'
                         }`}
                       >
                         <div className="w-4 h-4 bg-white rounded-full" />
@@ -198,10 +198,10 @@ const CookieConsent = () => {
                   </div>
 
                   {/* Marketing Cookies */}
-                  <div className="flex items-start justify-between p-4 bg-gray-800/50 rounded-lg">
+                  <div className="flex items-start justify-between p-4 bg-ink-900/50">
                     <div className="flex-1">
-                      <h4 className="font-medium text-white">Marketing Cookies</h4>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <h4 className="font-medium text-ink-50">Marketing Cookies</h4>
+                      <p className="text-sm text-ink-300 mt-1">
                         Track visitors across websites to display relevant advertisements.
                       </p>
                     </div>
@@ -212,7 +212,7 @@ const CookieConsent = () => {
                     >
                       <div
                         className={`w-12 h-6 rounded-full transition-colors flex items-center p-1 ${
-                          preferences.marketing ? 'bg-cyan-500 justify-end' : 'bg-gray-600 justify-start'
+                          preferences.marketing ? 'bg-signal justify-end' : 'bg-ink-700 justify-start'
                         }`}
                       >
                         <div className="w-4 h-4 bg-white rounded-full" />
@@ -224,13 +224,13 @@ const CookieConsent = () => {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={handleSavePreferences}
-                    className="flex-1 px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-md hover:from-cyan-600 hover:to-blue-600 transition-colors font-medium"
+                    className="flex-1 px-6 py-2 bg-signal text-ink-50 rounded-md transition-colors font-medium"
                   >
                     Save Preferences
                   </button>
                   <button
                     onClick={() => setShowSettings(false)}
-                    className="px-6 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors"
+                    className="px-6 py-2 border border-ink-700 text-ink-200 rounded-md hover:bg-ink-900 transition-colors"
                   >
                     Cancel
                   </button>
