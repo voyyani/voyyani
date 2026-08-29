@@ -21,7 +21,7 @@ const NoCaptureNotice = ({ project }) => (
         <path d="M3 16l5-5 4 4 3-3 6 6" />
         <path d="M4 4l16 16" />
       </svg>
-      <p className="eyebrow text-ink-500">
+      <p className="eyebrow text-ink-400">
         {project.liveStatus?.state === 'maintenance'
           ? 'Capture pending — client site in maintenance'
           : 'Capture pending — private client deployment'}

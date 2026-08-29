@@ -25,7 +25,7 @@ const SEO = ({
     "@type": "Person",
     "name": "Karisa Voyani",
     "jobTitle": ["Mechanical Engineer", "Full-Stack Developer"],
-    "url": "https://voyani.tech",
+    "url": SITE.url,
     "image": image,
     "description": description,
     "nationality": {
@@ -58,7 +58,7 @@ const SEO = ({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Karisa Voyani Portfolio",
-    "url": "https://voyani.tech",
+    "url": SITE.url,
     "description": description,
     "author": {
       "@type": "Person",

@@ -59,6 +59,15 @@
            transition-colors duration-250 ease-signal hover:bg-signal-hover;
   }
 
+  /* Skip-to-content. Phase 5 accessibility pass — the site had no bypass mechanism, so a
+     keyboard or screen-reader user had to tab the entire navbar on every page.
+     Off-screen rather than `display:none` or `visibility:hidden`, both of which remove an
+     element from the focus order entirely and would defeat the purpose. */
+  .skip-link {
+    @apply absolute left-4 z-[100] -translate-y-24 bg-signal px-4 py-3 font-semibold text-ink-950
+           transition-transform duration-250 ease-signal focus:translate-y-4;
+  }
+
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 border border-ink-700 px-6 py-3.5 font-medium text-ink-50
            transition-colors duration-250 ease-signal hover:border-ink-500 hover:bg-ink-900;

@@ -18,10 +18,16 @@ import React from 'react';
  * figure is about.
  */
 
-const INK = '#8B8890';
+/* These mirror the tailwind.config.js ink ramp. They are duplicated as literals because
+   SVG presentation attributes cannot read Tailwind classes — keep them in sync by hand.
+
+   MUTED was #6E6C74 until the Phase 5 accessibility pass. It labels 10-11px SVG text,
+   and measured 3.48:1 against the ink-850 card ground — below the 4.5:1 WCAG AA floor.
+   It now tracks ink-400's corrected value. */
+const INK = '#8B8890'; // ink-300 — graphical strokes (3:1 threshold), not text
 const EDGE = '#2E2E33';
 const TEXT = '#F2F1EE';
-const MUTED = '#6E6C74';
+const MUTED = '#828089'; // ink-400 — carries real text, so AA applies
 const SIGNAL = '#C8FF3D';
 
 const Box = ({ x, y, w = 124, h = 52, label, sub, accent = false }) => (

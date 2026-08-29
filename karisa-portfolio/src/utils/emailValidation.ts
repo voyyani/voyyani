@@ -1,4 +1,10 @@
 /**
+ * 25 MB, the cap for both a single attachment and an email's attachments in total.
+ * Was written as the literal 26214400 in two separate places.
+ */
+export const MAX_TOTAL_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+
+/**
  * Email reply object from database
  */
 export interface InboundReply {
@@ -108,12 +114,16 @@ export function validateInboundEmail(email: InboundReply): ValidationResult {
     riskLevel = 'warning';
   }
 
-  // 4. Check for dangerous attachment types
-  if (email.has_attachments && email.attachment_count > 0) {
-    if (email.total_attachment_size > 26214400) { // 25MB
-      errors.push('Total attachment size exceeds 25MB limit');
-      riskLevel = 'danger';
-    }
+  // 4. Check total attachment size.
+  //
+  // Deliberately NOT nested under `has_attachments && attachment_count > 0`, which is
+  // where this check used to live. Every field on this object comes from an inbound
+  // webhook payload, so the sender controls `attachment_count` — and a payload
+  // declaring `attachment_count: 0` alongside a 25MB+ `total_attachment_size` skipped
+  // the cap entirely. The size limit must not depend on a count the sender chooses.
+  if (email.total_attachment_size > MAX_TOTAL_ATTACHMENT_BYTES) {
+    errors.push('Total attachment size exceeds 25MB limit');
+    riskLevel = 'danger';
   }
 
   // 5. Check spam flag
@@ -176,8 +186,7 @@ export function validateAttachment(attachment: InboundAttachment): {
   }
 
   // 4. Check file size
-  const maxSize = 26214400; // 25MB
-  if (attachment.file_size > maxSize) {
+  if (attachment.file_size > MAX_TOTAL_ATTACHMENT_BYTES) {
     errors.push(`File exceeds maximum size (${(attachment.file_size / 1024 / 1024).toFixed(1)}MB > 25MB)`);
   }
 

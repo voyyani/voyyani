@@ -1,16 +1,35 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ContactForm from './ContactForm';
-import emailjs from '@emailjs/browser';
 import { toast } from 'sonner';
 
-// Mock emailjs
-vi.mock('@emailjs/browser', () => ({
-  default: {
-    send: vi.fn(),
-  },
-}));
+/**
+ * ContactForm POSTs to a Supabase Edge Function. It used to send through EmailJS, and
+ * this file went on mocking `@emailjs/browser` and asserting `emailjs.send(...)` long
+ * after the component stopped importing it — so four submission tests were asserting
+ * against a dependency that no longer exists, and one of them expected the address
+ * `karisa@thebikecollector.info`, a dead domain Phase 0 removed from the site.
+ *
+ * The network boundary the component actually uses is `fetch`, so that is what is
+ * mocked here.
+ */
+const SUPABASE_URL = 'https://test.supabase.co';
+const NOTIFY_ENDPOINT = `${SUPABASE_URL}/functions/v1/send-notification`;
+
+let fetchMock;
+
+const fillValidForm = async (user) => {
+  await user.type(screen.getByLabelText(/name/i), 'John Doe');
+  await user.type(screen.getByLabelText(/email/i), 'john@example.com');
+  // Subject is a <select>, not a text input — user.type() leaves it empty, which is why
+  // every submission test failed validation before ever reaching the network.
+  await user.selectOptions(screen.getByLabelText(/subject/i), 'Project Inquiry');
+  await user.type(
+    screen.getByRole('textbox', { name: /message/i }),
+    'This is a test message with enough characters.'
+  );
+};
 
 // Mock sonner toast
 vi.mock('sonner', () => ({
@@ -33,8 +52,19 @@ vi.mock('framer-motion', () => ({
 describe('ContactForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset emailjs mock
-    emailjs.send.mockResolvedValue({ status: 200, text: 'OK' });
+    // The component reads import.meta.env.VITE_SUPABASE_URL to build its endpoint.
+    // Without this it would post to the string "undefined/functions/v1/...".
+    vi.stubEnv('VITE_SUPABASE_URL', SUPABASE_URL);
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
   });
 
   describe('Form Rendering', () => {
@@ -84,18 +114,19 @@ describe('ContactForm', () => {
       });
     });
 
-    it('shows error when name contains invalid characters', async () => {
-      const user = userEvent.setup();
-      render(<ContactForm />);
-
-      const nameInput = screen.getByLabelText(/name/i);
-      await user.type(nameInput, 'John123');
-      await user.tab();
-
-      await waitFor(() => {
-        expect(screen.getByText(/name can only contain letters and spaces/i)).toBeInTheDocument();
-      });
-    });
+    /*
+     * REMOVED: 'shows error when name contains invalid characters'.
+     *
+     * It asserted the message "Name can only contain letters and spaces". No such rule
+     * has ever existed in `contactFormSchema` — the name field only has .min(2)/.max(100)
+     * — so the test could never pass.
+     *
+     * It was not replaced with a letters-and-spaces regex, because that rule would reject
+     * real names: O'Brien, Jean-Luc, José, Ng'ang'a. Rejecting a legitimate visitor's name
+     * to satisfy a test is a worse outcome than accepting "John123", and the form already
+     * has a honeypot field and rate limiting for spam. Whether to add a permissive name
+     * rule is a product decision, not a test fix.
+     */
 
     it('shows error when email is invalid', async () => {
       const user = userEvent.setup();
@@ -110,16 +141,22 @@ describe('ContactForm', () => {
       });
     });
 
-    it('shows error when subject is too short', async () => {
+    // Was 'shows error when subject is too short', typing 'Hi' into what it assumed was a
+    // text input. Subject is a <select> with six fixed options, every one of them at
+    // least 5 characters, so "too short" is unreachable through the UI — the only value
+    // that fails .min(5) is the empty placeholder. That is what this now covers.
+    it('shows error when no subject is selected', async () => {
       const user = userEvent.setup();
       render(<ContactForm />);
 
-      const subjectInput = screen.getByLabelText(/subject/i);
-      await user.type(subjectInput, 'Hi');
-      await user.tab();
+      const subjectSelect = screen.getByLabelText(/subject/i);
+      // Pick a real option, then go back to the placeholder, so the field is both
+      // touched and empty.
+      await user.selectOptions(subjectSelect, 'Project Inquiry');
+      await user.selectOptions(subjectSelect, '');
 
       await waitFor(() => {
-        expect(screen.getByText(/subject must be at least 3 characters/i)).toBeInTheDocument();
+        expect(screen.getByText(/subject must be at least 5 characters/i)).toBeInTheDocument();
       });
     });
 
@@ -132,7 +169,7 @@ describe('ContactForm', () => {
       await user.tab();
 
       await waitFor(() => {
-        expect(screen.getByText(/message must be at least 10 characters/i)).toBeInTheDocument();
+        expect(screen.getByText(/message must be at least 20 characters/i)).toBeInTheDocument();
       });
     });
 
@@ -216,29 +253,24 @@ describe('ContactForm', () => {
       const user = userEvent.setup();
       render(<ContactForm />);
 
-      // Fill in all fields - using more specific selectors
-      await user.type(screen.getByLabelText(/name/i), 'John Doe');
-      await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-      await user.type(screen.getByLabelText(/subject/i), 'Test Subject');
-      await user.type(screen.getByRole('textbox', { name: /message/i }), 'This is a test message with enough characters.');
+      await fillValidForm(user);
 
       const submitButton = screen.getByRole('button', { name: /send/i });
       await user.click(submitButton);
 
-      await waitFor(() => {
-        expect(emailjs.send).toHaveBeenCalledWith(
-          expect.any(String), // serviceId
-          expect.any(String), // templateId
-          expect.objectContaining({
-            from_name: 'John Doe',
-            from_email: 'john@example.com',
-            subject: 'Test Subject',
-            message: 'This is a test message with enough characters.',
-            to_name: 'Karisa',
-            to_email: 'karisa@thebikecollector.info',
-          }),
-          expect.any(String) // publicKey
-        );
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+      const [url, init] = fetchMock.mock.calls[0];
+      expect(url).toBe(NOTIFY_ENDPOINT);
+      expect(init.method).toBe('POST');
+      // The CSRF token is generated per mount, so assert it is sent, not its value.
+      expect(init.headers['x-csrf-token']).toEqual(expect.any(String));
+      expect(JSON.parse(init.body)).toMatchObject({
+        type: 'contact',
+        name: 'John Doe',
+        email: 'john@example.com',
+        subject: 'Project Inquiry',
+        message: 'This is a test message with enough characters.',
       });
     });
 
@@ -246,10 +278,7 @@ describe('ContactForm', () => {
       const user = userEvent.setup();
       render(<ContactForm />);
 
-      await user.type(screen.getByLabelText(/name/i), 'John Doe');
-      await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-      await user.type(screen.getByLabelText(/subject/i), 'Test Subject');
-      await user.type(screen.getByRole('textbox', { name: /message/i }), 'This is a test message with enough characters.');
+      await fillValidForm(user);
 
       const submitButton = screen.getByRole('button', { name: /send/i });
       await user.click(submitButton);
@@ -262,15 +291,17 @@ describe('ContactForm', () => {
     });
 
     it('shows error toast on submission failure', async () => {
-      emailjs.send.mockRejectedValueOnce({ text: 'Network error' });
+      // A non-ok response with no `message` field makes the component fall back to its
+      // own copy, which is what this asserts.
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({}),
+      });
 
       const user = userEvent.setup();
       render(<ContactForm />);
 
-      await user.type(screen.getByLabelText(/name/i), 'John Doe');
-      await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-      await user.type(screen.getByLabelText(/subject/i), 'Test Subject');
-      await user.type(screen.getByRole('textbox', { name: /message/i }), 'This is a test message with enough characters.');
+      await fillValidForm(user);
 
       const submitButton = screen.getByRole('button', { name: /send/i });
       await user.click(submitButton);
@@ -285,17 +316,17 @@ describe('ContactForm', () => {
     it('disables submit button while submitting', async () => {
       const user = userEvent.setup();
       
-      // Make emailjs.send take some time
-      emailjs.send.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve({ status: 200 }), 100))
+      // Hold the request open so the disabled state is observable.
+      fetchMock.mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ ok: true, json: async () => ({}) }), 100)
+          )
       );
 
       render(<ContactForm />);
 
-      await user.type(screen.getByLabelText(/name/i), 'John Doe');
-      await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-      await user.type(screen.getByLabelText(/subject/i), 'Test Subject');
-      await user.type(screen.getByRole('textbox', { name: /message/i }), 'This is a test message with enough characters.');
+      await fillValidForm(user);
 
       const submitButton = screen.getByRole('button', { name: /send/i });
       await user.click(submitButton);
@@ -313,10 +344,7 @@ describe('ContactForm', () => {
       const subjectInput = screen.getByLabelText(/subject/i);
       const messageInput = screen.getByRole('textbox', { name: /message/i });
 
-      await user.type(nameInput, 'John Doe');
-      await user.type(emailInput, 'john@example.com');
-      await user.type(subjectInput, 'Test Subject');
-      await user.type(messageInput, 'This is a test message with enough characters.');
+      await fillValidForm(user);
 
       const submitButton = screen.getByRole('button', { name: /send/i });
       await user.click(submitButton);
@@ -375,7 +403,7 @@ describe('ContactForm', () => {
       // Fill form normally
       await user.type(screen.getByLabelText(/name/i), 'John Doe');
       await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-      await user.type(screen.getByLabelText(/subject/i), 'Test Subject');
+      await user.selectOptions(screen.getByLabelText(/subject/i), 'Project Inquiry');
       await user.type(screen.getByRole('textbox', { name: /message/i }), 'This is a test message with enough characters.');
 
       // Find and fill honeypot (it should be hidden)
@@ -388,7 +416,7 @@ describe('ContactForm', () => {
       await user.click(submitButton);
 
       // EmailJS should not be called
-      expect(emailjs.send).not.toHaveBeenCalled();
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 });

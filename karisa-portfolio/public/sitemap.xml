@@ -1,48 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <!-- Homepage - Highest Priority -->
+<!--
+  Phase 5 item 3. Rewritten 2026-08-29.
+
+  Two things were wrong before:
+
+  1. Every <loc> used the bare host `https://voyani.tech`, which redirects to
+     `www.voyani.tech`. A sitemap that lists redirecting URLs asks Google to index a
+     hop rather than the destination. `www` is the canonical host (see src/config/site.js).
+
+  2. Four of the five entries were `#fragment` URLs — /#skills, /#projects, /#philosophy,
+     /#contact. Search engines do not treat a fragment as a separate document, so those
+     entries were inert: they never represented indexable pages.
+
+  Every `lastmod` also still read 2026-01-20, months after the content changed.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://voyani.tech/</loc>
-    <lastmod>2026-01-20</lastmod>
+    <loc>https://www.voyani.tech/</loc>
+    <lastmod>2026-08-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- Main Sections -->
-  <url>
-    <loc>https://voyani.tech/#skills</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://voyani.tech/#projects</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://voyani.tech/#philosophy</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://voyani.tech/#contact</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  
-  <!-- Privacy & Legal Pages (if implementing separate routes) -->
-  <!-- Uncomment when privacy policy is on separate route -->
-  <!--
-  <url>
-    <loc>https://voyani.tech/privacy</loc>
-    <lastmod>2026-01-20</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  -->
 </urlset>

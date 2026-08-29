@@ -282,7 +282,7 @@ const GitHubActivity = () => {
               <p className="mb-3 font-mono text-[11px] text-ink-400">
                 {repo.languages.slice(0, 3).map((l) => l.name).join(' · ')}
               </p>
-              <p className="font-mono text-[11px] text-ink-500">
+              <p className="font-mono text-[11px] text-ink-400">
                 {fmtDate(repo.firstCommit)} → {fmtDate(repo.lastCommit)}
               </p>
             </li>
@@ -291,7 +291,7 @@ const GitHubActivity = () => {
 
         <motion.p
           variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-          className="mt-5 font-mono text-[11px] text-ink-500"
+          className="mt-5 font-mono text-[11px] text-ink-400"
         >
           Synced {fmtDate(syncedAt)} ·{' '}
           <a

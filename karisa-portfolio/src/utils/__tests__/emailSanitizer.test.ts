@@ -200,8 +200,13 @@ describe('emailSanitizer - createSafeLink', () => {
   });
 
   it('should return escaped text for unsafe URLs', () => {
-    const result = createSafeLink('javascript:alert("xss")', 'Click me');
+    // The link text carries markup on purpose. This assertion used to run against the
+    // plain text 'Click me', which contains no '<' — so `toContain('&lt;')` could never
+    // pass no matter how correct createSafeLink was. The escaping claim is only testable
+    // if the input has something to escape.
+    const result = createSafeLink('javascript:alert("xss")', '<b>Click me</b>');
     expect(result).toContain('&lt;');
+    expect(result).not.toContain('<b>');
     expect(result).not.toContain('href=');
     expect(result).not.toContain('javascript:');
   });

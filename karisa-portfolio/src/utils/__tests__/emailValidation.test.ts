@@ -264,7 +264,10 @@ describe('emailValidation - utility functions', () => {
   describe('formatFileSize', () => {
     it('should format bytes correctly', () => {
       expect(formatFileSize(0)).toBe('0 Bytes');
-      expect(formatFileSize(512)).toBe('0.5 KB');
+      // 512 bytes is under 1 KB, so it is reported in bytes. This expected '0.5 KB',
+      // which the function never returned and should not — sub-kilobyte sizes read
+      // more clearly in bytes.
+      expect(formatFileSize(512)).toBe('512 Bytes');
       expect(formatFileSize(1024)).toBe('1 KB');
       expect(formatFileSize(1024 * 1024)).toBe('1 MB');
       expect(formatFileSize(1024 * 1024 * 1024)).toBe('1 GB');

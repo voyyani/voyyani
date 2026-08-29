@@ -94,10 +94,15 @@ const HomePage = () => (
         }}
       />
 
+      {/* First focusable element in the DOM, so a keyboard user meets it before the nav. */}
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+
       <ScrollProgressIndicator />
       <div className="relative z-10">
         <Navbar />
-        <main>
+        <main id="main" tabIndex={-1}>
           <Hero />
 
           <Suspense fallback={<SectionLoader />}>

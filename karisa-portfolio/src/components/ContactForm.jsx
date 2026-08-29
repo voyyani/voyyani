@@ -7,11 +7,6 @@ import { trackFormSubmission } from '../utils/analytics';
 import { contactFormSchema } from '../utils/validationSchemas';
 import { getCSRFToken, clearCSRFToken } from '../utils/csrfTokens';
 
-// Honeypot validation
-const honeypotSchema = {
-  honeypot: ''
-};
-
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitCount, setSubmitCount] = useState(0);
@@ -30,6 +25,7 @@ const ContactForm = () => {
     formState: { errors, isValid },
     reset,
     watch,
+    getValues,
   } = useForm({
     resolver: zodResolver(contactFormSchema),
     mode: 'onChange',
@@ -65,9 +61,14 @@ const ContactForm = () => {
       return;
     }
 
-    // Check honeypot
-    if (data.honeypot) {
-      console.log('Bot detected');
+    // Check honeypot.
+    //
+    // Read through getValues(), NOT off `data`. `data` is the zodResolver's parsed
+    // output, and `contactFormSchema` has no `honeypot` key — zod strips unknown keys,
+    // so `data.honeypot` was always undefined and this branch could never be taken.
+    // The honeypot field was decorative and blocked nothing. getValues() reads
+    // react-hook-form's own field state, which does include it.
+    if (getValues('honeypot')) {
       return;
     }
 

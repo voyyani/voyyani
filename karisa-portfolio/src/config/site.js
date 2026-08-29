@@ -33,7 +33,16 @@ export const SITE = {
   role: 'Mechanical Engineer → Full-Stack Developer',
   location: 'Nairobi, Kenya',
 
-  url: 'https://voyani.tech',
+  /**
+   * Canonical host — Phase 5 item 3, decided by Karisa 2026-08-29: `www` wins.
+   *
+   * This was `https://voyani.tech` (bare), which the canonical tag, the OG url and
+   * sitemap.xml all published — while the apex host actually redirected to `www`.
+   * So every canonical URL the site emitted pointed at a URL that redirects away.
+   * `www` was chosen because it matches what DNS already does, making this a
+   * tag-only change rather than a DNS reconfiguration.
+   */
+  url: 'https://www.voyani.tech',
 
   // Confirmed by Karisa, 2026-08-29. See the note above before changing.
   email: 'voyanitech@gmail.com',
@@ -57,7 +66,7 @@ export const SITE = {
     alt: 'Karisa Voyani, Mechanical Engineer and Full-Stack Developer',
   },
 
-  ogImage: 'https://voyani.tech/og-image.jpg',
+  ogImage: 'https://www.voyani.tech/og-image.jpg',
 };
 
 export const mailto = (subject) =>

@@ -41,8 +41,13 @@ module.exports = {
           800: '#1E1E21', // hairline
           700: '#2E2E33', // border
           600: '#34333A',
-          500: '#55545A',
-          400: '#6E6C74', // muted / mono labels
+          500: '#55545A', // NON-TEXT ONLY — borders/dividers. 2.63:1 on ink-950; fails AA for any text.
+          // Phase 5 accessibility pass. Was #6E6C74, which measured 3.80 / 3.69 / 3.48:1
+          // against the ink-950 / 900 / 850 grounds — below the 4.5:1 WCAG AA floor. This
+          // is the `.eyebrow` colour, and .eyebrow is 11px, so no large-text exemption
+          // applies. #828089 is the minimum hue-preserving value that clears AA on all
+          // three grounds (5.06 / 4.91 / 4.63).
+          400: '#828089', // muted / mono labels
           300: '#8B8890', // tertiary copy
           200: '#A5A29B', // secondary copy
           50: '#F2F1EE', // primary copy
