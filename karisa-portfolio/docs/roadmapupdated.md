@@ -34,11 +34,23 @@ path: `src/lib/supabase.js` used to call `createClient(url || '', key || '')`, w
 `"supabaseUrl is required."` at import time and white-screened the entire public portfolio
 over a credential only the admin CRM needs. It now returns `null` and callers null-check.
 
-Two real deployment gaps do remain, both tracked in Phase 5:
-- **No `vercel.json` anywhere in the repo**, so there is no SPA rewrite — `/admin/login`
-  and every future `/writing/*` URL hard-404 on Vercel even though `/` resolves.
+Two real deployment gaps were found alongside it:
+- ✅ **Fixed 2026-08-29:** there was no `vercel.json` anywhere in the repo, so Vercel had
+  no SPA rewrite — `https://www.voyani.tech/admin/login` returned a hard **404**, verified
+  live. `karisa-portfolio/vercel.json` now rewrites unmatched paths to `/index.html`.
+  Vercel checks the filesystem *before* applying rewrites, so hashed assets, images,
+  `sitemap.xml` and the résumé PDF are still served directly and are not shadowed.
+  The file deliberately contains **no apex→www redirect** — that depends on the canonical
+  decision in Phase 5 item 3, which is not settled yet.
 - **No local `.env`** in `karisa-portfolio/` (only `.env.example`). Recover it with
-  `vercel env pull karisa-portfolio/.env`.
+  `vercel env pull karisa-portfolio/.env`. Note that `VITE_SUPABASE_URL` and
+  `VITE_SUPABASE_ANON_KEY` are scoped **Production-only** in Vercel, so `/admin` will
+  never work on a preview/branch deployment. The public site is unaffected either way.
+
+**Also found (2026-08-29):** `SEO.jsx` reads `VITE_GOOGLE_VERIFICATION` and
+`VITE_BING_VERIFICATION`, and neither is set in Vercel. Both are optional-guarded so
+nothing breaks, but the Search Console verification meta tag does not render — which
+Phase 6 item 1 (GSC sitemap submission) assumes it does.
 
 ---
 
