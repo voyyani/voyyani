@@ -7,6 +7,41 @@
 
 ---
 
+## ⚠️ Deployment status — read this first (2026-08-29)
+
+**None of Phases 0–3 are live.** `origin/main` is still at `c4b52e4` ("feat: implement
+world-class inbound email system…"), the pre-revamp commit. Vercel's production
+deployment tracks `main`, and every phase of this roadmap has landed on the
+`phase-0-foundation-and-truth` branch, which has never been merged.
+
+Verified against the live HTML at `https://www.voyani.tech` on 2026-08-29:
+
+| Live site serves | The branch produces |
+|---|---|
+| `theme-color="#061220"` (pre-Phase-2 navy) | `#0B0B0C` |
+| Cloudinary-hosted favicon | local `/favicon-32.png` |
+| no `About` / `GitHubActivity` chunks | both present |
+
+**This blocks Phase 5.** Phase 5's first item is a Lighthouse audit "against the deployed
+site post-redesign" — run today it would score the *old* site, producing a number worse
+than useless because it would be recorded as if it meant something.
+
+**Not an environment-variable problem.** A missing `VITE_*` was suspected. It is not the
+cause: `.env` has never been in git (`.gitignore` excludes `.env*`), nothing in this repo
+can alter Vercel's dashboard, and `npm run build` was run on 2026-08-29 with **zero**
+`VITE_*` variables set — it completed green, 885 modules. Phase 0 in fact *hardened* this
+path: `src/lib/supabase.js` used to call `createClient(url || '', key || '')`, which throws
+`"supabaseUrl is required."` at import time and white-screened the entire public portfolio
+over a credential only the admin CRM needs. It now returns `null` and callers null-check.
+
+Two real deployment gaps do remain, both tracked in Phase 5:
+- **No `vercel.json` anywhere in the repo**, so there is no SPA rewrite — `/admin/login`
+  and every future `/writing/*` URL hard-404 on Vercel even though `/` resolves.
+- **No local `.env`** in `karisa-portfolio/` (only `.env.example`). Recover it with
+  `vercel env pull karisa-portfolio/.env`.
+
+---
+
 ## 0. How to use this document
 
 Each phase has: a goal, a numbered task list with exact files to touch, which Claude Code skill to invoke (if any), and a Definition of Done you can check against. Work top to bottom — later phases assume earlier ones landed. Do not start Phase 2 (visual redesign) before Phase 0 (real content wired in) — designing around placeholder content wastes the redesign.
@@ -348,9 +383,30 @@ view — and unauthenticated calls are capped at 60/hour. The section therefore 
 sync date and links to the profile, so the numbers stay checkable even when stale.
 Re-run `npm run sync:github` before a deploy.
 
-### Phase 4 — Content & Trust (1–2 weeks, can run partly in parallel with Phase 3)
+### Phase 4 — Content & Trust (1–2 weeks, can run partly in parallel with Phase 3) — 🟡 DESIGNED, NOT BUILT (2026-08-29)
 
 **Goal:** third-party proof and a small amount of real writing — quality over the "5 blog posts" quota the old `AUDIT.md` chased.
+
+> **Status:** a design spec is written, reviewed and committed to
+> [`docs/superpowers/specs/2026-08-29-phase-4-content-and-trust-design.md`](./superpowers/specs/2026-08-29-phase-4-content-and-trust-design.md).
+> **No Phase 4 code exists yet.** There is no `Testimonials.jsx`, no `/writing` route,
+> no write-ups and no `vercel.json`. This entry says "designed" and not "done" on
+> purpose — the whole reason this roadmap supersedes `AUDIT.md` is that the old docs
+> rated work complete before it shipped.
+>
+> **Scope change:** item 3 (CAD Web Viewer case study) was **deferred out of Phase 4**
+> by Karisa on 2026-08-29. Phase 1 had already removed that project from the site for
+> having no capturable visual — it is commissioned work on a private deployment — and
+> putting it back would reopen a settled decision. It stays in `RESUME.md`, which is a
+> separate artifact and needs no screenshot. Phase 4's Definition of Done is amended
+> below to match.
+>
+> **Design decisions recorded in the spec:** write-ups are plain JSX components plus a
+> metadata registry (not MDX — a new build dependency and pipeline for two posts, and
+> it cannot cleanly embed the existing inline-SVG diagrams); each post gets its own
+> route, `<title>`, meta description, canonical and `Article` JSON-LD; and every
+> testimonial carries an `approved: false` flag, with only approved entries rendering
+> and a test that fails if an unapproved draft ever reaches the DOM.
 
 1. **Two testimonials**, not zero. Reach out to a real contact at Raslipwani and Neema Foundation for 2-3 sentences each on what shipping the platform changed for them. Build a small `Testimonials.jsx` — plain, no fabricated names/quotes.
 2. **Two real deep-dive write-ups**, not five generic ones:
@@ -359,12 +415,26 @@ Re-run `npm run sync:github` before a deploy.
    Both live as static pages/MDX under a new `Writing` nav item — no CMS needed for two posts.
 3. **CAD Web Viewer gets its own short case study** given how differentiated it is — even 3-4 paragraphs plus a screen-capture GIF outperforms its current single-line resume mention.
 
-**Definition of Done:** 2 testimonials live, 2 real write-ups live, CAD Web Viewer has a proper case study.
+**Definition of Done (amended 2026-08-29):** 2 real write-ups live at their own URLs;
+`Testimonials.jsx` shipped with its approval gate and both drafts written, rendering
+nothing until a client signs off. ~~CAD Web Viewer has a proper case study~~ — deferred,
+see the status note above.
+
+Note that "2 testimonials live" is **not** in this Definition of Done and cannot be.
+Publishing a quote requires a real person at Raslipwani or Neema Foundation to say
+something and agree to be named; no amount of engineering makes that happen. What Phase 4
+can guarantee is that the moment those quotes arrive, publishing them is a one-line data
+edit with no code work left.
 
 ### Phase 5 — Technical Polish & Ship (3–5 days)
 
 **Goal:** verify claims about performance/accessibility for real, rather than carrying forward the old audit's "predicted" Lighthouse scores.
 
+0. **Prerequisite: merge to `main` and confirm the deploy.** Items 1 and 3 below both
+   measure "the deployed site," which today is the pre-revamp build (see the deployment
+   banner at the top). Running them before the merge produces numbers about the old site.
+   Also add the missing `karisa-portfolio/vercel.json` — there is none in the repo, so
+   Vercel has no SPA rewrite and every non-`/` route 404s.
 1. Run an actual Lighthouse audit (not a prediction) against the deployed site post-redesign; fix what it flags.
 2. Accessibility pass: keyboard nav through the whole page, skip-to-content link, contrast check on the new palette from Phase 2, focus states on the redesigned Projects modal/cards.
 3. Confirm `voyani.tech` → `www.voyani.tech` is a real 301 (not a 307) if that's the intended canonical, and that `src/components/SEO.jsx`'s canonical tag and `public/sitemap.xml` agree with it.
@@ -400,7 +470,7 @@ Per your decision: **scale it back, redirect the effort to content & design.** C
 | Resume (PDF/HTML/MD) | Exists, unlinked, 1 placeholder URL | Wire in + fix placeholder | 0 |
 | Raslipwani screenshots | Don't exist | Capture manually or via Playwright | 0 |
 | Neema screenshots | Don't exist | Capture manually or via Playwright | 0 |
-| CAD Web Viewer case study | Exists only as 1 resume line | Write short case study + capture GIF | 0 (add project), 4 (case study) |
+| CAD Web Viewer case study | Exists only as 1 resume line | **Deferred** — removed from the site in Phase 1 (no capturable visual, private client deployment); stays in `RESUME.md`. Revisit only if Karisa records a screen capture. | ~~4~~ deferred |
 | About section | Never built (0-byte stub) | Write and build | 1 |
 | Testimonials (2) | Don't exist | Request from real clients | 4 |
 | Deep-dive write-ups (2) | Don't exist | Write, grounded in real project data already in `Projects.jsx` | 4 |
@@ -428,8 +498,13 @@ Not "9.5/10 self-rating." Concrete and checkable:
 - [x] Zero placeholder URLs anywhere in shipped content — fixed the LinkedIn placeholder, the wrong LinkedIn in `SEO.jsx`, and the `@karisavoyani` Twitter handle
 - [x] No public link to `/admin` from the marketing site — removed from desktop and mobile nav
 - [x] An About section exists on the live site — built in Phase 1, restyled in Phase 2
-- [ ] 2 testimonials live (currently 0) — **Phase 4**
-- [ ] 2 real deep-dive write-ups live (currently 0) — **Phase 4**
+- [ ] **Phases 0–3 are actually live on voyani.tech** — currently **no**; `main` is still
+      on the pre-revamp commit and every phase sits unmerged on a branch. This is the
+      single highest-impact unchecked box on the list: five phases of work exist and
+      nobody can see any of it.
+- [ ] 2 testimonials live (currently 0) — **Phase 4**, gated on the clients replying,
+      not on code
+- [ ] 2 real deep-dive write-ups live (currently 0) — **Phase 4 designed, not built**
 - [x] Visual design is distinguishable from the prior template look in a side-by-side screenshot — **Phase 2 done**: near-black ground, one lime signal colour, square corners, Archivo + JetBrains Mono, no gradients or blobs anywhere. Still worth asking 3 people the "does this look like a template?" question.
 - [ ] Real (not predicted) Lighthouse Performance/Accessibility/SEO scores recorded in `docs/CHANGELOG.md` — **Phase 5**
 - [x] *(added)* Every published contact address actually receives mail — all three were dead domains; now routed through `src/config/site.js`
@@ -439,8 +514,17 @@ Not "9.5/10 self-rating." Concrete and checkable:
 
 ## 11. Immediate Next Actions
 
-Phases 0, 0.5, 1, 2 and 3 are done (2026-08-29). What's left needs Karisa specifically —
-these are the only blockers no one else can clear:
+Phases 0, 0.5, 1, 2 and 3 are **built** (2026-08-29) but **not deployed** — see the
+deployment banner at the top of this document. Phase 4 is designed and specced but not
+built.
+
+**0. Merge `phase-0-foundation-and-truth` into `main`.** This outranks everything else
+below it. Until it happens, five phases of work are invisible to every hiring manager and
+client who visits the site, Phase 5's Lighthouse audit cannot produce a meaningful number,
+and every remaining item is polish on something nobody can see. It needs Karisa's
+go-ahead because it is a live production deploy.
+
+The rest needs Karisa specifically — these are the blockers no one else can clear:
 
 1. ✅ **Contact email confirmed** as `voyanitech@gmail.com` (2026-08-29). Still worth
    doing eventually: add an MX record to `voyani.tech` and switch to
@@ -460,9 +544,14 @@ these are the only blockers no one else can clear:
    the Raslipwani booking reschedule and the Neema permission matrix, both from inside
    the admin panels you have credentials for. Drop them in
    `public/images/projects/<project>/` — the rendering already exists.
-6. **Then Phase 4 — testimonials and two written case studies.** This is now the
-   highest-value remaining work for actually getting hired, and it is entirely gated on
-   you reaching out to the two clients. Nothing else on the roadmap needs you specifically.
+6. **Email the two clients for testimonials.** This is the only Phase 4 item that is
+   genuinely gated on you — the code around it can be built before a single reply
+   arrives, and the spec is written so that publishing a quote is a one-line data edit.
+   Draft emails will land in `docs/testimonial-outreach.md` when Phase 4 is built.
+   *Correction to the previous version of this list, which said Phase 4 was "entirely
+   gated" on client outreach: it is not. Only the quotes themselves are.*
+7. **Then build Phase 4** (spec: `docs/superpowers/specs/2026-08-29-phase-4-…-design.md`),
+   then Phase 5.
 
 ---
 
