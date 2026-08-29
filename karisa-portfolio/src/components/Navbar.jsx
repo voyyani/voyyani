@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { SITE } from '../config/site';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -48,14 +48,16 @@ const Navbar = () => {
               </a>
             ))}
 
-            {/* Admin Link */}
-            <div className="h-6 w-px bg-[#005792]/30"></div>
-            <Link
-              to="/admin"
-              className="text-gray-300 hover:text-[#61DAFB] transition-colors font-medium text-sm px-3 py-1 rounded-lg hover:bg-[#005792]/20"
+            <a
+              href={SITE.resume.href}
+              download={SITE.resume.downloadAs}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border border-[#61DAFB]/50 text-[#61DAFB] hover:bg-[#61DAFB]/10 hover:border-[#61DAFB] transition-colors focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#061220]"
             >
-              Admin
-            </Link>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Resume
+            </a>
           </div>
           
           <button 
@@ -92,14 +94,17 @@ const Navbar = () => {
                 </a>
               ))}
 
-              {/* Mobile Admin Link */}
-              <Link
-                to="/admin"
-                className="text-gray-300 hover:text-[#61DAFB] py-3 px-4 rounded-lg transition-colors font-medium border-b border-[#005792]/20 hover:bg-[#005792]/20"
+              <a
+                href={SITE.resume.href}
+                download={SITE.resume.downloadAs}
                 onClick={toggleMenu}
+                className="mt-3 flex items-center justify-center gap-2 text-[#61DAFB] font-semibold py-3 px-4 rounded-lg border border-[#61DAFB]/50 hover:bg-[#61DAFB]/10 transition-colors"
               >
-                Admin
-              </Link>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Resume
+              </a>
             </div>
           </motion.div>
         )}

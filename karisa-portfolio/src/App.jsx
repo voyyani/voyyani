@@ -12,7 +12,7 @@ import CookieConsent from './components/CookieConsent';
 import { initGA, trackPageView } from './utils/analytics';
 import { initWebVitals } from './utils/webVitals';
 import { initSentry } from './utils/sentry';
-import { supabase } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 // Admin pages
 import AdminLayout from './admin/layout/AdminLayout';
@@ -30,6 +30,20 @@ const Footer = lazy(() => import('./components/Footer'));
 
 // Auth Guard Component
 const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) => {
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <h1 className="text-2xl font-bold text-amber-400 mb-4">Admin area unavailable</h1>
+          <p className="text-gray-300 mb-6">
+            Supabase environment variables are not configured for this deployment.
+          </p>
+          <a href="/" className="text-blue-400 hover:text-blue-300">Return to homepage</a>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#061220] to-[#0a1929] flex items-center justify-center">
@@ -185,6 +199,13 @@ function App() {
 
   // Check authentication status
   useEffect(() => {
+    // Admin auth needs Supabase; the public site does not. Bail out quietly rather
+    // than letting a missing admin credential break the whole page.
+    if (!isSupabaseConfigured) {
+      setIsLoading(false);
+      return;
+    }
+
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -238,6 +259,7 @@ function App() {
   }, []);
 
   const handleLogout = async () => {
+    if (!supabase) return;
     try {
       await supabase.auth.signOut();
       setUser(null);

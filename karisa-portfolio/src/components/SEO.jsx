@@ -1,12 +1,13 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { SITE } from '../config/site';
 
 const SEO = ({
   title = "Karisa Voyani - Mechanical Engineer & Full-Stack Developer",
   description = "Portfolio of Karisa Voyani, a Mechanical Engineer and Full-Stack Developer from Kenya. Specializing in React, Supabase, and engineering-driven web solutions.",
   keywords = "mechanical engineer Kenya, full-stack developer, React developer, Supabase, web development, software engineer Kenya, Nairobi developer, African tech, engineering portfolio",
-  image = "https://voyani.tech/og-image.jpg",
-  url = "https://voyani.tech",
+  image = SITE.ogImage,
+  url = SITE.url,
   type = "website"
 }) => {
   const siteTitle = "Karisa Voyani - Portfolio";
@@ -45,9 +46,10 @@ const SEO = ({
       "Full-Stack Development",
       "Software Engineering"
     ],
+    "email": SITE.email,
     "sameAs": [
-      "https://github.com/voyyani",
-      "https://linkedin.com/in/karisa-voyani"
+      SITE.social.github,
+      SITE.social.linkedin
     ]
   };
 
@@ -99,7 +101,8 @@ const SEO = ({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={image} />
-      <meta name="twitter:creator" content="@karisavoyani" /> {/* Update with actual handle */}
+      {/* twitter:creator intentionally omitted: "@karisavoyani" was an unverified
+          placeholder. Add it back here once a real handle exists. */}
 
       {/* Additional Meta Tags */}
       <meta name="robots" content="index, follow" />

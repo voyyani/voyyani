@@ -16,6 +16,9 @@ vi.mock('framer-motion', () => {
       }
     }),
     AnimatePresence: ({ children }) => children,
+    // Projects.jsx calls this to honour prefers-reduced-motion. Without it the mock
+    // throws on import and every test in this file fails before it renders anything.
+    useReducedMotion: () => false,
   };
 });
 
@@ -53,7 +56,7 @@ describe('Projects Component', () => {
 
     it('should display the section description', () => {
       render(<Projects />);
-      expect(screen.getByText(/Enterprise-grade real estate management/i)).toBeDefined();
+      expect(screen.getByText(/Enterprise-grade applications/i)).toBeDefined();
       expect(screen.getByText(/modern architecture/i)).toBeDefined();
     });
   });
@@ -96,7 +99,7 @@ describe('Projects Component', () => {
     it('should display metric icons', () => {
       render(<Projects />);
       expect(screen.getByText('👥')).toBeDefined(); // Users icon
-      expect(screen.getByText('⚡')).toBeDefined(); // Speed icon
+      expect(screen.getAllByText('⚡').length).toBeGreaterThan(0); // Speed icon
       expect(screen.getByText('📊')).toBeDefined(); // Performance icon
     });
 
@@ -104,7 +107,7 @@ describe('Projects Component', () => {
       render(<Projects />);
       expect(screen.getByText('React 18.3')).toBeDefined();
       expect(screen.getByText('Vite 6.3')).toBeDefined();
-      expect(screen.getByText('Supabase')).toBeDefined();
+      expect(screen.getAllByText('Supabase').length).toBeGreaterThan(0);
       expect(screen.getByText('PostgreSQL')).toBeDefined();
     });
 
@@ -116,7 +119,7 @@ describe('Projects Component', () => {
 
     it('should display "Explore Full Details" CTA', () => {
       render(<Projects />);
-      expect(screen.getByText('Explore Full Details')).toBeDefined();
+      expect(screen.getAllByText('Explore Full Details').length).toBe(3);
     });
 
     it('should have cursor-pointer class for interactivity', () => {
@@ -131,7 +134,7 @@ describe('Projects Component', () => {
       const user = userEvent.setup();
       render(<Projects />);
 
-      const projectCard = screen.getByText('Raslipwani Properties').closest('div.cursor-pointer');
+      const projectCard = screen.getByText('Raslipwani Properties').closest('.cursor-pointer');
       await user.click(projectCard);
 
       // Modal should be visible (project details section should appear)
@@ -145,7 +148,7 @@ describe('Projects Component', () => {
       const user = userEvent.setup();
       render(<Projects />);
 
-      const projectCard = screen.getByText('Raslipwani Properties').closest('div.cursor-pointer');
+      const projectCard = screen.getByText('Raslipwani Properties').closest('.cursor-pointer');
       await user.click(projectCard);
 
       await waitFor(() => {
@@ -159,7 +162,7 @@ describe('Projects Component', () => {
       const { container } = render(<Projects />);
 
       // Open modal
-      const projectCard = screen.getByText('Raslipwani Properties').closest('div.cursor-pointer');
+      const projectCard = screen.getByText('Raslipwani Properties').closest('.cursor-pointer');
       await user.click(projectCard);
 
       // Wait for modal
@@ -180,7 +183,7 @@ describe('Projects Component', () => {
       const { container } = render(<Projects />);
 
       // Open modal
-      const projectCard = screen.getByText('Raslipwani Properties').closest('div.cursor-pointer');
+      const projectCard = screen.getByText('Raslipwani Properties').closest('.cursor-pointer');
       await user.click(projectCard);
 
       await waitFor(() => {
@@ -201,7 +204,7 @@ describe('Projects Component', () => {
     beforeEach(async () => {
       const user = userEvent.setup();
       render(<Projects />);
-      const projectCard = screen.getByText('Raslipwani Properties').closest('div.cursor-pointer');
+      const projectCard = screen.getByText('Raslipwani Properties').closest('.cursor-pointer');
       await user.click(projectCard);
     });
 
@@ -217,12 +220,18 @@ describe('Projects Component', () => {
       });
     });
 
-    it('should display live URL link', async () => {
+    // Raslipwani is flagged liveStatus.state === 'maintenance', so the modal must warn
+    // the visitor rather than promising a live platform behind the link.
+    it('should link to the live site and disclose the maintenance window', async () => {
       await waitFor(() => {
-        const liveLink = screen.getByText(/View Live Platform/i);
+        const liveLink = screen.getByText(/Visit Site Anyway/i);
         expect(liveLink).toBeDefined();
         expect(liveLink.closest('a')).toBeDefined();
+        expect(liveLink.closest('a').getAttribute('href')).toBe('https://raslipwani.co.ke');
       });
+
+      expect(screen.getByText(/scheduled maintenance window/i)).toBeDefined();
+      expect(screen.queryByText(/View Live Platform/i)).toBeNull();
     });
 
     it.skip('should display GitHub URL link', async () => {
@@ -239,7 +248,7 @@ describe('Projects Component', () => {
   describe('Additional Info', () => {
     it('should display project stats footer', () => {
       render(<Projects />);
-      expect(screen.getByText(/5,700\+ lines of production code/i)).toBeDefined();
+      expect(screen.getByText(/10,000\+ lines of production code/i)).toBeDefined();
       expect(screen.getByText(/90% test coverage/i)).toBeDefined();
       expect(screen.getByText(/Zero compilation errors/i)).toBeDefined();
     });
@@ -289,8 +298,8 @@ describe('Projects Component', () => {
   describe('Data Integrity', () => {
     it('should render correct number of metrics in card (3)', () => {
       const { container } = render(<Projects />);
-      const metrics = container.querySelectorAll('.grid-cols-3 > div');
-      expect(metrics.length).toBe(3);
+      const firstCardMetrics = container.querySelector('.grid-cols-3');
+      expect(firstCardMetrics.children.length).toBe(3);
     });
 
     it('should render correct number of tech tags in card (4 + more badge)', () => {

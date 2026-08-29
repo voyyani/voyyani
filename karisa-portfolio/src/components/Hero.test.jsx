@@ -180,18 +180,20 @@ describe('Hero Component', () => {
   describe('Stats Section', () => {
     it('should display all three stats', () => {
       render(<Hero />);
-      
-      expect(screen.getByText('Years Experience')).toBeDefined();
-      expect(screen.getByText('Projects Completed')).toBeDefined();
-      expect(screen.getByText('Technologies')).toBeDefined();
+
+      expect(screen.getByText('Years Shipping Software')).toBeDefined();
+      expect(screen.getByText('Platforms Shipped End-to-End')).toBeDefined();
+      expect(screen.getByText('Engineering Degree')).toBeDefined();
     });
 
+    // These values are deliberately checkable against the rest of the page:
+    // the Projects section must show as many platforms as this claims.
     it('should display correct stat values', () => {
       render(<Hero />);
-      
+
       expect(screen.getByText('3+')).toBeDefined();
-      expect(screen.getByText('10+')).toBeDefined();
-      expect(screen.getByText('15+')).toBeDefined();
+      expect(screen.getByText('3')).toBeDefined();
+      expect(screen.getByText('B.Eng')).toBeDefined();
     });
 
     it('should render stats in a grid layout', () => {

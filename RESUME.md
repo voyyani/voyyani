@@ -1,7 +1,7 @@
 # KARISA
 ### Mechanical Engineer · Full-Stack Developer
 
-📧 karisa@thebikecollector.tech &nbsp;|&nbsp; 🌐 [voyani.tech](https://voyani.tech) &nbsp;|&nbsp; 💼 [LinkedIn](https://linkedin.com/in/yourprofile) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/voyyani)
+📧 voyanitech@gmail.com &nbsp;|&nbsp; 🌐 [voyani.tech](https://voyani.tech) &nbsp;|&nbsp; 💼 [LinkedIn](https://linkedin.com/in/karisa-ngowa-b7630111b/) &nbsp;|&nbsp; 🐙 [GitHub](https://github.com/voyyani)
 
 ---
 
@@ -117,12 +117,12 @@ Relevant coursework: Computational Methods, Finite Element Analysis, Thermodynam
 
 | | |
 |---|---|
-| **3+** Years shipping production software | **10+** Projects completed end-to-end |
+| **3+** Years shipping production software | **3** Platforms shipped end-to-end |
 | **15+** Technologies in active use | **90%** Test coverage standard |
-| **1.2s** Best-in-class load time achieved | **99.9%** Uptime on production systems |
+| **1.2s** Best-in-class load time achieved | **B.Eng** Mechanical Engineering |
 | **65%** Client review cycle reduction | **60%** Performance gains on key projects |
 | **95/100** Mobile Lighthouse score | **5-tier RBAC** built from scratch |
 
 ---
 
-*Portfolio: [voyani.tech](https://voyani.tech) &nbsp;·&nbsp; Email: [karisa@thebikecollector.tech](mailto:karisa@thebikecollector.tech)*
+*Portfolio: [voyani.tech](https://voyani.tech) &nbsp;·&nbsp; Email: [voyanitech@gmail.com](mailto:voyanitech@gmail.com)*

@@ -2,6 +2,30 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { trackProjectView, trackEvent } from '../utils/analytics';
+import ImageWithFallback from './ImageWithFallback';
+
+/**
+ * Shown instead of a screenshot when a project genuinely has no capture available.
+ * Deliberately reads as "not captured yet" rather than imitating a screenshot —
+ * a portfolio that fakes product imagery is worse than one that admits a gap.
+ */
+const NoCaptureNotice = ({ project }) => (
+  <div
+    className="w-full h-full flex items-center justify-center bg-[#061220] border-b border-[#005792]/30"
+    style={{ aspectRatio: '16 / 10' }}
+  >
+    <div className="text-center px-6">
+      <div className="text-4xl mb-3 opacity-40" role="img" aria-hidden="true">
+        {project.emoji}
+      </div>
+      <p className="text-gray-500 text-xs uppercase tracking-[0.15em]">
+        {project.liveStatus?.state === 'maintenance'
+          ? 'Capture pending — client site in maintenance'
+          : 'Capture pending — private client deployment'}
+      </p>
+    </div>
+  </div>
+);
 
 const Projects = () => {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -37,8 +61,7 @@ const Projects = () => {
         { icon: "⚡", label: "Load Time", value: "1.2s" },
         { icon: "📊", label: "Performance", value: "60% ↑" },
         { icon: "🎯", label: "Coverage", value: "90%" },
-        { icon: "📱", label: "Mobile Score", value: "95/100" },
-        { icon: "🔄", label: "Uptime", value: "99.9%" }
+        { icon: "📱", label: "Mobile Score", value: "95/100" }
       ],
       category: "Full-Stack",
       challenge: "Building a scalable real estate platform that handles complex booking workflows, client relationship management, property tracking, and admin operations while maintaining exceptional performance with real-time updates for concurrent users.",
@@ -128,6 +151,17 @@ const Projects = () => {
       ],
       liveUrl: "https://raslipwani.co.ke",
       githubUrl: "https://github.com/voyyani/raslipwani",
+      // Checked 2026-08-29: every route serves the client's scheduled-maintenance page,
+      // so the "View Live Platform" button would land a visitor on a countdown screen.
+      // Say so rather than let them find out. Clear this once the window closes.
+      liveStatus: {
+        state: "maintenance",
+        label: "Client site is in a scheduled maintenance window",
+        checkedOn: "29 Aug 2026"
+      },
+      // No product screenshots yet — the live site is behind the maintenance page and
+      // the admin dashboard needs Karisa's own login to capture. See docs/CHANGELOG.md.
+      screenshots: [],
       color: "#3ECF8E",
       gradient: "from-[#3ECF8E] to-[#2AA876]",
       emoji: "🏢"
@@ -155,17 +189,21 @@ const Projects = () => {
         "DND Kit",
         "Lucide Icons"
       ],
+      // Verified 2026-08-29 against the live site: the donate page reports
+      // "10,000+ lives touched" and "4 active programs". The previous "Programs 15+"
+      // was not backed by anything the client publishes, and "RBAC Roles 6"
+      // contradicted this same object's own "5-tier RBAC" description.
       metrics: [
-        { icon: "🏥", label: "Programs", value: "15+" },
+        { icon: "🏥", label: "Active Programs", value: "4" },
         { icon: "⚡", label: "LCP Score", value: "<2.5s" },
         { icon: "♿", label: "A11y Score", value: "95+" },
-        { icon: "🔐", label: "RBAC Roles", value: "6" },
+        { icon: "🔐", label: "RBAC Tiers", value: "5" },
         { icon: "📱", label: "Mobile First", value: "100%" },
-        { icon: "🌍", label: "Impact", value: "10K+" }
+        { icon: "🌍", label: "Lives Touched", value: "10K+" }
       ],
       category: "Full-Stack",
       challenge: "Creating a digital platform for a non-profit that effectively communicates impact, drives donations and volunteer registrations, manages diverse programs, and provides transparent governance—all while maintaining exceptional accessibility, performance, and a world-class admin experience for non-technical staff.",
-      solution: "Built a React 19 + TypeScript architecture with Supabase backend featuring a 5-tier RBAC system (Super Admin → Viewer), comprehensive CMS with TipTap rich-text editing, drag-and-drop content ordering, real-time metrics dashboard, Three.js animated hero, and automated workflows. Implemented granular permissions matrix with 20+ distinct permission types across 6 user roles.",
+      solution: "Built a React 19 + TypeScript architecture with Supabase backend featuring a 5-tier RBAC system (Super Admin → Viewer), comprehensive CMS with TipTap rich-text editing, drag-and-drop content ordering, real-time metrics dashboard, Three.js animated hero, and automated workflows. Implemented granular permissions matrix with 20+ distinct permission types across 5 user roles.",
       features: [
         "Dynamic Programs showcase with category filtering",
         "Interactive Impact metrics with animated counters",
@@ -263,9 +301,82 @@ const Projects = () => {
         "First Input Delay: <100ms"
       ],
       liveUrl: "https://neemafoundationkilifi.org",
+      githubUrl: "https://github.com/voyyani/Neema-Foundation-Kilifi",
+      liveStatus: { state: "live", checkedOn: "29 Aug 2026" },
+      // Captured from the live site on 2026-08-29 at 1440x900 @2x.
+      screenshots: [
+        {
+          src: "/images/projects/neema/home.jpg",
+          alt: "Neema Foundation home page: full-bleed hero reading 'Need meets God's Grace In Ganze Community' over a dark red gradient, with donate and programs calls to action",
+          caption: "Home — hero copy, imagery and impact counters are all editable from the admin CMS"
+        },
+        {
+          src: "/images/projects/neema/programs.jpg",
+          alt: "Programs page listing transformational programs with a gallery timeline and category filters",
+          caption: "Programs — CMS-driven listings with drag-and-drop ordering and category filters"
+        },
+        {
+          src: "/images/projects/neema/donate.jpg",
+          alt: "Donation page headed 'Support Neema Foundation' showing impact statistics and multiple ways to give",
+          caption: "Donate — multi-pathway giving (bank, mobile money, sponsorship)"
+        },
+        {
+          src: "/images/projects/neema/media.jpg",
+          alt: "Media gallery page titled 'Our Story, In Pictures' with album filters for programs, events and behind the scenes",
+          caption: "Media — album gallery with filtering, populated entirely through the CMS"
+        },
+        {
+          src: "/images/projects/neema/volunteer.jpg",
+          alt: "Volunteer registration page headed 'Join Our Volunteer Family'",
+          caption: "Volunteer — registration workflow with role matching"
+        }
+      ],
       color: "#E67E22",
       gradient: "from-[#E67E22] to-[#D35400]",
       emoji: "💚"
+    },
+    {
+      id: 3,
+      title: "CAD Web Viewer",
+      tagline: "Browser-Based 3D Engineering Visualisation",
+      description: "A commissioned browser-based 3D model viewer for mechanical engineering components, built so clients could inspect and mark up CAD geometry without a desktop CAD licence. Custom WebGL shaders handle sectioning and material shading; the viewer streams geometry progressively so large assemblies stay interactive on ordinary hardware.",
+      technologies: ["Three.js", "React", "WebGL", "Custom GLSL Shaders"],
+      metrics: [
+        { icon: "⏱️", label: "Review Cycle", value: "65% ↓" },
+        { icon: "🖥️", label: "CAD Licence Needed", value: "None" },
+        { icon: "🧩", label: "Runs In", value: "Browser" }
+      ],
+      category: "Engineering",
+      challenge: "Client review of mechanical designs required every reviewer to have desktop CAD software installed and licensed. That gated feedback behind software procurement, so review cycles stretched out and non-engineer stakeholders were effectively excluded from the conversation.",
+      solution: "Built a WebGL viewer that renders the same geometry in any browser. Custom shaders provide section cuts and material shading; progressive geometry streaming keeps large assemblies responsive without requiring a workstation GPU.",
+      features: [
+        "Browser-based 3D model inspection — no CAD licence required",
+        "Custom GLSL shaders for sectioning and material shading",
+        "Progressive geometry streaming for large assemblies",
+        "Orbit, pan and zoom navigation with model-fit framing",
+        "Direct markup on the model for review feedback"
+      ],
+      technicalHighlights: [
+        "Custom WebGL shader pipeline rather than off-the-shelf material presets",
+        "Progressive geometry loading to keep large assemblies interactive",
+        "Three.js scene graph driven from React state",
+        "Runs on integrated graphics — no workstation GPU assumed"
+      ],
+      keyAchievements: [
+        "Cut client review cycles by 65% by removing the CAD-licence prerequisite",
+        "Opened design review to non-engineer stakeholders for the first time",
+        "Bridged the mechanical-engineering and web-development toolchains directly"
+      ],
+      // Commissioned client work: source is not public and the deployment sits behind
+      // the client's environment, so there is no live URL and no capture yet.
+      // Recording a short screen capture of the viewer is the open action item.
+      liveUrl: null,
+      githubUrl: null,
+      liveStatus: { state: "private", label: "Commissioned client work — source and deployment are private" },
+      screenshots: [],
+      color: "#D4A017",
+      gradient: "from-[#D4A017] to-[#B8860B]",
+      emoji: "📐"
     }
   ], []);
 
@@ -362,6 +473,36 @@ const Projects = () => {
                   </div>
                 </div>
 
+                {/* Screenshots — real captures of the shipped product, taken from the live site */}
+                {selectedProject.screenshots?.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                      <span className="text-2xl" role="img" aria-hidden="true">🖼️</span> The Shipped Product
+                    </h3>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {selectedProject.screenshots.map((shot, idx) => (
+                        <motion.figure
+                          key={shot.src}
+                          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: shouldReduceMotion ? 0 : idx * 0.06 }}
+                          className={idx === 0 ? 'sm:col-span-2' : undefined}
+                        >
+                          <ImageWithFallback
+                            src={shot.src}
+                            alt={shot.alt}
+                            width={1600}
+                            height={1000}
+                            sizes="(max-width: 640px) 100vw, 640px"
+                            className="rounded-xl border border-[#005792]/40"
+                          />
+                          <figcaption className="mt-2 text-xs text-gray-400">{shot.caption}</figcaption>
+                        </motion.figure>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Content Grid */}
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                   {/* Main Content */}
@@ -441,6 +582,7 @@ const Projects = () => {
                     </div>
 
                     {/* Architecture */}
+                    {selectedProject.architecture?.length > 0 && (
                     <div className="p-6 rounded-2xl bg-[#061220]/60 border border-blue-500/30">
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span className="text-2xl" role="img" aria-hidden="true">🏗️</span> System Architecture
@@ -459,8 +601,10 @@ const Projects = () => {
                         ))}
                       </div>
                     </div>
+                    )}
 
                     {/* Database Schema */}
+                    {selectedProject.databaseSchema?.length > 0 && (
                     <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#3ECF8E]/30">
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span className="text-2xl" role="img" aria-hidden="true">🗄️</span> Database Schema
@@ -479,8 +623,10 @@ const Projects = () => {
                         ))}
                       </div>
                     </div>
+                    )}
 
                     {/* Performance Metrics */}
+                    {selectedProject.performanceMetrics?.length > 0 && (
                     <div className="p-6 rounded-2xl bg-[#061220]/60 border border-yellow-500/30">
                       <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                         <span className="text-2xl" role="img" aria-hidden="true">⚡</span> Performance Metrics
@@ -499,6 +645,7 @@ const Projects = () => {
                         ))}
                       </div>
                     </div>
+                    )}
 
                     {/* Key Achievements */}
                     <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#D4A017]/30">
@@ -576,6 +723,7 @@ const Projects = () => {
                     </div>
 
                     {/* Admin Features */}
+                    {selectedProject.adminFeatures?.length > 0 && (
                     <div className="p-6 rounded-2xl bg-[#061220]/60 border border-[#61DAFB]/30">
                       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                         <span className="text-2xl" role="img" aria-hidden="true">👨‍💼</span> Admin Panel
@@ -604,25 +752,41 @@ const Projects = () => {
                         )}
                       </div>
                     </div>
+                    )}
 
                     {/* CTA Buttons */}
                     <div className="space-y-3">
-                      <motion.a 
+                      {selectedProject.liveStatus?.state === 'maintenance' && (
+                        <p className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs leading-relaxed">
+                          <span role="img" aria-hidden="true">🛠️</span>{' '}
+                          {selectedProject.liveStatus.label} (checked {selectedProject.liveStatus.checkedOn}),
+                          so the live link currently shows the client&apos;s maintenance page.
+                        </p>
+                      )}
+                      {selectedProject.liveStatus?.state === 'private' && (
+                        <p className="p-3 rounded-xl bg-[#0a1929] border border-[#005792]/40 text-gray-400 text-xs leading-relaxed">
+                          <span role="img" aria-hidden="true">🔒</span> {selectedProject.liveStatus.label}.
+                        </p>
+                      )}
+                      {selectedProject.liveUrl && (
+                      <motion.a
                         href={selectedProject.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         whileHover={{ scale: 1.02, y: -2 }}
                         whileTap={{ scale: 0.98 }}
                         className={`block w-full text-center bg-gradient-to-r ${selectedProject.gradient} text-white py-4 rounded-xl font-bold shadow-xl hover:shadow-2xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#061220]`}
-                        style={{ focusRingColor: selectedProject.color }}
                       >
                         <span className="flex items-center justify-center gap-2">
-                          🚀 View Live Platform
+                          {selectedProject.liveStatus?.state === 'maintenance'
+                            ? 'Visit Site Anyway'
+                            : '🚀 View Live Platform'}
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                         </span>
                       </motion.a>
+                      )}
                       {selectedProject.githubUrl && (
                         <motion.a 
                           href={selectedProject.githubUrl}
@@ -732,7 +896,7 @@ const Projects = () => {
           layout
           id="projects-grid"
           role="tabpanel"
-          className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto"
         >
           <AnimatePresence mode="popLayout">
             {filteredProjects.map((project, index) => (
@@ -755,14 +919,27 @@ const Projects = () => {
                   {/* Glow Effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#61DAFB]/0 to-[#61DAFB]/0 group-hover:from-[#61DAFB]/10 group-hover:to-transparent transition-all duration-300 pointer-events-none" aria-hidden="true" />
                   
+                  {/* Lead visual: a real screenshot where one exists, an honest notice where it doesn't */}
+                  <div className="relative">
+                    {project.screenshots?.length > 0 ? (
+                      <ImageWithFallback
+                        src={project.screenshots[0].src}
+                        alt={project.screenshots[0].alt}
+                        width={1600}
+                        height={1000}
+                        sizes="(max-width: 768px) 100vw, 560px"
+                        className="border-b border-[#005792]/30"
+                      />
+                    ) : (
+                      <NoCaptureNotice project={project} />
+                    )}
+                    <span className="absolute top-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full text-xs font-bold text-white">
+                      {project.category}
+                    </span>
+                  </div>
+
                   {/* Header */}
-                  <div className={`relative p-8 bg-gradient-to-br ${project.gradient}`}>
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="text-5xl" role="img" aria-hidden="true">{project.emoji}</span>
-                      <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold text-white">
-                        {project.category}
-                      </span>
-                    </div>
+                  <div className={`relative px-6 py-5 bg-gradient-to-br ${project.gradient}`}>
                     <h3 className="text-2xl font-bold text-white mb-1">{project.title}</h3>
                     <p className="text-white/80 text-sm">{project.tagline}</p>
                   </div>

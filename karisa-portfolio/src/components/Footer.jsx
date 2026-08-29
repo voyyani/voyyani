@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
+import { SITE, mailto } from '../config/site';
 
 const Footer = () => {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  
   // African-inspired pattern as base64
   const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
   
@@ -25,7 +23,16 @@ const Footer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
-      url: 'mailto:karisa@thebikecollector.tech'
+      url: mailto('Portfolio enquiry')
+    },
+    {
+      name: 'LinkedIn',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M4.98 3.5C4.98 4.881 3.87 6 2.5 6S0 4.881 0 3.5C0 2.12 1.12 1 2.5 1S4.98 2.12 4.98 3.5zM.02 8.5h4.96V24H.02V8.5zm7.44 0h4.75v2.11h.07c.66-1.25 2.27-2.57 4.68-2.57 5 0 5.92 3.29 5.92 7.57V24h-4.95v-7.4c0-1.77-.03-4.04-2.46-4.04-2.47 0-2.85 1.93-2.85 3.92V24H7.46V8.5z" />
+        </svg>
+      ),
+      url: SITE.social.linkedin
     },
     {
       name: 'GitHub',
@@ -34,19 +41,9 @@ const Footer = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
         </svg>
       ),
-      url: 'https://github.com/voyyani'
+      url: SITE.social.github
     },
   ];
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (email) {
-      console.log("Subscribed with email:", email);
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 3000);
-    }
-  };
 
   const scrollToTop = (e) => {
     e.preventDefault();
@@ -54,8 +51,7 @@ const Footer = () => {
   };
 
   return (
-    <footer 
-      id="contact" 
+    <footer
       className="relative overflow-hidden pt-16 pb-10 px-4 border-t border-[#005792]/30"
       style={{ backgroundImage: `url("${africanPattern}")` }}
     >
@@ -73,34 +69,22 @@ const Footer = () => {
               <h2 className="text-xl font-bold text-white">Voyani.tech</h2>
             </div>
             <p className="text-gray-400 mb-6">
-              Mechanical Engineer → Full-Stack Developer
+              {SITE.role}
               <br />
               Crafting high-performance solutions with engineering precision
             </p>
-            
+
             <div className="mt-auto">
-              <h3 className="text-lg font-bold mb-4 text-gray-200">Stay Updated</h3>
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your email address"
-                  className="bg-[#061220]/70 border border-[#005792]/30 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r from-[#005792] to-[#004274] text-white px-6 py-3 rounded-lg font-medium transition-all hover:opacity-90"
-                >
-                  Subscribe
-                </button>
-              </form>
-              {subscribed && (
-                <p className="mt-2 text-sm text-[#3ECF8E]">
-                  Thank you for subscribing!
-                </p>
-              )}
+              <a
+                href={SITE.resume.href}
+                download={SITE.resume.downloadAs}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#005792] to-[#004274] text-white px-6 py-3 rounded-lg font-medium transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[#61DAFB] focus:ring-offset-2 focus:ring-offset-[#061220]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download Resume
+              </a>
             </div>
           </div>
           
@@ -119,11 +103,11 @@ const Footer = () => {
                 </div>
                 <div>
                   <h4 className="text-gray-400 text-sm">Email</h4>
-                  <a 
-                    href="mailto:karisa@thebikecollector.info" 
+                  <a
+                    href={mailto('Portfolio enquiry')}
                     className="text-white hover:text-[#61DAFB] transition-colors break-all"
                   >
-                    karisa@thebikecollector.info
+                    {SITE.email}
                   </a>
                 </div>
               </div>
@@ -137,7 +121,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <h4 className="text-gray-400 text-sm">Based In</h4>
-                  <p className="text-white">Nairobi, Kenya</p>
+                  <p className="text-white">{SITE.location}</p>
                 </div>
               </div>
             </div>
@@ -203,7 +187,7 @@ const Footer = () => {
         <div className="mt-12 pt-6 border-t border-[#005792]/20 text-center">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-500 text-sm">
-              © {new Date().getFullYear()} Karisa. All rights reserved.
+              © {new Date().getFullYear()} {SITE.name}. All rights reserved.
             </p>
             
             <div className="flex items-center gap-2">
