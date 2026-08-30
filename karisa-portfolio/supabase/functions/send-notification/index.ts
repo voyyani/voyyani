@@ -412,7 +412,7 @@ function submissionEmailTemplate(
 
       <!-- Footer Section -->
       <div class="footer">
-        <div class="footer-name">Karisa Voyani</div>
+        <div class="footer-name">Ngowa Karisa</div>
         <p class="footer-tagline">
           Engineering Precision • African Innovation • Modern Tech
         </p>
@@ -748,7 +748,7 @@ function confirmationEmailTemplate(senderName: string, subject: string): string 
 
       <!-- Footer Section -->
       <div class="footer">
-        <div class="footer-name">Karisa Voyani</div>
+        <div class="footer-name">Ngowa Karisa</div>
         <p class="footer-subtitle">
           Contact Form Confirmation
         </p>

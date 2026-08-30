@@ -33,7 +33,7 @@ const Navbar = () => {
                 <path d="M2 15h20" />
               </svg>
             </span>
-            <span className="font-semibold tracking-tight text-ink-50">{SITE.name}</span>
+            <span className="font-semibold tracking-tight text-ink-50">{SITE.brand}</span>
           </a>
 
           <div className="hidden items-center gap-7 md:flex">

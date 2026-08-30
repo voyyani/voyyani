@@ -3,7 +3,7 @@
 **Status:** Live
 **Last updated:** 2026-08-29
 
-All notable changes to the Karisa Voyani portfolio (voyani.tech), newest first.
+All notable changes to the Ngowa Karisa portfolio (voyani.tech), newest first.
 Format follows [Keep a Changelog](https://keepachangelog.com); dates come from git history.
 
 This file replaces the ~40 phase- and week-completion reports that used to live in

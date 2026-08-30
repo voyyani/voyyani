@@ -620,7 +620,7 @@ function replyEmailTemplate(
       <div class="header">
         <div class="badge">Engineering × Development</div>
         <h1>Re: ${escapeHtml(originalSubject)}</h1>
-        <p class="header-subtitle">Response from Karisa Voyani</p>
+        <p class="header-subtitle">Response from Ngowa Karisa</p>
       </div>
 
       <!-- Main Content -->
@@ -648,7 +648,7 @@ function replyEmailTemplate(
       <!-- Footer Section -->
       <div class="footer">
         <div class="footer-brand">
-          <div class="footer-name">Karisa Voyani</div>
+          <div class="footer-name">Ngowa Karisa</div>
           <p class="footer-tagline">
             Engineering Precision • African Innovation • Modern Tech
           </p>

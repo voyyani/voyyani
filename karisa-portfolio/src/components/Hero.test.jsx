@@ -46,7 +46,7 @@ describe('Hero Component', () => {
       const { container } = render(<Hero />);
       const h1 = container.querySelector('h1');
       expect(h1).toBeDefined();
-      expect(h1.textContent).toContain('Karisa Voyani');
+      expect(h1.textContent).toContain('Ngowa Karisa');
       expect(h1.textContent).toContain(SITE.location);
     });
 

@@ -249,7 +249,7 @@ const projectSchema = {
   "name": "Raslipwani Properties",
   "creator": {
     "@type": "Person",
-    "name": "Karisa Voyani"
+    "name": "Ngowa Karisa"
   },
   "description": "Full-stack property management platform",
   "url": "https://voyani.tech/#projects"
@@ -386,7 +386,7 @@ Add location to structured data:
 - 100-500 impressions/month
 - 10-50 clicks/month
 - Keywords ranking (positions 10-30)
-- Brand name ("Karisa Voyani") ranks #1
+- Brand name ("Ngowa Karisa") ranks #1
 
 ### Month 6+
 - 500-2000 impressions/month

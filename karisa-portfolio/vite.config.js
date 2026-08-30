@@ -18,7 +18,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'Karisa Voyani - Software Engineer',
+        name: 'Ngowa Karisa - Software Engineer',
         short_name: 'Karisa Portfolio',
         description: 'Portfolio website showcasing software engineering projects and skills',
         theme_color: '#0f172a',

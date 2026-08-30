@@ -1,6 +1,6 @@
 # Portfolio Revamp Roadmap — roadmapupdated.md
 
-**Author:** Claude (audit + plan), for Karisa Voyani
+**Author:** Claude (audit + plan), for Ngowa Karisa
 **Date:** 2026-08-28
 **Supersedes:** `ROADMAP.md`, `PROJECT_ROADMAP_UPDATED.md`, `AUDIT.md`, and every `PHASE*_*.md` file in this folder — those tracked the inbound-email/admin subsystem and self-rated the site "9.0/10 world-class" with zero screenshots to back it up. This document does not carry that rating forward. Treat this as the single source of truth going forward; archive the rest (see Phase 0.5).
 **Goal:** turn this repo into a portfolio that gets Karisa hired (as an employee) or hired (as Voyani LLC) in 2026 — not a portfolio that scores well on a self-written rubric.
@@ -438,23 +438,87 @@ something and agree to be named; no amount of engineering makes that happen. Wha
 can guarantee is that the moment those quotes arrive, publishing them is a one-line data
 edit with no code work left.
 
-### Phase 5 — Technical Polish & Ship (3–5 days)
+### Phase 5 — Technical Polish & Ship (3–5 days) — 🟡 IN PROGRESS (2026-08-29)
 
 **Goal:** verify claims about performance/accessibility for real, rather than carrying forward the old audit's "predicted" Lighthouse scores.
+
+> **Status:** items 2, 3 and 5 are done. Item 1 (Lighthouse) is blocked on the deploy.
+> Item 4 was already satisfied by Phase 0/1. Item 6 has nothing to trigger it yet.
+>
+> **Two WCAG AA failures were measured, not guessed.** Every foreground/background pair
+> in the Phase 2 palette was computed against the WCAG relative-luminance formula:
+>
+> | Token | Role | On `ink-950` | Verdict |
+> |---|---|---|---|
+> | `ink-400` `#6E6C74` | `.eyebrow`, the site-wide mono micro-label (23 usages) | 3.80:1 | ✗ below the 4.5:1 AA floor |
+> | `ink-500` `#55545A` | 3 small-text usages | 2.63:1 | ✗ well below |
+>
+> `.eyebrow` is 11px, so the large-text exemption does not apply. `ink-400` is now
+> `#828089` — the minimum hue-preserving value clearing AA on all three grounds
+> (5.06 / 4.91 / 4.63). `ink-300` was **not** changed: it already passes at 5.64:1, and
+> lightening it would have collapsed it into `ink-200` (0.70 ratio points apart),
+> relocating the problem rather than fixing it. Everything else in the palette passes —
+> `signal` is 16.70:1, primary copy 17.42:1.
+>
+> **The site had no skip-to-content link at all.** Added.
+>
+> **The test suite went 10 failures → 0.** Item 5 says "keep it green"; it was not green.
+> Investigating rather than patching turned up a real bug in each of two places:
+>
+> 1. **The 25MB attachment cap could be bypassed.** It sat inside
+>    `if (has_attachments && attachment_count > 0)`. Every field on that object comes
+>    from an inbound webhook, so a payload declaring `attachment_count: 0` alongside an
+>    oversized `total_attachment_size` skipped the limit entirely. Size is now checked
+>    independently of a count the sender controls.
+> 2. **The contact form's honeypot had never worked.** `zodResolver` parses against
+>    `contactFormSchema`, which has no `honeypot` key, and zod strips unknown keys — so
+>    `data.honeypot` was always `undefined` and the bot guard could never fire. The test
+>    covering it passed only because it asserted on `emailjs.send`, which the component
+>    stopped calling long ago. Both fixed.
+>
+> The remaining failures were stale tests describing a component that no longer exists:
+> `ContactForm.test.jsx` still mocked EmailJS and expected the dead address
+> `karisa@thebikecollector.info`, carried stale thresholds (subject 3 vs the schema's 5,
+> message 10 vs 20), and typed into a `<select>` as though it were a text input. One test
+> asserting a "letters and spaces" name rule was **removed rather than implemented** — such
+> a rule would reject O'Brien, Jean-Luc, José and Ng'ang'a, and rejecting a real visitor's
+> name to turn a test green is the wrong trade.
+>
+> **Verified:** 169 passing / 0 failing (was 10 failing), lint 89 → 88 problems, build green.
 
 0. **Prerequisite: merge to `main` and confirm the deploy.** Items 1 and 3 below both
    measure "the deployed site," which today is the pre-revamp build (see the deployment
    banner at the top). Running them before the merge produces numbers about the old site.
    Also add the missing `karisa-portfolio/vercel.json` — there is none in the repo, so
    Vercel has no SPA rewrite and every non-`/` route 404s.
-1. Run an actual Lighthouse audit (not a prediction) against the deployed site post-redesign; fix what it flags.
-2. Accessibility pass: keyboard nav through the whole page, skip-to-content link, contrast check on the new palette from Phase 2, focus states on the redesigned Projects modal/cards.
-3. Confirm `voyani.tech` → `www.voyani.tech` is a real 301 (not a 307) if that's the intended canonical, and that `src/components/SEO.jsx`'s canonical tag and `public/sitemap.xml` agree with it.
-4. Reconcile identity: pick one contact email (currently `karisa@thebikecollector.tech` in `RESUME.md` vs. whatever the live `ContactForm.jsx`/`SEO.jsx` use) and use it everywhere — site, resume, GitHub profile, LinkedIn.
-5. Re-run the existing test suite (`npm run test:coverage`) and keep it green through the redesign — this project's testing discipline is a real strength, don't regress it chasing the visual work.
-6. Before touching `supabase/functions/**` again for anything (even the Phase 0 freeze), run the `security-review` skill against any changes — these functions handle inbound webhook payloads and service-role keys.
+1. ⛔ **BLOCKED — Lighthouse audit.** Needs the merge to `main` to deploy first; against the
+   current production site it would score the pre-revamp build. There is also no Chrome in
+   the working sandbox (Playwright's cache holds `chromium-1234`, the library wants `1208`),
+   so this may need to be run from Karisa's own browser DevTools.
+2. ✅ **Accessibility pass.** Skip-to-content link added (there was none). Contrast measured
+   across the whole Phase 2 palette; the two AA failures found are fixed — see the status
+   note above. Focus states were already sound: `index.css` defines one global
+   `:focus-visible` outline in the signal colour.
+3. ✅ **Canonical reconciled to `www.voyani.tech`** (Karisa's choice). `SITE.url`, `ogImage`,
+   two hardcoded JSON-LD URLs in `SEO.jsx` and `sitemap.xml` all agreed on the *bare* host
+   while the bare host redirected to `www` — so every canonical URL the site emitted pointed
+   at a URL that redirects away. `vercel.json` now issues a **301** apex→www, replacing the 307.
+   `sitemap.xml` also dropped four `#fragment` entries that search engines never treated as
+   separate pages, and its `lastmod` (stuck at 2026-01-20) was corrected.
+4. ✅ **Identity already reconciled** in Phase 0/1 and re-verified here: `RESUME.md`, the site
+   and the backend all publish `voyanitech@gmail.com`, routed through `src/config/site.js`.
+   No `thebikecollector` address survives in shipped content. *(One was still lurking in
+   `ContactForm.test.jsx` as an assertion — removed in this phase.)*
+5. ✅ **Test suite green: 10 failures → 0** (169 passing, 3 skipped). Two real bugs were
+   found in the process; see the status note above.
+6. ⏸️ **Not triggered.** No changes were made to `supabase/functions/**` in this phase, so
+   the `security-review` gate has nothing to run against. The two security-relevant fixes
+   (the attachment-size bypass and the dead honeypot) are both in `src/`, not in the edge
+   functions. **Still required before any future edge-function change.**
 
 **Definition of Done:** real (not predicted) Lighthouse scores recorded in this doc's changelog, accessibility issues from a manual pass fixed, one consistent identity across every channel.
+
+**Remaining for DoD:** only the Lighthouse numbers, which are gated on the deploy.
 
 ### Phase 6 — Distribution (ongoing after ship)
 

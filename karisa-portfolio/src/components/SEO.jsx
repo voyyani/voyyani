@@ -3,14 +3,14 @@ import { Helmet } from 'react-helmet-async';
 import { SITE } from '../config/site';
 
 const SEO = ({
-  title = "Karisa Voyani - Mechanical Engineer & Full-Stack Developer",
-  description = "Portfolio of Karisa Voyani, a Mechanical Engineer and Full-Stack Developer from Kenya. Specializing in React, Supabase, and engineering-driven web solutions.",
+  title = "Ngowa Karisa - Mechanical Engineer & Full-Stack Developer",
+  description = "Portfolio of Ngowa Karisa, a Mechanical Engineer and Full-Stack Developer from Kenya. Specializing in React, Supabase, and engineering-driven web solutions.",
   keywords = "mechanical engineer Kenya, full-stack developer, React developer, Supabase, web development, software engineer Kenya, Nairobi developer, African tech, engineering portfolio",
   image = SITE.ogImage,
   url = SITE.url,
   type = "website"
 }) => {
-  const siteTitle = "Karisa Voyani - Portfolio";
+  const siteTitle = "Ngowa Karisa - Portfolio";
   const fullTitle = title === siteTitle ? title : `${title} | ${siteTitle}`;
 
   // Google Search Console verification (add your verification code)
@@ -23,7 +23,7 @@ const SEO = ({
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Karisa Voyani",
+    "name": "Ngowa Karisa",
     "jobTitle": ["Mechanical Engineer", "Full-Stack Developer"],
     "url": SITE.url,
     "image": image,
@@ -57,12 +57,12 @@ const SEO = ({
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Karisa Voyani Portfolio",
+    "name": "Ngowa Karisa Portfolio",
     "url": SITE.url,
     "description": description,
     "author": {
       "@type": "Person",
-      "name": "Karisa Voyani"
+      "name": "Ngowa Karisa"
     }
   };
 
@@ -73,7 +73,7 @@ const SEO = ({
       <meta name="title" content={fullTitle} />
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
-      <meta name="author" content="Karisa Voyani" />
+      <meta name="author" content="Ngowa Karisa" />
       <meta name="geo.region" content="KE" />
       <meta name="geo.placename" content="Kenya" />
       
@@ -92,7 +92,7 @@ const SEO = ({
       <meta property="og:image" content={image} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="Karisa Voyani Portfolio" />
+      <meta property="og:site_name" content="Ngowa Karisa Portfolio" />
       <meta property="og:locale" content="en_US" />
 
       {/* Twitter */}

@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
               </h2>
               <div className="prose prose-invert max-w-none">
                 <p className="text-ink-200 leading-relaxed">
-                  Welcome to Karisa Voyani's portfolio website. This Privacy Policy explains how we collect, use, and protect your personal information when you visit our website. We are committed to protecting your privacy and ensuring transparency about our data practices.
+                  Welcome to Ngowa Karisa's portfolio website. This Privacy Policy explains how we collect, use, and protect your personal information when you visit our website. We are committed to protecting your privacy and ensuring transparency about our data practices.
                 </p>
                 <p className="text-ink-200 leading-relaxed mt-4">
                   By using this website, you agree to the collection and use of information in accordance with this policy.

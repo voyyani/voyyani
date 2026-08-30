@@ -26,7 +26,7 @@
  */
 
 export const SITE = {
-  name: 'Karisa Voyani',
+  name: 'Ngowa Karisa',
   shortName: 'Karisa',
   brand: 'Voyani.tech',
 
@@ -55,15 +55,15 @@ export const SITE = {
   },
 
   resume: {
-    href: '/Karisa-Voyani-Resume.pdf',
+    href: '/Ngowa-Karisa-Resume.pdf',
     // filename the browser saves it as
-    downloadAs: 'Karisa-Voyani-Resume.pdf',
+    downloadAs: 'Ngowa-Karisa-Resume.pdf',
   },
 
   headshot: {
     portrait: '/images/karisa-headshot.jpg', // 1024x1280 (4:5)
     square: '/images/karisa-headshot-square.jpg', // 1024x1024
-    alt: 'Karisa Voyani, Mechanical Engineer and Full-Stack Developer',
+    alt: 'Ngowa Karisa, Mechanical Engineer and Full-Stack Developer',
   },
 
   ogImage: 'https://www.voyani.tech/og-image.jpg',
