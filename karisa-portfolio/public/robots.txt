@@ -1,23 +1,20 @@
-# Robots.txt for voyani.tech
-# Updated: 2026-01-20
+# robots.txt for www.voyani.tech
+# Updated: 2026-08-30
 
-# Allow all search engines
 User-agent: *
 Allow: /
 
-# Crawl-delay for polite bots (optional)
-Crawl-delay: 1
+# The admin CRM is not public-facing and has nothing to index. It is already unlinked
+# from the nav; this keeps crawlers from spending budget on a login form.
+Disallow: /admin
+Disallow: /admin/
 
-# Disallow crawling of development/test files
-Disallow: /test/
-Disallow: /*.test.js$
-Disallow: /*.test.jsx$
-
-# Disallow crawling of source maps
+# Build artefacts and source maps
 Disallow: /*.map$
 
-# Disallow admin or private sections (if any in the future)
-# Disallow: /admin/
-
-# Important: Sitemap location
-Sitemap: https://voyani.tech/sitemap.xml
+# Sitemap.
+#
+# This previously pointed at https://voyani.tech/sitemap.xml — the bare host, which
+# 301-redirects to www. Pointing a sitemap directive at a redirect asks search engines
+# to follow a hop before they can read it. Canonical host is www (docs/AUDIT.md §3.2).
+Sitemap: https://www.voyani.tech/sitemap.xml

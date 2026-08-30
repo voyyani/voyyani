@@ -14,10 +14,20 @@
     <!-- Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0B0B0C" />
-    <meta name="description" content="Portfolio of Ngowa Karisa - Mechanical Engineer & Full-Stack Developer from Kenya" />
-    
-    <!-- Title (will be overridden by react-helmet-async) -->
-    <title>Ngowa Karisa - Mechanical Engineer & Full-Stack Developer</title>
+
+    <!--
+      Title, description, canonical, Open Graph, Twitter card and JSON-LD are injected
+      here at BUILD time by the `inject-seo-meta` plugin in vite.config.js, from the
+      single definition in src/config/seo.js.
+
+      Do not hand-write them here. They previously existed only inside react-helmet-async,
+      which meant they were never in the served HTML at all — so every social share
+      rendered as a bare link with no image. Editing them here instead of in
+      src/config/seo.js would reintroduce the drift that setup exists to prevent.
+
+      The build FAILS if this placeholder is removed.
+    -->
+    <!--%SEO_META%-->
   </head>
   <body>
     <div id="root"></div>

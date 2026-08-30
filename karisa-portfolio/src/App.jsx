@@ -8,6 +8,7 @@ import BackToTop from './components/BackToTop';
 import ScrollProgressIndicator from './components/ScrollProgressIndicator';
 import SectionLoader from './components/SectionLoader';
 import CookieConsent from './components/CookieConsent';
+import NotFound from './components/NotFound';
 import { initGA, trackPageView } from './utils/analytics';
 import { initWebVitals } from './utils/webVitals';
 import { initSentry } from './utils/sentry';
@@ -316,8 +317,13 @@ function App() {
         }
       />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/*
+        Fallback. This was `<Navigate to="/" replace />`, which turned every unmatched
+        URL — typos, stale links, crawler probes — into the homepage at a 200. Search
+        engines saw unlimited distinct URLs serving identical content. A real 404 page
+        carrying `noindex` replaces it. See docs/AUDIT.md §3.3.
+      */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

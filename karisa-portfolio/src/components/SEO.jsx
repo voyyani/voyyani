@@ -1,126 +1,62 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { SITE } from '../config/site';
+import { buildSeoTags } from '../config/seo';
 
-const SEO = ({
-  title = "Ngowa Karisa - Mechanical Engineer & Full-Stack Developer",
-  description = "Portfolio of Ngowa Karisa, a Mechanical Engineer and Full-Stack Developer from Kenya. Specializing in React, Supabase, and engineering-driven web solutions.",
-  keywords = "mechanical engineer Kenya, full-stack developer, React developer, Supabase, web development, software engineer Kenya, Nairobi developer, African tech, engineering portfolio",
-  image = SITE.ogImage,
-  url = SITE.url,
-  type = "website"
-}) => {
-  const siteTitle = "Ngowa Karisa - Portfolio";
-  const fullTitle = title === siteTitle ? title : `${title} | ${siteTitle}`;
+/**
+ * Runtime half of the SEO setup.
+ *
+ * The tags themselves are defined once in `src/config/seo.js`. The Vite plugin in
+ * vite.config.js renders that same definition into index.html at build time, so
+ * crawlers and social scrapers get it with no JavaScript; this component renders it
+ * again through Helmet so per-route overrides work (Phase 4's /writing/* pages will
+ * pass their own title, description and url).
+ *
+ * The static tags carry `data-rh="true"`, which is the attribute react-helmet-async
+ * uses to mark tags it owns. On mount, Helmet removes every `[data-rh="true"]` tag and
+ * inserts its own — so the two sets replace rather than duplicate. See the header
+ * comment in src/config/seo.js for the full reasoning.
+ *
+ * This component no longer hardcodes any copy: previously the same title, description
+ * and schema were spelled out here AND (post-fix) would have been spelled out in
+ * index.html, which is exactly the duplication that goes stale.
+ */
+const SEO = ({ title, description, keywords, image, url, type, noindex }) => {
+  const tags = buildSeoTags({ title, description, keywords, image, url, type, noindex });
 
-  // Google Search Console verification (add your verification code)
+  // Search-engine verification. Both are optional; note that per docs/AUDIT.md §3.4
+  // neither is currently set in Vercel, and DNS TXT verification is the more reliable
+  // route because it does not depend on the page rendering at all.
   const googleVerification = import.meta.env.VITE_GOOGLE_VERIFICATION || '';
-
-  // Bing Webmaster Tools verification (optional)
   const bingVerification = import.meta.env.VITE_BING_VERIFICATION || '';
-
-  // Structured Data - Person Schema
-  const personSchema = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "Ngowa Karisa",
-    "jobTitle": ["Mechanical Engineer", "Full-Stack Developer"],
-    "url": SITE.url,
-    "image": image,
-    "description": description,
-    "nationality": {
-      "@type": "Country",
-      "name": "Kenya"
-    },
-    "knowsAbout": [
-      "Mechanical Engineering",
-      "Web Development",
-      "React",
-      "JavaScript",
-      "TypeScript",
-      "Supabase",
-      "PostgreSQL",
-      "Node.js",
-      "CAD",
-      "MATLAB",
-      "Full-Stack Development",
-      "Software Engineering"
-    ],
-    "email": SITE.email,
-    "sameAs": [
-      SITE.social.github,
-      SITE.social.linkedin
-    ]
-  };
-
-  // Structured Data - Website Schema
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Ngowa Karisa Portfolio",
-    "url": SITE.url,
-    "description": description,
-    "author": {
-      "@type": "Person",
-      "name": "Ngowa Karisa"
-    }
-  };
 
   return (
     <Helmet>
-      {/* Primary Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="author" content="Ngowa Karisa" />
-      <meta name="geo.region" content="KE" />
-      <meta name="geo.placename" content="Kenya" />
-      
-      {/* Search Engine Verification */}
+      <title>{tags.title}</title>
+
+      {tags.meta.map((m) =>
+        m.property ? (
+          <meta key={m.property} property={m.property} content={m.content} />
+        ) : (
+          <meta key={m.name} name={m.name} content={m.content} />
+        )
+      )}
+
+      {tags.link.map((l) => (
+        <link key={l.rel} rel={l.rel} href={l.href} />
+      ))}
+
       {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
       {bingVerification && <meta name="msvalidate.01" content={bingVerification} />}
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href={url} />
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="Ngowa Karisa Portfolio" />
-      <meta property="og:locale" content="en_US" />
-
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:url" content={url} />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
-      {/* twitter:creator intentionally omitted: "@karisavoyani" was an unverified
-          placeholder. Add it back here once a real handle exists. */}
-
-      {/* Additional Meta Tags */}
-      <meta name="robots" content="index, follow" />
       <meta name="language" content="English" />
-      <meta name="revisit-after" content="7 days" />
       <meta name="theme-color" content="#0B0B0C" />
-      
-      {/* Mobile Optimization */}
-      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       <meta name="format-detection" content="telephone=no" />
 
-      {/* Structured Data */}
-      <script type="application/ld+json">
-        {JSON.stringify(personSchema)}
-      </script>
-      <script type="application/ld+json">
-        {JSON.stringify(websiteSchema)}
-      </script>
+      {tags.jsonLd.map((schema, i) => (
+        <script key={i} type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      ))}
     </Helmet>
   );
 };

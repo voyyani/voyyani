@@ -3,11 +3,47 @@ import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
+import { buildSeoTags, renderTagsToHtml } from './src/config/seo.js'
+
+/**
+ * Bake the SEO tags into index.html at build time.
+ *
+ * Without this, every og:*, twitter:*, canonical and JSON-LD tag existed only after
+ * React mounted — so social scrapers, which do not run JavaScript, saw a bare
+ * `<div id="root">` and rendered every shared link with no title and no image.
+ * See docs/AUDIT.md §3.1 and the header comment in src/config/seo.js.
+ *
+ * The tags come from src/config/seo.js, which SEO.jsx also reads, so the static HTML
+ * and the runtime Helmet output cannot drift apart.
+ *
+ * Runs in dev too (transformIndexHtml fires on both), so `npm run dev` shows exactly
+ * what production serves — you can verify with View Source rather than DevTools.
+ */
+function seoMetaPlugin() {
+  return {
+    name: 'inject-seo-meta',
+    transformIndexHtml: {
+      // `pre` so the injected tags land before the PWA plugin appends its own.
+      order: 'pre',
+      handler(html) {
+        const rendered = renderTagsToHtml(buildSeoTags())
+        if (!html.includes('<!--%SEO_META%-->')) {
+          throw new Error(
+            'index.html is missing the <!--%SEO_META%--> placeholder; SEO tags would ' +
+              'silently not be injected and every social share would break again.'
+          )
+        }
+        return html.replace('<!--%SEO_META%-->', rendered)
+      },
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    seoMetaPlugin(),
     visualizer({
       open: false, // Don't auto-open in browser
       gzipSize: true,
