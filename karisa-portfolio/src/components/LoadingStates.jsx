@@ -2,7 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 // Spinner Loader
-export const Spinner = ({ size = 'md', color = '#C8FF3D' }) => {
+// #C8FF3D — the previous identity's acid lime — survived here as a default prop after
+// the rest of the site moved to the Kanga Sheet. It is kanga indigo now.
+export const Spinner = ({ size = 'md', color = '#243D8F' }) => {
   const sizes = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',

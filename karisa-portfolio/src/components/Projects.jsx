@@ -66,6 +66,7 @@ const StateMark = ({ liveStatus }) => {
 };
 
 const Packet = ({ project, onOpen }) => {
+  const sourcedMetrics = project.metrics.filter((m) => m.source);
   const [turned, setTurned] = useState(false);
   const [reverseMounted, setReverseMounted] = useState(false);
 
@@ -78,7 +79,7 @@ const Packet = ({ project, onOpen }) => {
   };
 
   return (
-    <article className="flex flex-col border border-mark-900 bg-cloth-50">
+    <article className="flex min-w-0 flex-col border border-mark-900 bg-cloth-50">
       <div className="packet-stack" data-turned={turned ? 'true' : 'false'}>
         {/* ---- Face: the painted promise ---- */}
         <div
@@ -111,10 +112,15 @@ const Packet = ({ project, onOpen }) => {
           )}
 
           <div className="p-5 sm:p-6">
+            {/*
+              The face carried `project.index` — 01 / 02 — as a display-scale figure.
+              Nothing on this page ever refers to a project by its number, so it was an
+              ornament with a rationale; and once the panel started sorting by evidence
+              it printed "02" above "01", which a reader receives as a mistake rather
+              than as proof the number is not positional. It survives on the reverse,
+              where it labels one face of a two-sided object, which is real information.
+            */}
             <div className="flex items-baseline gap-3">
-              <span className="tabular font-display text-title font-bold text-pindo">
-                {project.index}
-              </span>
               <h3 className="font-display text-title font-bold text-mark-900">{project.title}</h3>
               <span className="ml-auto shrink-0 text-label uppercase text-mark-600">
                 {project.category}
@@ -125,7 +131,11 @@ const Packet = ({ project, onOpen }) => {
 
             <p className="mt-4 max-w-prose leading-relaxed text-mark-700">{project.summary}</p>
 
-            <Band items={project.metrics.slice(0, 3)} columns={3} printed={false} />
+            {/* Only figures carrying their provenance. An unsourced number cannot reach
+                display scale by accident; see the note on `metrics` in data/projects.js. */}
+            {sourcedMetrics.length > 0 && (
+              <Band items={sourcedMetrics} columns={sourcedMetrics.length} printed={false} />
+            )}
 
             <div className="mt-6 flex flex-wrap gap-2">
               {project.technologies.slice(0, 4).map((tech) => (
@@ -158,16 +168,40 @@ const Packet = ({ project, onOpen }) => {
             className="packet-reverse bg-cloth-200 p-5 sm:p-6"
             aria-hidden={turned ? undefined : 'true'}
           >
-            <p className="text-label uppercase text-mark-600">
-              {project.index} · Specification
-            </p>
+            {/* The identity sits BESIDE the heading, not above it. A small uppercase
+                line stacked over a title is the one arrangement this system bans
+                outright, and the label token's own contract says it is interior. */}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+              <h4 className="font-display text-title font-bold text-mark-900">
+                Tables the platform runs on
+              </h4>
+              <span className="text-label uppercase text-mark-600">
+                {project.index} · Specification
+              </span>
+            </div>
 
-            <h4 className="mt-4 font-display text-title font-bold text-mark-900">
-              Tables the platform runs on
-            </h4>
+            {/*
+              Two renderings of one table, because a schema is genuinely tabular at
+              reading width and genuinely is not on a phone. The table used to carry a
+              26rem minimum inside a scroll container, which asked someone to drag
+              sideways inside a card that also turns — and, until the grid track was
+              constrained, pushed the whole packet through the panel's border instead.
+              Below sm the same rows stack; at sm and up the columns return.
+            */}
+            <ul className="mt-4 list-none space-y-3 p-0 sm:hidden">
+              {project.databaseSchema.map((row) => (
+                <li key={row.name} className="border-b border-cloth-300 pb-3">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                    <span className="break-words font-semibold text-pindo">{row.name}</span>
+                    <span className="tabular text-xs text-mark-600">{row.shape}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-mark-700">{row.holds}</p>
+                </li>
+              ))}
+            </ul>
 
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[26rem] border-collapse text-left text-sm">
+            <div className="mt-3 hidden max-w-full overflow-x-auto sm:block">
+              <table className="w-full border-collapse text-left text-sm">
                 <caption className="sr-only">
                   Database tables in the {project.title} schema
                 </caption>
@@ -193,7 +227,7 @@ const Packet = ({ project, onOpen }) => {
             <h4 className="mt-7 font-display text-title font-bold text-mark-900">How it is put together</h4>
             <ul className="mt-3 list-none space-y-1.5 p-0 text-sm text-mark-700">
               {project.architecture.map((line) => (
-                <li key={line} className="border-b border-cloth-300 pb-1.5">{line}</li>
+                <li key={line} className="break-words border-b border-cloth-300 pb-1.5">{line}</li>
               ))}
             </ul>
           </div>
@@ -309,13 +343,15 @@ const Projects = () => {
                   <div className="max-h-[86vh] overflow-y-auto">
                     <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b-2 border-pindo bg-cloth-100 px-5 py-4 sm:px-8">
                       <div>
-                        <p className="text-label uppercase text-mark-600">
-                          {selectedProject.index} · {selectedProject.category}
-                        </p>
-                        <h3 id="modal-title" className="mt-2 font-display text-display font-bold text-mark-900">
+                        <h3 id="modal-title" className="font-display text-display font-bold text-mark-900">
                           {selectedProject.title}
                         </h3>
-                        <p className="mt-1 text-mark-600">{selectedProject.tagline}</p>
+                        <p className="mt-1 text-mark-600">
+                          {selectedProject.tagline}
+                          <span className="ml-2 whitespace-nowrap text-label uppercase text-mark-500">
+                            {selectedProject.index} · {selectedProject.category}
+                          </span>
+                        </p>
                       </div>
 
                       <button
@@ -373,7 +409,11 @@ const Projects = () => {
 
                       <section>
                         <h4 className="font-display text-title font-bold text-mark-900">Measured</h4>
-                        <Band items={selectedProject.metrics} columns={3} printed={false} />
+                        <Band
+                          items={selectedProject.metrics.filter((m) => m.source)}
+                          columns={3}
+                          printed={false}
+                        />
                       </section>
 
                       {selectedProject.architecture?.length > 0 && (

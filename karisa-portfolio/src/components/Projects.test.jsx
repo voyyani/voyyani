@@ -85,25 +85,33 @@ describe('Projects Component', () => {
 
     // Phase 2 removed decorative emoji: they render differently on every platform,
     // can't take the accent colour, and are one of the clearest template tells.
-    it('should number each project rather than badge it with an emoji', () => {
+    it('should not badge a project with an emoji', () => {
       render(<Projects />);
-      expect(screen.getByText('01')).toBeDefined();
-      expect(screen.getByText('02')).toBeDefined();
+      // The 01 / 02 numbering was removed from the card face: nothing on the page
+      // refers to a project by its number, and once the panel began ordering by
+      // evidence it printed 02 above 01, which reads as a mistake. It survives on the
+      // specification reverse, where it labels one face of a two-sided object.
+      // This test's intent was always "no emoji badges", which still holds.
       expect(screen.queryByText('🏢')).toBeNull();
       expect(screen.queryByText('💚')).toBeNull();
     });
 
-    it('should display first 3 metrics', () => {
+    // Only figures carrying a `source` reach display scale now (Product Principle 1:
+    // a number links to the artifact that proves it, or it does not go on the page).
+    // "100+ Active Users" and "95/100 Mobile Lighthouse" have no recorded provenance
+    // and are retained in the data but no longer rendered.
+    it('should display only the metrics that carry their provenance', () => {
       render(<Projects />);
-      expect(screen.getByText('3s → 1.2s')).toBeDefined(); // Page Load
-      expect(screen.getByText('100+')).toBeDefined(); // Active Users
-      expect(screen.getByText('95/100')).toBeDefined(); // Mobile Lighthouse
+      expect(screen.getByText('3s → 1.2s')).toBeDefined(); // Page Load, sourced
+      expect(screen.getByText(/Before and after, in the case study/i)).toBeDefined();
+      expect(screen.queryByText('100+')).toBeNull(); // Active Users, unsourced
+      expect(screen.queryByText('95/100')).toBeNull(); // Mobile Lighthouse, unsourced
     });
 
     it('should label metrics in words rather than emoji', () => {
       render(<Projects />);
       expect(screen.getByText('Page Load')).toBeDefined();
-      expect(screen.getByText('Active Users')).toBeDefined();
+      expect(screen.getByText('Test coverage target')).toBeDefined();
       expect(screen.queryByText('👥')).toBeNull();
       expect(screen.queryByText('⚡')).toBeNull();
     });
@@ -324,7 +332,9 @@ describe('Projects Component', () => {
       // Verify core project data is present
       expect(screen.getByText('Raslipwani Properties')).toBeDefined();
       expect(screen.getByText('Real estate booking & client management')).toBeDefined();
-      expect(screen.getByText('100+')).toBeDefined();
+      // '100+' was this assertion's metric sample; it is now unsourced and unrendered.
+      // '3s → 1.2s' is the sourced figure that reaches the card in its place.
+      expect(screen.getByText('3s → 1.2s')).toBeDefined();
       expect(screen.getByText('React 18.3')).toBeDefined();
     });
   });

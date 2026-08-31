@@ -21,6 +21,7 @@ import { trackEvent } from '../utils/analytics';
 const CookieConsent = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [contactInView, setContactInView] = useState(false);
   const [preferences, setPreferences] = useState({
     necessary: true, // Always required
     analytics: false,
@@ -118,6 +119,45 @@ const CookieConsent = () => {
     }));
   };
 
+  /**
+   * Deferring the banner to 60% scroll moved it off the first viewport, but put it in
+   * the path of the panel the visitor is meant to act in: a bottom-fixed dialog lands
+   * over the contact form's lower fields on a phone. It stands down while the contact
+   * panel is on screen and returns when the visitor leaves it.
+   *
+   * The contact panel is lazy, so it is NOT in the DOM when this component first
+   * mounts — the first version of this effect looked once, found nothing, and silently
+   * never observed anything. It retries until the panel exists, and gives up after
+   * ~6s rather than looping forever.
+   */
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+
+    let observer;
+    let attempts = 0;
+    let timer;
+
+    const attach = () => {
+      const contact = document.getElementById('contact');
+      if (contact) {
+        observer = new IntersectionObserver(
+          ([entry]) => setContactInView(entry.isIntersecting),
+          { threshold: 0.1 }
+        );
+        observer.observe(contact);
+        return;
+      }
+      if (attempts++ < 20) timer = setTimeout(attach, 300);
+    };
+
+    attach();
+
+    return () => {
+      clearTimeout(timer);
+      observer?.disconnect();
+    };
+  }, []);
+
   const toggleSetting = (key) => {
     if (key === 'necessary') return; // Can't disable necessary cookies
     setPreferences((prev) => ({
@@ -126,7 +166,7 @@ const CookieConsent = () => {
     }));
   };
 
-  if (!showBanner) return null;
+  if (!showBanner || contactInView) return null;
 
   return (
     <AnimatePresence>
