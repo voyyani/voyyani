@@ -1,6 +1,7 @@
 // supabase/functions/send-notification/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildFrom } from '../_shared/mail.ts';
 
 interface NotificationPayload {
   type: string;
@@ -15,6 +16,9 @@ interface NotificationPayload {
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
+const mailDomain = Deno.env.get('MAIL_DOMAIN') || 'voyani.tech';
+const fromAddress = Deno.env.get('MAIL_FROM_ADDRESS') || `karisa@${mailDomain}`;
+const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'voyanitech@gmail.com';
 const portfolioUrl = Deno.env.get('PORTFOLIO_URL') || 'https://voyani.tech';
 const dashboardUrl = Deno.env.get('DASHBOARD_URL') || `${portfolioUrl}/admin/submissions`;
@@ -781,7 +785,7 @@ async function sendEmailViaResend(
           'Authorization': `Bearer ${resendApiKey}`,
         },
         body: JSON.stringify({
-          from: 'Karisa <karisa@voyani.tech>',
+          from: buildFrom(fromName, fromAddress),
           to,
           subject,
           html,

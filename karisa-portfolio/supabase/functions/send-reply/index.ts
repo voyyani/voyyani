@@ -1,6 +1,7 @@
 // supabase/functions/send-reply/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { buildFrom, buildReplyAddress, buildThreadMessageId } from '../_shared/mail.ts';
 
 interface ReplyPayload {
   submission_id: string;
@@ -32,6 +33,9 @@ interface DecodedJWT {
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
+const mailDomain = Deno.env.get('MAIL_DOMAIN') || 'voyani.tech';
+const fromAddress = Deno.env.get('MAIL_FROM_ADDRESS') || `karisa@${mailDomain}`;
+const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 const portfolioUrl = Deno.env.get('PORTFOLIO_URL') || 'https://voyani.tech';
 const sentryDsn = Deno.env.get('SENTRY_DSN');
 
@@ -167,11 +171,11 @@ async function sendEmailViaResend(to: string, subject: string, html: string, sub
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       // Explicitly construct payload to avoid scoping issues
-      const replyToAddress = `reply+${submissionId}@voyani.tech`;
-      const messageId = `<${submissionId}.${Date.now()}@voyani.tech>`;
+      const replyToAddress = buildReplyAddress(submissionId, mailDomain);
+      const messageId = buildThreadMessageId(submissionId, mailDomain);
 
       const payload = {
-        from: 'Karisa <karisa@voyani.tech>',
+        from: buildFrom(fromName, fromAddress),
         reply_to: replyToAddress,
         to,
         subject,
