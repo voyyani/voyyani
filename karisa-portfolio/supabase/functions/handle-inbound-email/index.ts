@@ -2,6 +2,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { crypto } from 'https://deno.land/std@0.208.0/crypto/mod.ts';
+import {
+  routeInboundAddress,
+  parseAddress,
+  buildInboundReplyRow,
+  buildAttachmentRow,
+} from '../_shared/inbound.ts';
 
 /**
  * Phase 4: Inbound Email Webhook Handler
@@ -22,6 +28,9 @@ import { crypto } from 'https://deno.land/std@0.208.0/crypto/mod.ts';
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET') || '';
+const mailDomain = Deno.env.get('MAIL_DOMAIN') || 'voyani.tech';
+const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'voyanitech@gmail.com';
+const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
 // Initialize Supabase client
 const supabase = supabaseUrl && supabaseServiceKey
@@ -110,21 +119,6 @@ async function verifyWebhookSignature(
     console.error('[verify] Signature verification error:', error);
     return false;
   }
-}
-
-/**
- * Extract submission ID from email address
- * Format: reply+{uuid}@voyani.tech
- */
-function extractSubmissionId(toAddress: string): string | null {
-  const match = toAddress.match(/reply\+([a-f0-9\-]+)@/i);
-  if (match && match[1]) {
-    // Validate UUID format
-    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(match[1])) {
-      return match[1];
-    }
-  }
-  return null;
 }
 
 /**
@@ -324,6 +318,18 @@ async function calculateSpamScore(
   }
 }
 
+// Placeholder — Task 6 replaces this with real forwarding to ADMIN_EMAIL.
+async function handleDirectMail(
+  payload: ResendWebhookPayload,
+  toAddress: string
+): Promise<Response> {
+  console.log('[handler] Direct mail to', toAddress, 'from', payload.from, '(not yet forwarded)');
+  return new Response(
+    JSON.stringify({ success: true, handled: 'direct' }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } }
+  );
+}
+
 /**
  * Main webhook handler
  */
@@ -397,18 +403,25 @@ serve(async (req: Request) => {
       );
     }
 
-    // 3. Extract submission ID
+    // 3. Route the recipient address
     const toAddress = payload.to[0];
-    const submissionId = extractSubmissionId(toAddress);
+    const route = routeInboundAddress(toAddress, mailDomain);
 
-    if (!submissionId) {
-      console.warn('[handler] Could not extract submission ID from:', toAddress);
+    if (route.kind === 'foreign') {
+      console.warn('[handler] Address is not ours, ignoring:', toAddress);
+      // 200, not 400: a non-2xx makes Resend retry an email we will never accept.
       return new Response(
-        JSON.stringify({ error: 'Invalid recipient address format' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: true, ignored: 'foreign recipient' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
+    if (route.kind === 'direct') {
+      // Human mail to karisa@voyani.tech, not a threaded reply.
+      return await handleDirectMail(payload, toAddress);
+    }
+
+    const submissionId = route.submissionId;
     console.log('[handler] Extracted submission_id:', submissionId);
 
     // 4. Get submission to verify and get sender email
@@ -429,21 +442,26 @@ serve(async (req: Request) => {
 
     console.log('[handler] Found submission for:', submission.email);
 
-    // 5. Verify sender (optional - accept from any email)
-    const senderVerified = payload.from.toLowerCase().includes(submission.email.toLowerCase()) ||
-      submission.email.toLowerCase().includes(payload.from.toLowerCase());
+    // 5. Verify sender.
+    // Compare bare addresses. The old version ran `includes()` on the raw From header,
+    // so "Jane <jane@evil.com>" matched a submission from "e@vil.com" by substring.
+    const senderVerified =
+      parseAddress(payload.from).email === String(submission.email).toLowerCase();
 
     console.log('[handler] Sender verification:', senderVerified ? 'PASS' : 'MISMATCH');
 
     // 6. Extract and clean email body
-    const bodyText = payload.text || extractTextFromHtml(payload.html || '');
-    const cleanedBody = cleanEmailBody(bodyText);
+    // Named emailBody, not bodyText: `bodyText` is already the raw request body read at
+    // the top of this handler. The collision was a SyntaxError that stopped the whole
+    // function from evaluating, so nothing below here has ever run in production.
+    const emailBody = payload.text || extractTextFromHtml(payload.html || '');
+    const cleanedBody = cleanEmailBody(emailBody);
 
     // 7. Calculate spam score
     const { score: spamScore, reasons: spamReasons } = await calculateSpamScore(
       payload.from,
       payload.subject || '',
-      bodyText,
+      emailBody,
       payload.html || ''
     );
 
@@ -453,25 +471,21 @@ serve(async (req: Request) => {
     // 8. Store in database
     const { data: reply, error: replyError } = await supabase
       .from('inbound_replies')
-      .insert({
-        submission_id: submissionId,
-        from_email: payload.from,
-        to_email: toAddress,
-        subject: payload.subject || '(No subject)',
-        body_text: cleanedBody,
-        body_html: payload.html,
-        body_preview: cleanedBody.substring(0, 200),
-        sender_verified: senderVerified,
-        spam_score: spamScore,
-        spam_reasons: spamReasons,
-        is_spam: isSpam,
-        status: isSpam ? 'spam' : 'processing',
-        message_id: payload.message_id,
-        in_reply_to: payload.in_reply_to,
-        references: payload.references,
-        received_at: new Date().toISOString(),
-        processed_at: new Date().toISOString(),
-      })
+      .insert(
+        buildInboundReplyRow({
+          submissionId,
+          toAddress,
+          from: payload.from,
+          subject: payload.subject || '',
+          bodyText: cleanedBody,
+          bodyHtml: payload.html,
+          payload,
+          senderVerified,
+          spamScore,
+          spamReasons,
+          isSpam,
+        })
+      )
       .select()
       .single();
 
@@ -496,18 +510,17 @@ serve(async (req: Request) => {
           const uploadResult = await uploadAttachment(submissionId, attachment, i);
 
           if (uploadResult) {
-            await supabase
-              .from('inbound_attachments')
-              .insert({
-                inbound_reply_id: reply.id,
+            await supabase.from('inbound_attachments').insert(
+              buildAttachmentRow({
+                inboundReplyId: reply.id,
                 filename: attachment.filename,
-                file_extension: attachment.filename.split('.').pop(),
-                mime_type: attachment.content_type,
+                mimeType: attachment.content_type || 'application/octet-stream',
                 size: uploadResult.size,
-                storage_path: uploadResult.path,
-                is_inline: attachment.content_disposition === 'inline',
-                content_id: attachment.content_id,
-              });
+                storagePath: uploadResult.path,
+                isInline: attachment.content_disposition === 'inline',
+                contentId: attachment.content_id,
+              })
+            );
 
             console.log('[handler] Attachment stored:', attachment.filename);
           }
@@ -543,8 +556,8 @@ serve(async (req: Request) => {
         .insert({
           event_type: isSpam ? 'inbound_email_spam' : 'inbound_email_received',
           submission_id: submissionId,
-          metadata: {
-            from: payload.from,
+          event_data: {
+            from: parseAddress(payload.from).email,
             spam_score: spamScore,
             has_attachments: (payload.attachments?.length || 0) > 0,
           },
