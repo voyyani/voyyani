@@ -318,12 +318,82 @@ async function calculateSpamScore(
   }
 }
 
-// Placeholder — Task 6 replaces this with real forwarding to ADMIN_EMAIL.
+/**
+ * Re-send an inbound message to the mailbox Karisa actually reads.
+ *
+ * `from` must stay on the verified domain — Resend will not send as the original
+ * sender — so the original address goes in reply_to, which makes hitting Reply in
+ * Gmail do the right thing.
+ */
+async function forwardToAdmin(
+  payload: ResendWebhookPayload,
+  toAddress: string,
+  banner: string
+): Promise<void> {
+  if (!resendApiKey) {
+    console.error('[forward] RESEND_API_KEY not set — cannot forward');
+    return;
+  }
+
+  const sender = parseAddress(payload.from);
+  const body =
+    payload.html ||
+    `<pre style="white-space:pre-wrap;font-family:inherit">${
+      (payload.text || '').replace(/[<>&]/g, (c) =>
+        ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c] as string)
+      )
+    }</pre>`;
+
+  const html = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
+      <p style="background:#f5f5f5;border-left:3px solid #888;padding:10px 14px;margin:0 0 18px;font-size:13px;color:#555">
+        ${banner}<br>
+        <strong>From:</strong> ${sender.name ? `${sender.name} ` : ''}&lt;${sender.email}&gt;<br>
+        <strong>To:</strong> ${toAddress}
+      </p>
+      ${body}
+    </div>`;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${resendApiKey}`,
+    },
+    body: JSON.stringify({
+      from: `Voyani Mail <karisa@${mailDomain}>`,
+      to: adminEmail,
+      reply_to: sender.email,
+      subject: `[voyani.tech] ${payload.subject || '(No subject)'}`,
+      html,
+    }),
+  });
+
+  if (!res.ok) {
+    console.error('[forward] Resend rejected the forward:', res.status, await res.text());
+    return;
+  }
+
+  console.log('[forward] Forwarded to', adminEmail);
+}
+
+/**
+ * Mail sent straight to karisa@voyani.tech (or any other mailbox on the domain).
+ * There is no submission to thread it onto, so it is forwarded and acknowledged.
+ */
 async function handleDirectMail(
   payload: ResendWebhookPayload,
   toAddress: string
 ): Promise<Response> {
-  console.log('[handler] Direct mail to', toAddress, 'from', payload.from, '(not yet forwarded)');
+  console.log('[handler] Direct mail to', toAddress, 'from', payload.from);
+
+  try {
+    await forwardToAdmin(payload, toAddress, 'Direct message to your voyani.tech address.');
+  } catch (error) {
+    console.error('[handler] Forward failed:', error);
+  }
+
+  // 200 regardless: a retry from Resend would only duplicate the forward.
   return new Response(
     JSON.stringify({ success: true, handled: 'direct' }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
@@ -562,6 +632,22 @@ serve(async (req: Request) => {
         });
     } catch (error) {
       console.error('[handler] Error logging analytics:', error);
+    }
+
+    // A reply that only lands in /admin/submissions is a reply Karisa will not see today.
+    // Spam is stored but not forwarded.
+    if (!isSpam) {
+      try {
+        await forwardToAdmin(
+          payload,
+          toAddress,
+          `Reply on submission <a href="${
+            Deno.env.get('PORTFOLIO_URL') || 'https://www.voyani.tech'
+          }/admin/submissions/${submissionId}">${submissionId}</a>.`
+        );
+      } catch (error) {
+        console.error('[handler] Reply forward failed:', error);
+      }
     }
 
     console.log('[handler] Webhook processing complete ✓');
