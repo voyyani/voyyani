@@ -20,9 +20,8 @@
  * (supabase/functions/send-notification/index.ts:18) — so site, resume and backend now
  * agree for the first time.
  *
- * Optional later: a custom-domain address reads better on a portfolio. Adding an MX
- * record to voyani.tech (a forwarding service is enough) would let this become
- * karisa@voyani.tech. Change it here only — every component imports from this file.
+ * Done, 2026-08-31: voyani.tech has an MX record via Resend Inbound and this is now
+ * karisa@voyani.tech. See docs/EMAIL_ROADMAP.md.
  */
 
 export const SITE = {
@@ -44,8 +43,16 @@ export const SITE = {
    */
   url: 'https://www.voyani.tech',
 
-  // Confirmed by Karisa, 2026-08-29. See the note above before changing.
-  email: 'voyanitech@gmail.com',
+  /**
+   * Changed 2026-08-31 from voyanitech@gmail.com. voyani.tech now has a Resend MX
+   * record, so this address both sends (Resend, from the edge functions) and receives
+   * (Resend Inbound -> handle-inbound-email -> forwarded to voyanitech@gmail.com).
+   *
+   * Verified before publishing: `dig +short MX voyani.tech` returns the Resend host and
+   * a live send to this address arrived in Gmail. Do NOT change this without repeating
+   * both checks — the whole point of this file is that the published address is real.
+   */
+  email: 'karisa@voyani.tech',
 
   social: {
     github: 'https://github.com/voyyani',

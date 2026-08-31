@@ -172,7 +172,7 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react-vendor'
           if (/[\\/]node_modules[\\/]react-router/.test(id)) return 'router'
           if (/[\\/]node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/.test(id)) return 'animation'
-          if (/[\\/]node_modules[\\/](react-hook-form|zod|@hookform|@emailjs)[\\/]/.test(id)) return 'forms'
+          if (/[\\/]node_modules[\\/](react-hook-form|zod|@hookform)[\\/]/.test(id)) return 'forms'
           if (/[\\/]node_modules[\\/](@supabase|@sentry)[\\/]/.test(id)) return 'platform'
           if (/[\\/]node_modules[\\/](sonner|dompurify)[\\/]/.test(id)) return 'ui'
 

@@ -15,7 +15,6 @@
     "sync:github": "node scripts/fetch-github-activity.mjs"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@hookform/resolvers": "^5.2.2",
     "@sentry/react": "^10.35.0",
     "@supabase/supabase-js": "^2.100.0",

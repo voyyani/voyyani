@@ -192,10 +192,19 @@ const PrivacyPolicy = () => {
                     </p>
                   </div>
                   <div className="bg-cloth-50 p-4 border border-cloth-300">
-                    <h4 className="font-semibold text-mark-900 mb-2">EmailJS</h4>
+                    <h4 className="font-semibold text-mark-900 mb-2">Resend</h4>
                     <p className="text-sm text-mark-600">
-                      Contact form message delivery.
-                      <a href="https://www.emailjs.com/legal/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-pindo hover:underline ml-1">
+                      Delivers email sent from and to {SITE.email}.
+                      <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-pindo hover:underline ml-1">
+                        Privacy Policy →
+                      </a>
+                    </p>
+                  </div>
+                  <div className="bg-cloth-50 p-4 border border-cloth-300">
+                    <h4 className="font-semibold text-mark-900 mb-2">Supabase</h4>
+                    <p className="text-sm text-mark-600">
+                      Stores contact submissions and replies.
+                      <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-pindo hover:underline ml-1">
                         Privacy Policy →
                       </a>
                     </p>
