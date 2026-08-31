@@ -602,10 +602,11 @@ go-ahead because it is a live production deploy.
 
 The rest needs Karisa specifically — these are the blockers no one else can clear:
 
-1. ✅ **Contact email confirmed** as `voyanitech@gmail.com` (2026-08-29). Still worth
-   doing eventually: add an MX record to `voyani.tech` and switch to
-   `karisa@voyani.tech` — one line in `src/config/site.js`. The domain currently has A
-   records but cannot receive mail at all.
+1. ✅ **Contact email done** (2026-08-31). `voyani.tech` now has SPF, DKIM and MX
+   records, the site publishes `karisa@voyani.tech`, and inbound mail is forwarded to
+   `voyanitech@gmail.com`. Remaining for Karisa: add the `_dmarc` TXT record, deploy the
+   edge functions, and run the live send/receive test. See
+   [`EMAIL_ROADMAP.md`](./EMAIL_ROADMAP.md) — Tasks 8, 9 and 11.
 2. **Record a screen capture of the CAD Web Viewer** (5–10s of the viewer rotating a
    model is enough). It's the single strongest piece of evidence for the ME→dev story
    and it's the only project with no visual at all. Drop it in

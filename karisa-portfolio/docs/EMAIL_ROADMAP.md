@@ -10,6 +10,23 @@
 
 **Spec:** This document. The current-state audit in §0 is the spec every task argues from.
 
+## Execution status — 2026-08-31
+
+| Task | State |
+|---|---|
+| 0. Credential scaffold | ✅ `.env.example`, `scripts/push-email-secrets.sh` |
+| 1. Verify sending domain | ⚠️ DKIM, SPF and `send` MX resolve (eu-west-1). **`_dmarc` TXT is still missing** (Step 4). Resend's "Verified" badge and the test send (Steps 6–8) are unconfirmed. |
+| 2. Inbound MX + webhooks | ⚠️ Root MX resolves to `inbound-smtp.eu-west-1.amazonaws.com`. Webhook registration (Steps 5–6) is unconfirmed — dashboard access needed. |
+| 3–7. Code | ✅ Done, committed, type-checked, 30 new tests passing. |
+| 8. Migration + bucket | ⬜ Needs the Supabase dashboard. |
+| 9. Secrets + deploy | ⬜ Needs `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and the project ref. |
+| 10. Publish the address | ✅ Done — flipped ahead of Task 11 on Karisa's explicit call, against this document's own gate. |
+| 11. Prove the loop | ⬜ Steps 1–5 (live tests) outstanding; Steps 6–8 (docs) done. |
+
+**The site now publishes an address that will not deliver until Tasks 8, 9 and 11 are
+done.** That is the known trade-off of flipping Task 10 early — see Rollback below for
+the one-line revert.
+
 ---
 
 ## 0. Current state — audit findings
@@ -271,7 +288,7 @@ The `handle-inbound-email` bugs in §0 are all data-shaping bugs. Pull that shap
   - `buildInboundReplyRow(input: InboundRowInput): Record<string, unknown>`
   - `buildAttachmentRow(input: AttachmentRowInput): Record<string, unknown>`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
   Create `supabase/functions/_shared/inbound.test.ts`:
 
@@ -454,7 +471,7 @@ describe('buildAttachmentRow', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
   ```bash
   npm test -- --run supabase/functions/_shared/inbound.test.ts
@@ -462,7 +479,7 @@ describe('buildAttachmentRow', () => {
 
   Expected: FAIL — `Failed to resolve import "./inbound"`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
   Create `supabase/functions/_shared/inbound.ts`:
 
@@ -610,7 +627,7 @@ export function buildAttachmentRow(input: AttachmentRowInput): Record<string, un
 }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
   ```bash
   npm test -- --run supabase/functions/_shared/inbound.test.ts
@@ -618,7 +635,7 @@ export function buildAttachmentRow(input: AttachmentRowInput): Record<string, un
 
   Expected: PASS, 25 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add supabase/functions/_shared/inbound.ts supabase/functions/_shared/inbound.test.ts
@@ -637,7 +654,7 @@ Fixes the boot-blocking `SyntaxError` and every schema mismatch by deleting the 
 **Interfaces:**
 - Consumes: everything exported from `_shared/inbound.ts`.
 
-- [ ] **Step 1: Import the shared module**
+- [x] **Step 1: Import the shared module**
 
   At the top of `supabase/functions/handle-inbound-email/index.ts`, after the existing imports, add:
 
@@ -656,7 +673,7 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
   Note the `.ts` extension — Deno requires it, and Vitest resolves it fine.
 
-- [ ] **Step 2: Delete the shadowed variable**
+- [x] **Step 2: Delete the shadowed variable**
 
   This is the boot blocker. At line ~439, rename the *second* declaration so it no longer collides with the request body read at line ~363:
 
@@ -679,7 +696,7 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
 
   Then update the one downstream use — in the `calculateSpamScore(...)` call, change the third argument `bodyText` to `emailBody`.
 
-- [ ] **Step 3: Delete the local `extractSubmissionId` and route through the shared function**
+- [x] **Step 3: Delete the local `extractSubmissionId` and route through the shared function**
 
   Delete the whole `function extractSubmissionId(toAddress: string): string | null { ... }` block.
 
@@ -707,7 +724,7 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
     console.log('[handler] Extracted submission_id:', submissionId);
 ```
 
-- [ ] **Step 3b: Add a placeholder `handleDirectMail` so this task type-checks alone**
+- [x] **Step 3b: Add a placeholder `handleDirectMail` so this task type-checks alone**
 
   Task 6 replaces this with the real forwarding implementation. Without it, Step 8's type
   check fails on an undefined name. Add it above the `serve(...)` call:
@@ -726,7 +743,7 @@ async function handleDirectMail(
 }
 ```
 
-- [ ] **Step 4: Replace the `inbound_replies` insert**
+- [x] **Step 4: Replace the `inbound_replies` insert**
 
   Replace the whole `.insert({ ... })` object on `inbound_replies` with a call to the builder:
 
@@ -752,7 +769,7 @@ async function handleDirectMail(
       .single();
 ```
 
-- [ ] **Step 5: Fix sender verification to compare parsed addresses**
+- [x] **Step 5: Fix sender verification to compare parsed addresses**
 
   Replace the `senderVerified` computation with:
 
@@ -763,7 +780,7 @@ async function handleDirectMail(
       parseAddress(payload.from).email === String(submission.email).toLowerCase();
 ```
 
-- [ ] **Step 6: Fix the attachment insert**
+- [x] **Step 6: Fix the attachment insert**
 
   Replace the `inbound_attachments` `.insert({ ... })` object with:
 
@@ -781,7 +798,7 @@ async function handleDirectMail(
             );
 ```
 
-- [ ] **Step 7: Fix the analytics insert column**
+- [x] **Step 7: Fix the analytics insert column**
 
   In the analytics block, rename `metadata:` to `event_data:` — `public.analytics_events` has `event_data jsonb`, not `metadata` (`supabase/schema.sql:106`):
 
@@ -797,7 +814,7 @@ async function handleDirectMail(
       });
 ```
 
-- [ ] **Step 8: Type-check the function**
+- [x] **Step 8: Type-check the function**
 
   ```bash
   npx --yes deno@2 check supabase/functions/handle-inbound-email/index.ts
@@ -805,7 +822,7 @@ async function handleDirectMail(
 
   Expected: `Check file:///...` with no errors. Specifically, the previous `bodyText` redeclaration error must be gone. If `deno` is unavailable, `npx supabase functions deploy handle-inbound-email --no-verify-jwt --dry-run` surfaces the same class of error — but the type check is faster and does not need auth.
 
-- [ ] **Step 9: Confirm the shared tests still pass**
+- [x] **Step 9: Confirm the shared tests still pass**
 
   ```bash
   npm test -- --run supabase/functions/_shared/inbound.test.ts
@@ -813,7 +830,7 @@ async function handleDirectMail(
 
   Expected: PASS.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add supabase/functions/handle-inbound-email/index.ts
@@ -830,7 +847,7 @@ The handler currently logs a bad signature and processes the payload anyway, so 
 - Modify: `supabase/functions/handle-inbound-email/index.ts`
 - Modify: `supabase/functions/handle-resend-webhook/index.ts`
 
-- [ ] **Step 1: Fail closed in `handle-inbound-email`**
+- [x] **Step 1: Fail closed in `handle-inbound-email`**
 
   Replace the whole signature block (the `if (!webhookSecret) { ... } else { ... }` that contains `'proceeding anyway for debugging'`) with:
 
@@ -858,7 +875,7 @@ The handler currently logs a bad signature and processes the payload anyway, so 
 
   Delete the now-dead commented-out `return new Response(... 401 ...)` block below it.
 
-- [ ] **Step 2: Fail closed in `handle-resend-webhook`**
+- [x] **Step 2: Fail closed in `handle-resend-webhook`**
 
   In `verifyWebhookSignature`, replace:
 
@@ -878,7 +895,7 @@ The handler currently logs a bad signature and processes the payload anyway, so 
   }
 ```
 
-- [ ] **Step 3: Type-check both**
+- [x] **Step 3: Type-check both**
 
   ```bash
   npx --yes deno@2 check supabase/functions/handle-inbound-email/index.ts supabase/functions/handle-resend-webhook/index.ts
@@ -886,7 +903,7 @@ The handler currently logs a bad signature and processes the payload anyway, so 
 
   Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add supabase/functions/handle-inbound-email/index.ts supabase/functions/handle-resend-webhook/index.ts
@@ -908,7 +925,7 @@ Without this, mail a human sends to the newly published address vanishes, and th
 - Consumes: `route.kind === 'direct'` from Task 4 Step 3.
 - Produces: `handleDirectMail(payload, toAddress)` and `forwardToAdmin(...)`.
 
-- [ ] **Step 1: Add the forwarding helpers**
+- [x] **Step 1: Add the forwarding helpers**
 
   In `supabase/functions/handle-inbound-email/index.ts`, **delete the placeholder
   `handleDirectMail` added in Task 4 Step 3b** and put these two functions in its place,
@@ -998,7 +1015,7 @@ async function handleDirectMail(
 }
 ```
 
-- [ ] **Step 2: Forward threaded replies too**
+- [x] **Step 2: Forward threaded replies too**
 
   In the `serve` handler, immediately before the final success `return new Response(...)` (after the analytics block), add:
 
@@ -1020,7 +1037,7 @@ async function handleDirectMail(
     }
 ```
 
-- [ ] **Step 3: Type-check**
+- [x] **Step 3: Type-check**
 
   ```bash
   npx --yes deno@2 check supabase/functions/handle-inbound-email/index.ts
@@ -1028,7 +1045,7 @@ async function handleDirectMail(
 
   Expected: no errors.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add supabase/functions/handle-inbound-email/index.ts
@@ -1050,7 +1067,7 @@ git commit -m "feat(email): forward direct mail and threaded replies to the admi
 **Interfaces:**
 - Produces: `buildFrom(name, address)`, `buildReplyAddress(submissionId, domain)`, `buildThreadMessageId(submissionId, domain, now)`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
   Create `supabase/functions/_shared/mail.test.ts`:
 
@@ -1089,7 +1106,7 @@ describe('buildThreadMessageId', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
   ```bash
   npm test -- --run supabase/functions/_shared/mail.test.ts
@@ -1097,7 +1114,7 @@ describe('buildThreadMessageId', () => {
 
   Expected: FAIL — `Failed to resolve import "./mail"`.
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
   Create `supabase/functions/_shared/mail.ts`:
 
@@ -1128,7 +1145,7 @@ export function buildThreadMessageId(
 }
 ```
 
-- [ ] **Step 4: Run it and watch it pass**
+- [x] **Step 4: Run it and watch it pass**
 
   ```bash
   npm test -- --run supabase/functions/_shared/mail.test.ts
@@ -1136,7 +1153,7 @@ export function buildThreadMessageId(
 
   Expected: PASS, 5 tests.
 
-- [ ] **Step 5: Use it in `send-notification`**
+- [x] **Step 5: Use it in `send-notification`**
 
   Add to the imports and env block at the top of `supabase/functions/send-notification/index.ts`:
 
@@ -1154,7 +1171,7 @@ const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
           from: buildFrom(fromName, fromAddress),
 ```
 
-- [ ] **Step 6: Use it in `send-reply`**
+- [x] **Step 6: Use it in `send-reply`**
 
   Add to the imports and env block at the top of `supabase/functions/send-reply/index.ts`:
 
@@ -1179,7 +1196,7 @@ const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 
   Leave the rest of the `payload` object (`to`, `subject`, `html`, `headers`) untouched.
 
-- [ ] **Step 7: Confirm no hardcoded address survives**
+- [x] **Step 7: Confirm no hardcoded address survives**
 
   ```bash
   grep -rn "karisa@voyani.tech" supabase/functions/
@@ -1187,7 +1204,7 @@ const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 
   Expected: matches only in `handle-inbound-email/index.ts` (the `Voyani Mail <karisa@${mailDomain}>` template literal from Task 6, which is already domain-driven) and in comments. **No** bare `'Karisa <karisa@voyani.tech>'` string literals.
 
-- [ ] **Step 8: Type-check and run the full suite**
+- [x] **Step 8: Type-check and run the full suite**
 
   ```bash
   npx --yes deno@2 check supabase/functions/send-notification/index.ts supabase/functions/send-reply/index.ts
@@ -1196,7 +1213,7 @@ const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 
   Expected: no type errors; all tests pass.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add supabase/functions/_shared/mail.ts supabase/functions/_shared/mail.test.ts supabase/functions/send-notification/index.ts supabase/functions/send-reply/index.ts
@@ -1356,7 +1373,7 @@ Only after Task 11's receive test passes in a scratch run — see the Global Con
 - Modify: `package.json` (remove `@emailjs/browser`)
 - Modify: `vite.config.js:175`
 
-- [ ] **Step 1: Flip the published address**
+- [x] **Step 1: Flip the published address**
 
   In `src/config/site.js`, replace:
 
@@ -1387,7 +1404,7 @@ Only after Task 11's receive test passes in a scratch run — see the Global Con
  * karisa@voyani.tech. See docs/EMAIL_ROADMAP.md.
 ```
 
-- [ ] **Step 2: Correct the privacy policy's third-party disclosure**
+- [x] **Step 2: Correct the privacy policy's third-party disclosure**
 
   `src/components/PrivacyPolicy.jsx` still names EmailJS as the processor, which is factually wrong and a real disclosure problem. Replace the EmailJS list entry (around line 195-200) with:
 
@@ -1417,7 +1434,7 @@ Only after Task 11's receive test passes in a scratch run — see the Global Con
                   </li>
 ```
 
-- [ ] **Step 3: Replace the stale `.env.example`**
+- [x] **Step 3: Replace the stale `.env.example`**
 
   It documents EmailJS variables that nothing reads and omits the Supabase variables that everything reads. Overwrite it with:
 
@@ -1447,7 +1464,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key_here
 EOF
 ```
 
-- [ ] **Step 4: Drop the dead EmailJS dependency**
+- [x] **Step 4: Drop the dead EmailJS dependency**
 
   No source file imports `@emailjs/browser` — only a comment in `ContactForm.test.jsx` mentions it historically.
 
@@ -1461,7 +1478,7 @@ EOF
           if (/[\\/]node_modules[\\/](react-hook-form|zod|@hookform)[\\/]/.test(id)) return 'forms'
 ```
 
-- [ ] **Step 5: Verify no stale address remains anywhere**
+- [x] **Step 5: Verify no stale address remains anywhere**
 
   ```bash
   grep -rn "voyanitech@gmail\|thebikecollector\|emailjs" --include="*.js" --include="*.jsx" --include="*.ts" --include="*.tsx" src/ vite.config.js
@@ -1469,7 +1486,7 @@ EOF
 
   Expected: **no matches in shipped code.** Matches inside comments in `ContactForm.test.jsx` and `src/config/site.js` are fine and should stay — they are the record of why the address changed. `voyanitech@gmail.com` legitimately remains in `supabase/functions/*` as the `ADMIN_EMAIL` fallback; that is the forward destination, not a published address.
 
-- [ ] **Step 6: Run the full suite, lint and build**
+- [x] **Step 6: Run the full suite, lint and build**
 
   ```bash
   npm test -- --run
@@ -1479,7 +1496,7 @@ EOF
 
   Expected: all tests pass, lint no worse than the current baseline, build succeeds. If a snapshot or assertion pinned the old address, update it to `karisa@voyani.tech` — that is a correct failure catching a real change.
 
-- [ ] **Step 7: Confirm the address renders**
+- [x] **Step 7: Confirm the address renders**
 
   ```bash
   npm run dev
@@ -1487,7 +1504,7 @@ EOF
 
   Open `http://localhost:5173`, and check three surfaces show `karisa@voyani.tech`: the footer contact link, the Contact section, and `/privacy`. Then View Source and confirm the JSON-LD `"email": "mailto:karisa@voyani.tech"` in the `Person` block.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/config/site.js src/components/PrivacyPolicy.jsx .env.example vite.config.js package.json package-lock.json
@@ -1577,15 +1594,15 @@ group by event_type;
 
   Expected: SPF, DKIM and DMARC all pass; mail-tester score ≥ 9/10. Fix anything flagged now — a portfolio contact address that lands in spam is worse than no address.
 
-- [ ] **Step 6: Update the changelog**
+- [x] **Step 6: Update the changelog**
 
   Prepend a dated entry to `docs/CHANGELOG.md` in the style of the existing entries, stating: Resend is now the mail provider on a verified `voyani.tech`; the published address is `karisa@voyani.tech`; `handle-inbound-email` could never boot before this (duplicate `const bodyText`) and its inserts disagreed with the migration in six ways; webhook signature verification was off and is now fail-closed; direct mail and threaded replies both forward to `voyanitech@gmail.com`; `@emailjs/browser` is gone.
 
-- [ ] **Step 7: Close the roadmap item**
+- [x] **Step 7: Close the roadmap item**
 
   `docs/roadmapupdated.md:605-607` carries the open item *"Contact email confirmed as voyanitech@gmail.com … Still worth … karisa@voyani.tech — one line in src/config/site.js. The domain currently has A records but no MX."* Mark it complete, dated 2026-08-31, and point it at `docs/EMAIL_ROADMAP.md`.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add docs/CHANGELOG.md docs/roadmapupdated.md docs/EMAIL_ROADMAP.md

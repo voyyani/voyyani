@@ -1,7 +1,7 @@
 # Changelog
 
 **Status:** Live
-**Last updated:** 2026-08-29
+**Last updated:** 2026-08-31
 
 All notable changes to the Ngowa Karisa portfolio (voyani.tech), newest first.
 Format follows [Keep a Changelog](https://keepachangelog.com); dates come from git history.
@@ -10,6 +10,70 @@ This file replaces the ~40 phase- and week-completion reports that used to live 
 `docs/`. Those are preserved in [`archive/`](./archive/) but are no longer maintained,
 and several of them contradict each other — where an archived doc disagrees with this
 file or with the code, the code wins.
+
+---
+
+## [Unreleased] — 2026-08-31 — Email: Resend on a real `voyani.tech`
+
+Executes [`EMAIL_ROADMAP.md`](./EMAIL_ROADMAP.md). Phase 0 removed every undeliverable
+address the site published; this makes the domain itself able to send and receive, and
+publishes `karisa@voyani.tech` on the back of it.
+
+**Not yet verified live.** The code below is committed and type-checked, but the edge
+functions have not been redeployed and the end-to-end send/receive test (roadmap Task 11,
+Steps 1–5) has not been run. `_dmarc.voyani.tech` is also still empty. Until those are
+done, treat the published address as configured-but-unproven.
+
+### Added
+- `supabase/functions/_shared/inbound.ts` + tests (25) — one pure, Deno-free module that
+  shapes every inbound row. It exists because the inline version of this logic disagreed
+  with `migrations/20260328000000_inbound_email_system.sql` in six separate ways.
+- `supabase/functions/_shared/mail.ts` + tests (5) — `buildFrom`, `buildReplyAddress`,
+  `buildThreadMessageId`. The sending identity now comes from `MAIL_FROM_ADDRESS` /
+  `MAIL_FROM_NAME` / `MAIL_DOMAIN`, so changing the address is a secret update rather
+  than a source edit in three files.
+- Forwarding: mail sent directly to `karisa@voyani.tech` (or any other mailbox on the
+  domain) is now re-sent to `voyanitech@gmail.com` with a provenance banner and the
+  original sender in `reply_to`. Threaded, non-spam replies are forwarded too — before
+  this they were visible only inside `/admin/submissions`.
+- A `direct` inbound route. `extractSubmissionId()` matched only `reply+{uuid}@` and
+  returned `400 Invalid recipient address format` for everything else, so a human
+  emailing the address would have been rejected outright.
+
+### Fixed
+- **`handle-inbound-email` could never boot.** It declared `const bodyText` twice in the
+  same block scope — a `SyntaxError` at module evaluation. Every line below it had
+  therefore never run in production.
+- Six schema mismatches in its `inbound_replies` insert: `sender_verified` →
+  `is_sender_verified`; the `GENERATED ALWAYS` column `body_preview` was being written
+  to; `references` was a `string` against a `text[]` column; `message_id` could be
+  `undefined` against `NOT NULL UNIQUE`; `from_email` carried the raw
+  `Jane <j@x.com>` header against a `CHECK` regex that rejects it. Plus
+  `analytics_events.metadata` → `event_data`, and `filename`/`size` →
+  `file_name`/`file_size` on `inbound_attachments`.
+- Sender verification compared raw headers with `includes()`, so
+  `Jane <jane@evil.com>` matched a submission from `e@vil.com` by substring. It now
+  compares parsed bare addresses.
+
+### Security
+- Webhook signature verification now **fails closed** in both receivers.
+  `handle-inbound-email` logged `'Invalid webhook signature - proceeding anyway for
+  debugging'` and carried on with the `401` commented out; `handle-resend-webhook`
+  returned `true` when no secret was set. Either one let anyone who learned the URL
+  write rows into `inbound_replies`.
+
+### Changed
+- Published contact address: `voyanitech@gmail.com` → **`karisa@voyani.tech`**, one line
+  in `src/config/site.js`. Footer, contact section, privacy policy and the JSON-LD
+  `Person.email` all read from it. `voyanitech@gmail.com` remains the forward
+  destination (`ADMIN_EMAIL`) and is no longer published anywhere on the site.
+- Privacy policy's third-party disclosure named **EmailJS** as the processor of contact
+  messages. Nothing had imported EmailJS since Phase 0 — the actual processors are
+  Resend and Supabase, which the page now names instead.
+
+### Removed
+- `@emailjs/browser`, a dependency no source file imported, and its entry in the
+  `forms` manual-chunk regex in `vite.config.js`.
 
 ---
 
