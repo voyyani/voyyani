@@ -12,8 +12,8 @@ async function verifyWebhookSignature(
   secret: string
 ): Promise<boolean> {
   if (!secret) {
-    console.warn("No webhook secret configured - skipping signature verification");
-    return true; // Allow if no secret configured (development mode)
+    console.error("RESEND_WEBHOOK_SECRET is not set — rejecting");
+    return false;
   }
 
   try {

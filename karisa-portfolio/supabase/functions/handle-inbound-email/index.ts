@@ -369,27 +369,25 @@ serve(async (req: Request) => {
     const bodyText = await req.text();
     const signature = req.headers.get('x-resend-signature');
 
+    // Fail closed. The previous version logged an invalid signature and carried on with
+    // the commented-out 401 still in the file, which made the endpoint world-writable.
     if (!webhookSecret) {
-      console.warn('[handler] Warning: No webhook secret configured - allowing webhook for development');
-      // Allow in development, require in production
-      if (Deno.env.get('DENO_ENV') === 'production') {
-        return new Response(
-          JSON.stringify({ error: 'Webhook secret not configured' }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    } else {
-      const isValid = await verifyWebhookSignature(bodyText, signature);
-      if (!isValid) {
-        console.error('[handler] Invalid webhook signature - proceeding anyway for debugging');
-        // Comment out for production - only for debugging
-        // return new Response(
-        //   JSON.stringify({ error: 'Invalid signature' }),
-        //   { status: 401, headers: { 'Content-Type': 'application/json' } }
-        // );
-      }
-      console.log('[handler] Webhook signature verified ✓');
+      console.error('[handler] RESEND_WEBHOOK_SECRET is not set — refusing the request');
+      return new Response(
+        JSON.stringify({ error: 'Webhook secret not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
     }
+
+    if (!(await verifyWebhookSignature(bodyText, signature))) {
+      console.error('[handler] Invalid webhook signature — rejecting');
+      return new Response(
+        JSON.stringify({ error: 'Invalid signature' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('[handler] Webhook signature verified');
 
     const payload: ResendWebhookPayload = JSON.parse(bodyText);
     console.log('[handler] Email from:', payload.from, '| to:', payload.to?.[0]);
