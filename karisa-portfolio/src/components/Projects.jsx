@@ -209,7 +209,11 @@ const Packet = ({ project, onOpen }) => {
             <path d="M4 4v6h6M20 20v-6h-6" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M20 9a8 8 0 0 0-14.7-2.5M4 15a8 8 0 0 0 14.7 2.5" strokeLinecap="round" />
           </svg>
-          {turned ? 'Turn to the screenshot' : 'Turn to the specification'}
+          {turned
+            ? project.screenshots?.length
+              ? 'Turn to the screenshot'
+              : 'Turn back to the summary'
+            : 'Turn to the specification'}
         </button>
       </div>
     </article>
@@ -259,10 +263,21 @@ const Projects = () => {
             printed={printed}
           />
 
+          {/*
+            Order by evidence, not by id.
+            The panel's jina is "What I built is still running", and the array's own
+            order put Raslipwani first — whose client site is in a maintenance window
+            and has no capture, so the first object under that claim was a
+            "capture pending" rectangle. A project that can show the running product
+            leads. The index on each card is its identifier, not its position, so it
+            travels with the project.
+          */}
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
-            {PROJECTS.map((project) => (
-              <Packet key={project.id} project={project} onOpen={openProjectDetails} />
-            ))}
+            {[...PROJECTS]
+              .sort((a, b) => (b.screenshots?.length ? 1 : 0) - (a.screenshots?.length ? 1 : 0))
+              .map((project) => (
+                <Packet key={project.id} project={project} onOpen={openProjectDetails} />
+              ))}
           </div>
 
           <p className="mt-10 max-w-prose text-mark-600">
