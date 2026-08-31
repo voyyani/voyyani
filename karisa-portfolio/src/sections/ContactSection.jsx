@@ -37,9 +37,10 @@ const ContactSection = () => (
           jina={PANELS.contact.jina}
           lead={PANELS.contact.lead}
           printed={printed}
+          reversed
         />
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-14">
+        <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-14">
           <div className="lg:col-span-7">
             <ContactForm />
           </div>

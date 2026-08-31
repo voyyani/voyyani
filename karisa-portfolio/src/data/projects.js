@@ -33,11 +33,33 @@ export const PROJECTS = [
       ],
       // "Load Time 1.2s" and "Performance 60% ↑" were the same fact stated twice.
       // Merged into one metric that shows the before-and-after the case study explains.
+      /**
+       * `source` is what makes a figure printable.
+       *
+       * Product Principle 1: a number on the page links to the artifact that proves it,
+       * or it does not go on the page. The card and the modal now render ONLY the
+       * metrics carrying a `source`, so an unsourced figure cannot reach display scale
+       * by accident. Nothing has been deleted — the entries below without a `source`
+       * are retained verbatim, and need one before they can be shown again.
+       *
+       * "Test Coverage 90%" was also mislabelled: `technicalHighlights` calls it a
+       * coverage TARGET, and a target printed as a result is a different claim.
+       */
       metrics: [
-        { label: "Page Load", value: "3s → 1.2s" },
+        {
+          label: "Page Load",
+          value: "3s → 1.2s",
+          source: "Before and after, in the case study"
+        },
+        {
+          label: "Test coverage target",
+          value: "90%",
+          source: "Vitest, stated target"
+        },
+        // No recorded provenance for either of these. See docs — they need a measured
+        // source (who ran it, against what, on what date) or they stay off the page.
         { label: "Active Users", value: "100+" },
-        { label: "Mobile Lighthouse", value: "95/100" },
-        { label: "Test Coverage", value: "90%" }
+        { label: "Mobile Lighthouse", value: "95/100" }
       ],
       category: "Full-Stack",
       challenge: "The first version loaded every property and every booking on page load. That was fine with 40 listings and painful by 400 — around 3 seconds to first paint, and the agency's staff were the ones paying for it, all day, on slow connections.",
@@ -168,12 +190,25 @@ export const PROJECTS = [
       // was not backed by anything the client publishes, and "RBAC Roles 6"
       // contradicted this same object's own "5-tier RBAC" description.
       metrics: [
-        { label: "Active Programs", value: "4" },
+        {
+          label: "Active Programs",
+          value: "4",
+          source: "The client's own donate page, checked 29 Aug 2026"
+        },
+        {
+          label: "Lives Touched",
+          value: "10K+",
+          source: "The client's own donate page, checked 29 Aug 2026"
+        },
+        {
+          label: "RBAC Tiers",
+          value: "5",
+          source: "The role tier column, on the specification"
+        },
+        // Unsourced — retained, not shown. See the note on the Raslipwani metrics.
         { label: "LCP Score", value: "<2.5s" },
         { label: "A11y Score", value: "95+" },
-        { label: "RBAC Tiers", value: "5" },
-        { label: "Mobile First", value: "100%" },
-        { label: "Lives Touched", value: "10K+" }
+        { label: "Mobile First", value: "100%" }
       ],
       category: "Full-Stack",
       challenge: "A non-profit's site goes stale the moment it needs a developer to change anything. This one had to be editable by staff with no technical background — while still not letting a volunteer with gallery access accidentally edit the donation details.",

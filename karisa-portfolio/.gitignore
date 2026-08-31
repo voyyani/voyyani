@@ -30,3 +30,9 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Impeccable review captures — regenerated on every inspection round.
+# The design record (DESIGN.md, .impeccable/design.json, config.json) IS tracked.
+.impeccable/review/
+.impeccable/mocks/
+.impeccable/hook.cache.json

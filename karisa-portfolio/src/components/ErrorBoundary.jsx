@@ -45,10 +45,10 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-cloth-100 flex items-center justify-center px-4">
           <div className="max-w-2xl w-full">
-            <div className="bg-cloth-50 border-2 border-red-500/30 p-8 shadow-2xl">
+            <div className="border-2 border-alarm bg-cloth-50 p-8">
               {/* Error Icon */}
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center">
+                <div className="flex h-20 w-20 items-center justify-center border-2 border-alarm">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
                     className="h-10 w-10 text-alarm" 
@@ -77,7 +77,7 @@ class ErrorBoundary extends React.Component {
 
               {/* Error Details (Development only) */}
               {import.meta.env.DEV && this.state.error && (
-                <div className="mb-6 p-4 bg-cloth-100 border border-red-500/20">
+                <div className="mb-6 p-4 bg-cloth-100 border border-alarm">
                   <h3 className="text-sm font-semibold text-alarm mb-2">Error Details:</h3>
                   <pre className="text-xs text-mark-600 overflow-x-auto">
                     {this.state.error.toString()}

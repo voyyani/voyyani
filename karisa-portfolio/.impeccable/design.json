@@ -1,0 +1,534 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-31T00:00:00Z",
+  "title": "Design System: Voyani — Ngowa Karisa",
+  "extensions": {
+    "colorMeta": {
+      "pindo": {
+        "role": "primary",
+        "displayName": "Kanga Indigo",
+        "canonical": "#243D8F",
+        "tonalRamp": [
+          "#0C1430",
+          "#131F4A",
+          "#1A2C68",
+          "#243D8F",
+          "#3C55AB",
+          "#7C8DC9",
+          "#B4BEE2",
+          "#E4E7F3"
+        ]
+      },
+      "pindo-deep": {
+        "role": "primary",
+        "displayName": "Indigo Deep",
+        "canonical": "#1A2C68",
+        "tonalRamp": [
+          "#080D20",
+          "#0F1738",
+          "#141F50",
+          "#1A2C68",
+          "#2A4390",
+          "#5C71B8",
+          "#9EACD8",
+          "#DDE2F0"
+        ]
+      },
+      "pindo-wash": {
+        "role": "primary",
+        "displayName": "Indigo Wash",
+        "canonical": "#E4E7F3",
+        "tonalRamp": [
+          "#171C33",
+          "#232B4C",
+          "#334066",
+          "#4B5B8C",
+          "#7987B4",
+          "#A8B2D2",
+          "#C9D0E6",
+          "#E4E7F3"
+        ]
+      },
+      "cloth-100": {
+        "role": "neutral",
+        "displayName": "Page Cotton",
+        "canonical": "#F2EEE5",
+        "tonalRamp": [
+          "#1E1B15",
+          "#3A352B",
+          "#5A5344",
+          "#7E7663",
+          "#A79E88",
+          "#C6BEAB",
+          "#E9E3D6",
+          "#F2EEE5"
+        ]
+      },
+      "cloth-50": {
+        "role": "neutral",
+        "displayName": "Raised Cotton",
+        "canonical": "#FAF8F3",
+        "tonalRamp": [
+          "#211E17",
+          "#3E392E",
+          "#5F5847",
+          "#847C68",
+          "#ADA48D",
+          "#CFC8B5",
+          "#EDE9DF",
+          "#FAF8F3"
+        ]
+      },
+      "cloth-200": {
+        "role": "neutral",
+        "displayName": "Recessed Cotton",
+        "canonical": "#E9E3D6",
+        "tonalRamp": [
+          "#1C1911",
+          "#363024",
+          "#544C39",
+          "#786E54",
+          "#A0947A",
+          "#C6BEAB",
+          "#DCD5C5",
+          "#E9E3D6"
+        ]
+      },
+      "cloth-300": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#DCD5C5",
+        "tonalRamp": [
+          "#1A170F",
+          "#332E22",
+          "#4F4834",
+          "#72694E",
+          "#998F74",
+          "#BFB59D",
+          "#DCD5C5",
+          "#F0EBE0"
+        ]
+      },
+      "cloth-400": {
+        "role": "neutral",
+        "displayName": "Heavy Rule (non-text only)",
+        "canonical": "#C6BEAB",
+        "tonalRamp": [
+          "#17140D",
+          "#2C271B",
+          "#453E2C",
+          "#635A42",
+          "#867B5C",
+          "#A89D80",
+          "#C6BEAB",
+          "#E4DFD1"
+        ]
+      },
+      "mark-900": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#14171C",
+        "tonalRamp": [
+          "#0A0C0F",
+          "#14171C",
+          "#252A32",
+          "#3B3E45",
+          "#4E525A",
+          "#5B5F67",
+          "#8E9299",
+          "#D5D8DC"
+        ]
+      },
+      "mark-700": {
+        "role": "neutral",
+        "displayName": "Secondary Ink",
+        "canonical": "#3B3E45",
+        "tonalRamp": [
+          "#0D0E11",
+          "#191B1F",
+          "#2A2C32",
+          "#3B3E45",
+          "#565A63",
+          "#7C8089",
+          "#ADB1B8",
+          "#DEE0E3"
+        ]
+      },
+      "mark-600": {
+        "role": "neutral",
+        "displayName": "Tertiary Ink",
+        "canonical": "#4E525A",
+        "tonalRamp": [
+          "#101116",
+          "#1D1F24",
+          "#2F3239",
+          "#4E525A",
+          "#6A6E78",
+          "#90949C",
+          "#BABDC3",
+          "#E3E4E7"
+        ]
+      },
+      "mark-500": {
+        "role": "neutral",
+        "displayName": "Caption Ink (text floor)",
+        "canonical": "#5B5F67",
+        "tonalRamp": [
+          "#121317",
+          "#202227",
+          "#34373D",
+          "#5B5F67",
+          "#7A7E86",
+          "#9EA2A9",
+          "#C4C6CB",
+          "#E7E8EA"
+        ]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Maintenance Ochre",
+        "canonical": "#8A5A08",
+        "tonalRamp": [
+          "#221604",
+          "#3B2706",
+          "#5C3B06",
+          "#8A5A08",
+          "#B7790E",
+          "#D9A139",
+          "#EAC684",
+          "#F7E7C8"
+        ]
+      },
+      "alarm": {
+        "role": "tertiary",
+        "displayName": "Alarm Red",
+        "canonical": "#A32014",
+        "tonalRamp": [
+          "#280805",
+          "#460E08",
+          "#6C160C",
+          "#A32014",
+          "#C93A2C",
+          "#E0705F",
+          "#EFA99C",
+          "#F9DBD4"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "jina": {
+        "displayName": "Jina",
+        "purpose": "The printed line under the seam. One per panel, always the largest type on it."
+      },
+      "jina-lead": {
+        "displayName": "Jina (lead)",
+        "purpose": "The lead panel's h1 only; a shallower slope for a half-width column."
+      },
+      "jina-sm": {
+        "displayName": "Jina (small)",
+        "purpose": "A jina set in a narrower measure."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "The section's real h2, set under the jina at 26ch in secondary ink."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sub-headings inside a panel field."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "The measured value in a band, tabular. Never used for non-measurements."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The paragraph under a heading, capped at 68ch."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running copy, capped at 68ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase interior label: bands, tables, chips, captions. Never a kicker above a heading."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "press",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The only easing curve on the site — an exponential settle, like a press coming down."
+      },
+      {
+        "name": "duration-250",
+        "value": "250ms",
+        "purpose": "Colour-only interaction transitions (buttons, links, fields, nav)."
+      },
+      {
+        "name": "duration-400",
+        "value": "400ms",
+        "purpose": "Longer chrome transitions."
+      },
+      {
+        "name": "print-frame",
+        "value": "settle 500ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "purpose": "Step 1 of the print: the frame settles."
+      },
+      {
+        "name": "print-jina",
+        "value": "print 620ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both",
+        "purpose": "Step 2: the jina wipes left-to-right via clip-path inset(0 100% 0 0) to inset(0)."
+      },
+      {
+        "name": "print-body",
+        "value": "settle 480ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both",
+        "purpose": "Step 3: the field follows."
+      },
+      {
+        "name": "print-band",
+        "value": "settle 480ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both",
+        "purpose": "Step 4: the measured band settles last."
+      },
+      {
+        "name": "packet-turn",
+        "value": "transform 620ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The two-faced packet's 180deg turn; cross-fades where preserve-3d is unsupported."
+      },
+      {
+        "name": "packet-track",
+        "value": "grid-template-columns: minmax(0, 1fr); min-width: 0",
+        "purpose": "Pins the flip container's track so the widest face cannot widen the object past the panel frame."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xs",
+        "value": "320px"
+      },
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      },
+      {
+        "name": "2xl",
+        "value": "1536px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The primary action. Indigo ground, cotton text, square, colour-only transition.",
+      "html": "<button class=\"ds-btn-pindo\">See what I&rsquo;ve shipped<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M4 12h15M13 6l6 6-6 6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-btn-pindo { display: inline-flex; align-items: center; justify-content: center; gap: 0.625rem; background: #243D8F; color: #FAF8F3; padding: 0.875rem 1.5rem; border: 0; border-radius: 0; font-family: Archivo, system-ui, sans-serif; font-weight: 600; cursor: pointer; transition: background-color 250ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-pindo:hover { background: #1A2C68; } .ds-btn-pindo:focus-visible { outline: 2px solid #243D8F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "The secondary action. A 2px indigo stroke that fills on hover.",
+      "html": "<button class=\"ds-btn-outline\">Available for hire</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 0.625rem; background: transparent; color: #243D8F; padding: 0.75rem 1.5rem; border: 2px solid #243D8F; border-radius: 0; font-family: Archivo, system-ui, sans-serif; font-weight: 600; cursor: pointer; transition: background-color 250ms cubic-bezier(0.16,1,0.3,1), color 250ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-outline:hover { background: #243D8F; color: #FAF8F3; } .ds-btn-outline:focus-visible { outline: 2px solid #243D8F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "The utility control — the packet turn, filters. A hairline stroke that goes indigo on hover.",
+      "html": "<button class=\"ds-btn-quiet\" aria-pressed=\"false\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M4 4v6h6M20 20v-6h-6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><path d=\"M20 9a8 8 0 0 0-14.7-2.5M4 15a8 8 0 0 0 14.7 2.5\" stroke-linecap=\"round\"/></svg>Turn to the specification</button>",
+      "css": ".ds-btn-quiet { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: transparent; color: #3B3E45; padding: 0.5rem 1rem; border: 1px solid #C6BEAB; border-radius: 0; font-family: Archivo, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: color 250ms cubic-bezier(0.16,1,0.3,1), border-color 250ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-quiet:hover { border-color: #243D8F; color: #243D8F; } .ds-btn-quiet:focus-visible { outline: 2px solid #243D8F; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A square field on raised cotton with a visible label; focus moves the stroke to indigo and adds a soft indigo ring.",
+      "html": "<label class=\"ds-field-label\" for=\"ds-name\">Name</label><input class=\"ds-field\" id=\"ds-name\" type=\"text\" placeholder=\"Your name\" />",
+      "css": ".ds-field-label { display: block; margin-bottom: 0.5rem; font-family: Archivo, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; color: #3B3E45; } .ds-field { width: 100%; background: #FAF8F3; color: #14171C; border: 1px solid #C6BEAB; border-radius: 0; padding: 0.75rem 1rem; font-family: Archivo, system-ui, sans-serif; font-size: 1rem; transition: border-color 250ms cubic-bezier(0.16,1,0.3,1), box-shadow 250ms cubic-bezier(0.16,1,0.3,1); } .ds-field::placeholder { color: #5B5F67; opacity: 1; } .ds-field:focus { outline: none; border-color: #243D8F; box-shadow: 0 0 0 2px rgba(36,61,143,0.25); } .ds-field[aria-invalid=\"true\"] { border-color: #A32014; }"
+    },
+    {
+      "name": "Panel Head (the seam and the jina)",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "The compositional law: a 2px indigo rule with the jina hanging beneath it, then the section's real heading. In the same place on every panel.",
+      "html": "<div class=\"ds-hem\"><p class=\"ds-jina\">What I built is still running.</p><h2 class=\"ds-panel-h2\">Two platforms, both in daily use</h2><p class=\"ds-lead\">Real client work, not demos. Each one I built end to end &mdash; schema, permissions, API, frontend, deploy &mdash; and still maintain.</p></div>",
+      "css": ".ds-hem { border-top: 2px solid #243D8F; padding-top: 1.5rem; background: #F2EEE5; } .ds-jina { margin: 0; font-family: \"Bricolage Grotesque\", Archivo, system-ui, sans-serif; font-weight: 700; font-size: clamp(2.25rem, 6.2vw, 5.25rem); line-height: 0.94; letter-spacing: -0.035em; color: #14171C; text-wrap: balance; } .ds-panel-h2 { margin: 1.5rem 0 0; max-width: 26ch; font-family: Archivo, system-ui, sans-serif; font-weight: 600; font-size: clamp(1.875rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.025em; color: #3B3E45; } .ds-lead { margin: 1.25rem 0 0; max-width: 68ch; font-family: Archivo, system-ui, sans-serif; font-size: clamp(1.0625rem, 1.15vw, 1.1875rem); line-height: 1.65; color: #3B3E45; }"
+    },
+    {
+      "name": "Reversed Panel Head",
+      "kind": "custom",
+      "refersTo": "panel-head-reversed",
+      "description": "The seam inverted: an indigo field with the jina reversed out in cotton, bled to the panel's edges. Spent exactly once, on the closing contact panel.",
+      "html": "<div class=\"ds-head-reversed\"><div class=\"ds-head-rule\" aria-hidden=\"true\"></div><p class=\"ds-jina-rev\">Tell me what has to hold, and under what load.</p><h2 class=\"ds-h2-rev\">Start a project</h2></div>",
+      "css": ".ds-head-reversed { background: #243D8F; padding: 2.5rem 1rem; } .ds-head-rule { height: 2px; width: 100%; background: #F2EEE5; margin-bottom: 1.5rem; } .ds-jina-rev { margin: 0; font-family: \"Bricolage Grotesque\", Archivo, system-ui, sans-serif; font-weight: 700; font-size: clamp(2.25rem, 6.2vw, 5.25rem); line-height: 0.94; letter-spacing: -0.035em; color: #FAF8F3; text-wrap: balance; } .ds-h2-rev { margin: 1.5rem 0 0; max-width: 26ch; font-family: Archivo, system-ui, sans-serif; font-weight: 600; font-size: clamp(1.875rem, 3.4vw, 2.75rem); line-height: 1.08; letter-spacing: -0.025em; color: #F2EEE5; }"
+    },
+    {
+      "name": "Band (measured facts)",
+      "kind": "card",
+      "refersTo": "band-cell",
+      "description": "Figures under the hem, in tabular type, each carrying the source it was measured from. A cell with a link goes indigo on hover.",
+      "html": "<div class=\"ds-band\"><a class=\"ds-band-cell\" href=\"#\"><span class=\"ds-band-figure\">3s &rarr; 1.2s</span><span class=\"ds-band-label\">Page load, Raslipwani</span><span class=\"ds-band-source\">Measured with Lighthouse on the deployed site</span></a><div class=\"ds-band-cell\"><span class=\"ds-band-figure\">2</span><span class=\"ds-band-label\">Client platforms, shipped end to end</span><span class=\"ds-band-source\">Both live and linked above</span></div></div>",
+      "css": ".ds-band { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1px; background: #DCD5C5; border-top: 1px solid #DCD5C5; padding-top: 1px; margin-top: 1.75rem; font-family: Archivo, system-ui, sans-serif; } .ds-band-cell { display: block; background: #F2EEE5; padding: 1rem 1.25rem 1rem 0; text-decoration: none; transition: background-color 250ms cubic-bezier(0.16,1,0.3,1); } a.ds-band-cell:hover { background: #E9E3D6; } .ds-band-figure { display: block; font-family: \"Bricolage Grotesque\", Archivo, sans-serif; font-weight: 700; font-size: clamp(1.375rem, 2vw, 1.875rem); line-height: 1; letter-spacing: -0.02em; color: #14171C; font-variant-numeric: tabular-nums; transition: color 250ms cubic-bezier(0.16,1,0.3,1); } a.ds-band-cell:hover .ds-band-figure { color: #243D8F; } .ds-band-label { display: block; margin-top: 0.5rem; font-size: 0.6875rem; line-height: 1.35; letter-spacing: 0.09em; text-transform: uppercase; color: #4E525A; } .ds-band-source { display: block; margin-top: 0.25rem; max-width: 34ch; font-size: 0.75rem; line-height: 1.375; color: #5B5F67; }"
+    },
+    {
+      "name": "State Mark",
+      "kind": "chip",
+      "refersTo": "mark-state",
+      "description": "State as a printed mark plus its own word, never as a hue. Live rounds the mark to a dot; maintenance hollows it into a rotated ochre diamond.",
+      "html": "<span class=\"ds-mark-state\" data-state=\"live\">Live &middot; checked Aug 2026</span> <span class=\"ds-mark-state\" data-state=\"maintenance\">In maintenance &middot; checked Aug 2026</span>",
+      "css": ".ds-mark-state { display: inline-flex; align-items: center; gap: 0.5rem; font-family: Archivo, system-ui, sans-serif; font-size: 0.6875rem; line-height: 1.35; letter-spacing: 0.09em; text-transform: uppercase; color: #3B3E45; } .ds-mark-state::before { content: \"\"; width: 9px; height: 9px; flex: none; background: #243D8F; } .ds-mark-state[data-state=\"live\"]::before { border-radius: 9999px; } .ds-mark-state[data-state=\"maintenance\"] { color: #8A5A08; } .ds-mark-state[data-state=\"maintenance\"]::before { background: none; border: 1.5px solid #8A5A08; transform: rotate(45deg); }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "link",
+      "description": "Fixed bar on the page ground: wordmark in Bricolage beside an indigo mark, plain links that go indigo on hover, primary action at the end.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-brand\" href=\"#\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M3 3h18v18H3z\"/><path d=\"M7 3v3M17 3v3M3 7h3M3 17h3\"/></svg><span>Voyani.tech</span></a><div class=\"ds-nav-links\"><a href=\"#\">Work</a><a href=\"#\">Activity</a><a href=\"#\">About</a><a class=\"ds-nav-cta\" href=\"#\">Start a project</a></div></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; background: #F2EEE5; padding: 0.875rem 1rem; font-family: Archivo, system-ui, sans-serif; } .ds-brand { display: inline-flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #243D8F; } .ds-brand span { font-family: \"Bricolage Grotesque\", Archivo, sans-serif; font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.02em; color: #14171C; } .ds-nav-links { display: flex; align-items: center; gap: 1.75rem; } .ds-nav-links a { font-size: 0.875rem; font-weight: 500; color: #3B3E45; text-decoration: none; transition: color 250ms cubic-bezier(0.16,1,0.3,1); } .ds-nav-links a:hover { color: #243D8F; } .ds-nav-cta { background: #243D8F; color: #FAF8F3 !important; padding: 0.625rem 1.25rem; font-weight: 600; } .ds-nav-cta:hover { background: #1A2C68; }"
+    },
+    {
+      "name": "Panel (one kanga)",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The recurring container: a nine-slice printed border enclosing a plain cotton field. No shadow, no radius.",
+      "html": "<section class=\"ds-panel\"><div class=\"ds-panel-inner\"><div class=\"ds-hem2\"><p class=\"ds-jina2\">Measure first. Claim second.</p></div></div></section>",
+      "css": ".ds-panel { background: #F2EEE5; border: 12px solid transparent; border-image-source: url('/patterns/pindo-rule.svg'); border-image-slice: 16; border-image-repeat: round; border-image-width: 12px; border-radius: 0; } .ds-panel-inner { padding: 2rem 1rem; } .ds-hem2 { border-top: 2px solid #243D8F; padding-top: 1.5rem; } .ds-jina2 { margin: 0; font-family: \"Bricolage Grotesque\", Archivo, sans-serif; font-weight: 700; font-size: clamp(2.25rem, 6.2vw, 5.25rem); line-height: 0.94; letter-spacing: -0.035em; color: #14171C; text-wrap: balance; }"
+    },
+    {
+      "name": "Two-Faced Packet",
+      "kind": "custom",
+      "refersTo": "packet",
+      "description": "The signature interaction: screenshot on the face, specification on the reverse, both in one pinned grid cell so the object keeps its height and width through the turn.",
+      "html": "<article class=\"ds-packet\"><div class=\"ds-packet-stack\" data-turned=\"false\"><div class=\"ds-packet-face\"><div class=\"ds-packet-shot\">Running screenshot</div></div><div class=\"ds-packet-reverse\"><div class=\"ds-packet-head\"><h4>Tables the platform runs on</h4><span class=\"ds-packet-id\">01 &middot; Specification</span></div><ul class=\"ds-packet-rows\"><li><div class=\"ds-packet-row\"><span class=\"ds-packet-name\">profiles</span><span class=\"ds-packet-shape\">7 cols</span></div><p>Staff accounts and their role tier.</p></li></ul></div></div><div class=\"ds-packet-stile\"><span class=\"ds-packet-state\">Live</span><button class=\"ds-packet-turn\" type=\"button\" aria-pressed=\"false\">Turn to the specification</button></div></article>",
+      "css": ".ds-packet { display: flex; flex-direction: column; background: #FAF8F3; border: 1px solid #14171C; border-radius: 0; font-family: Archivo, system-ui, sans-serif; } .ds-packet-stack { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; transform-style: preserve-3d; transition: transform 620ms cubic-bezier(0.16,1,0.3,1); } .ds-packet-stack > * { grid-area: 1 / 1; min-width: 0; backface-visibility: hidden; } .ds-packet-stack[data-turned=\"true\"] { transform: rotateY(180deg); } .ds-packet-reverse { transform: rotateY(180deg); background: #E9E3D6; padding: 1.25rem; } @supports not (transform-style: preserve-3d) { .ds-packet-stack[data-turned=\"true\"] { transform: none; } .ds-packet-reverse { transform: none; } } .ds-packet-shot { background: #E9E3D6; color: #5B5F67; padding: 3rem 1.25rem; text-align: center; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; } .ds-packet-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 1rem; } .ds-packet-head h4 { margin: 0; font-family: \"Bricolage Grotesque\", Archivo, sans-serif; font-weight: 700; font-size: clamp(1.25rem, 2.2vw, 1.75rem); line-height: 1.15; letter-spacing: -0.02em; color: #14171C; } .ds-packet-id { font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: #4E525A; } .ds-packet-rows { list-style: none; margin: 1rem 0 0; padding: 0; } .ds-packet-rows li { border-bottom: 1px solid #DCD5C5; padding-bottom: 0.75rem; } .ds-packet-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0 0.75rem; } .ds-packet-name { font-weight: 600; color: #243D8F; word-break: break-word; } .ds-packet-shape { font-size: 0.75rem; color: #4E525A; font-variant-numeric: tabular-nums; } .ds-packet-rows p { margin: 0.25rem 0 0; font-size: 0.875rem; color: #3B3E45; } .ds-packet-stile { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; border-top: 1px solid #14171C; background: #F2EEE5; padding: 0.75rem 1.25rem; } .ds-packet-state { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.6875rem; letter-spacing: 0.09em; text-transform: uppercase; color: #3B3E45; } .ds-packet-state::before { content: \"\"; width: 9px; height: 9px; background: #243D8F; border-radius: 9999px; } .ds-packet-turn { display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: #3B3E45; border: 1px solid #C6BEAB; border-radius: 0; padding: 0.5rem 1rem; font-family: inherit; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: color 250ms cubic-bezier(0.16,1,0.3,1), border-color 250ms cubic-bezier(0.16,1,0.3,1); } .ds-packet-turn:hover { border-color: #243D8F; color: #243D8F; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Kanga Sheet",
+    "overview": "A kanga is not decorated cloth. It is a printed statement you hold up: a border (the pindo) enclosing a plain field (the mji), captioned along the hem by one large printed line (the jina). Its whole grammar is frame, evidence, statement — and every section of this site is built that way. A panel is one kanga. The border is authored artwork, not a stroke; the field carries running client software and measured numbers; the jina says the claim out loud at true display scale, because on cloth the printed line is the largest thing on the object.\n\nThe surface is flat, warm and printed rather than lit. There is no gradient, no vignette, no texture image, no glass, no shadow. Depth exists only where ink meets cloth: a two-weight nine-slice border, hairline rules, a 2px indigo seam, and tonal steps in the unbleached-cotton ground. One accent carries the entire chromatic argument, and it is spent on structure and evidence — the border, state, links, the primary action — never on decoration.\n\nThis world replaced a near-black, acid-lime \"developer terminal\" identity. That look was coherent but argued in a vocabulary its audience — non-profit directors and business owners, often on a phone on a constrained connection — does not read. Confirmed rejections carried in the shipped direction contract: the category-default dark hero over a grid of hover-lifting project cards, and the mono terminal this site already was.",
+    "keyCharacteristics": [
+      "Unbleached cotton ground (#F2EEE5), never white, never a gradient.",
+      "Exactly one accent, kanga indigo (#243D8F), spent on frame, state, links and the primary action.",
+      "The pindo: a real nine-slice border-image at two weights, authored as SVG tiles.",
+      "The seam: a 2px indigo rule with the jina hanging beneath it, in the same place on every panel.",
+      "Square corners everywhere; full radius exists only for status dots.",
+      "Two self-hosted variable faces, no monospace; measurement is set in Archivo's tabular figures.",
+      "One motion orchestration and one easing curve for the whole site."
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "There is exactly one accent. It is spent on the border, on state, on links and on the primary action. If indigo is doing something decorative — a tint block, a fill for interest, a second brand colour — it is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Non-Text Floor Rule",
+        "body": "cloth-400 is 2.2:1 on the page ground and is never used for text. Every text colour on this site is one of mark-900 / 700 / 600 / 500, each of which clears WCAG AA on cloth-50, cloth-100 and cloth-200 (15.5:1 / 9.3:1 / 6.8:1 / 5.5:1 on cloth-100). mark-500 is the floor; placeholders are text and sit on it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Legacy Boundary Rule",
+        "body": "tailwind.config.js also carries an ink / signal dark ramp. That is the previous identity, retained solely because the private /admin area still runs on it. Nothing under src/components or src/sections may reference it — by token name or as a literal hex in a default prop, a fallback, or an inline style. The leak that survived longest was #C8FF3D, the previous identity's acid lime, sitting as a default argument on a public loading spinner where no class name would ever betray it. If /admin is ever redesigned, the block is deleted with it.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Costume Rule",
+        "body": "There is no monospace face. Labels, dates, repo names and figures are not code, and setting them in mono was the old system wearing \"technical\" as a costume. Measurement is set in Archivo with tabular figures via the .tabular class — which is also applied by default to table td, table th and time, so columns line up and nothing jitters on hover.",
+        "section": "typography"
+      },
+      {
+        "name": "The Jina-First Rule",
+        "body": "Exactly one jina per panel, and it is always the largest type on that panel. Never set two competing display lines in one field, and never use jina scale for anything that isn't the panel's claim.",
+        "section": "typography"
+      },
+      {
+        "name": "The Label Is Interior Rule",
+        "body": "The uppercase label style belongs inside bands, tables, chips and figure captions. It is never set above a heading as a kicker or eyebrow. A section is introduced by its seam and its jina, not by a small capitalised word. Where an identity line must accompany a heading, it sits beside it on a shared baseline (heading first) or rides at the end of the tagline as an inline span.",
+        "section": "typography"
+      },
+      {
+        "name": "The Seam Is The Law",
+        "body": "Every panel head is a 2px indigo top rule with the jina hanging directly beneath it, in the same place on every panel of the sheet. Nothing else on this site draws a 2px indigo rule. That exclusivity is the rule: the moment a second element borrows the seam, the sheet stops being a sheet.",
+        "section": "layout"
+      },
+      {
+        "name": "The Mirror-Margins Rule",
+        "body": "PanelHead's reversed variant bleeds to the panel's own edges using negative margins that mirror Panel's inner padding exactly. Change one and you must change the other, or the reversed band tears away from the frame.",
+        "section": "layout"
+      },
+      {
+        "name": "The Printed-Not-Lit Rule",
+        "body": "The ground is flat cotton, and no surface on the site casts a shadow — including modals and error states. No gradient, no vignette, no texture image, no blur, no glass, no box-shadow, no hover lift. If a surface needs to read as separate, change its tonal step or draw a rule; do not light it.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Real Frame Rule",
+        "body": "The pindo is a nine-slice border-image at two weights (.pindo-full on the lead panel only, .pindo everywhere else). Four CSS border lines pretending to be a frame is not this border. New framed surfaces reuse the existing tiles; they do not invent a third weight.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Sourced-Figure Rule",
+        "body": "A figure reaches display scale only if it carries provenance. Band renders item.source beneath the label rather than beside it, and Projects renders metrics.filter(m => m.source) — an unsourced number is structurally unable to appear at figure scale. This is a content rule with teeth: it is enforced by the filter, not by discipline.",
+        "section": "components"
+      },
+      {
+        "name": "The Printed Mark Rule",
+        "body": "State is a printed mark plus its own word, never a hue. .mark-state sets an uppercase label in mark-700 preceded by a 9x9px indigo square; live rounds it to a dot, maintenance hollows it into a rotated ochre diamond. Colour never carries the state alone, and green/amber/red status dots are not part of this language.",
+        "section": "components"
+      },
+      {
+        "name": "The One Press Rule",
+        "body": "Motion is a single orchestration, declared once in index.css and applied by Panel / PanelHead, never authored per section: the frame settles, the jina wipes left-to-right through a clip-path reveal, the body follows, the band settles last. One easing curve site-wide: press = cubic-bezier(0.16, 1, 0.3, 1).",
+        "section": "components"
+      },
+      {
+        "name": "The Pinned-Track Rule",
+        "body": "A flip container is a grid, and a grid track that is not pinned to minmax(0, 1fr) will be widened by its widest face. Every face of a two-faced object carries min-width: 0, and any content with an intrinsic minimum (a table, a long token, a preformatted line) gets a narrow rendering rather than a horizontal scroller. Verified with both packets turned at 320, 390, 430 and 768: nothing exceeds the panel frame.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do build every new section as a panel: pindo, field, seam, jina — <Panel> + <PanelHead>, not a bespoke layout.",
+      "Do spend indigo on the frame, state, links and the primary action only.",
+      "Do give every figure a source (or an href to the artifact); the filter will drop it otherwise.",
+      "Do state status as a printed mark plus its word (.mark-state with data-state).",
+      "Do keep every text colour at mark-500 or darker, and treat cloth-400 as non-text.",
+      "Do set measurements with the .tabular class in Archivo.",
+      "Do let Panel/PanelHead supply the entrance; one orchestration, one curve (press).",
+      "Do inline icons as SVG paths at 16–18px, stroked in currentColor.",
+      "Do pin any flip or stacked-face container to minmax(0, 1fr) with min-width: 0 on the container and every face.",
+      "Do give tabular content a stacked rendering below sm rather than a horizontal scroller.",
+      "Do set an identity line beside a heading on a shared baseline, never above it.",
+      "Do keep error and fallback states inside the palette: border-alarm on square corners, no shadow."
+    ],
+    "donts": [
+      "Don't add a second accent, a tint block, or any decorative use of indigo.",
+      "Don't draw a 2px indigo rule anywhere but a panel's seam.",
+      "Don't use the reversed panel head a second time; it belongs to the closing contact panel.",
+      "Don't add box-shadow, gradients, blur, glass, texture images or hover-lift; depth is ink weight and tonal ground.",
+      "Don't round a corner. The only full radius on the site is the live status dot.",
+      "Don't fake the pindo with plain CSS borders, or author a third border weight.",
+      "Don't introduce a monospace face, or set labels, dates, repo names or figures as if they were code.",
+      "Don't set a small uppercase label above a heading as a kicker or eyebrow; the seam and the jina are the introduction.",
+      "Don't author per-section entrance animations, or a second easing curve.",
+      "Don't reference the legacy ink / signal ramp anywhere in src/components or src/sections, including as a raw hex in a default prop or fallback.",
+      "Don't solve an overflowing face with overflow-x: auto and a min-width; pin the track and render narrow instead.",
+      "Don't reach for a Tailwind default palette colour (red-500 and friends) for an error surface; alarm is the destructive ink."
+    ]
+  }
+}

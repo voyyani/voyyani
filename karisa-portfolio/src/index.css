@@ -224,8 +224,11 @@
     grid-template-columns: minmax(0, 1fr) !important;
   }
 
+  /* One column on a phone, so the cell simply stacks: figure, label, source.
+     It was a baseline row (figure left, label right), which only worked while a
+     cell held two children — the provenance line made it three. */
   .band-cell {
-    @apply flex items-baseline justify-between gap-4 bg-cloth-100 py-3;
+    @apply block bg-cloth-100 py-4;
   }
 
   .band-figure {
@@ -233,7 +236,13 @@
   }
 
   .band-label {
-    @apply block max-w-[22ch] text-right text-label uppercase text-mark-600;
+    @apply mt-2 block max-w-none text-label uppercase text-mark-600;
+  }
+
+  /* Where the figure came from. Set below the label rather than beside it, because a
+     number whose provenance is optional is a number nobody checks. */
+  .band-source {
+    @apply mt-1 block max-w-[34ch] text-xs leading-snug text-mark-500;
   }
 
   @screen sm {
@@ -242,11 +251,7 @@
     }
 
     .band-cell {
-      @apply block pb-0 pr-4 pt-4;
-    }
-
-    .band-label {
-      @apply mt-2 max-w-none text-left;
+      @apply pb-4 pr-5 pt-4;
     }
   }
 
@@ -359,12 +364,19 @@
 
   .packet-stack {
     display: grid;
+    /* The single implicit column must not be widened by its content. A grid item's
+       default `min-width: auto` let the specification table's own min-width push the
+       track — and with it the whole packet — past the panel's border on a phone. The
+       table then never scrolled, because nothing was ever narrower than it. */
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
     transform-style: preserve-3d;
     transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .packet-stack > * {
     grid-area: 1 / 1;
+    min-width: 0;
     backface-visibility: hidden;
   }
 
