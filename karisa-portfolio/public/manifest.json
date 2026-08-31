@@ -4,8 +4,8 @@
   "description": "Portfolio of Ngowa Karisa - Mechanical Engineer & Full-Stack Developer",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0B0B0C",
-  "theme_color": "#0B0B0C",
+  "background_color": "#F2EEE5",
+  "theme_color": "#F2EEE5",
   "orientation": "portrait-primary",
   "icons": [
     {

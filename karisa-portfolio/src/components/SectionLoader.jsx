@@ -1,26 +1,24 @@
 import React from 'react';
 
 /**
- * Loading spinner for lazy-loaded sections
- * Matches portfolio theme and provides smooth loading experience
+ * Placeholder for a lazily-loaded panel.
+ *
+ * Not a spinner. A spinner says "something is happening"; this says "a panel of this
+ * shape is arriving here", which is what stops the page jumping when it does. It is
+ * drawn in the sheet's own border language and holds roughly a panel's height.
  */
-const SectionLoader = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        {/* Animated spinner */}
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 border-4 border-ink-800 rounded-full"></div>
-          <div className="absolute inset-0 border-4 border-t-signal border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
+const SectionLoader = () => (
+  <div className="px-4 pb-section sm:px-6 lg:px-10" aria-hidden="true">
+    <div className="mx-auto min-h-[24rem] max-w-sheet bg-cloth-100 pindo">
+      <div className="px-4 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-14">
+        <div className="border-t-2 border-pindo pt-6 md:pt-8">
+          <div className="h-10 w-3/4 animate-pulse bg-cloth-300 sm:h-14" />
+          <div className="mt-6 h-5 w-1/2 animate-pulse bg-cloth-200" />
+          <div className="mt-8 h-40 w-full animate-pulse bg-cloth-200" />
         </div>
-        
-        {/* Loading text with fade animation */}
-        <p className="text-ink-300 text-sm font-mono animate-pulse">
-          Loading...
-        </p>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
 export default SectionLoader;

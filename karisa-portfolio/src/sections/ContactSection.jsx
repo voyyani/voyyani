@@ -1,140 +1,118 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import Panel from '../components/Panel';
+import { PanelHead } from '../components/Band';
 import ContactForm from '../components/ContactForm';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { SITE, mailto } from '../config/site';
+import { PANELS } from '../config/panels';
 
-const ContactSection = () => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
+/**
+ * The closing kanga.
+ *
+ * What was here before: three blurred colour blobs behind a rounded "LET'S CONNECT"
+ * pill, a heading with one word in the accent colour, and three identical icon cards
+ * reading "Within 24 hours / Nairobi, Kenya / Open for projects". None of that told a
+ * prospective client anything they could act on.
+ *
+ * What replaced it is the brief. The panel says what to send, what happens next, and
+ * what Karisa does not do — because a client who reads the constraint before writing is
+ * the client whose enquiry is worth answering. Every fact here is in PRODUCT.md or
+ * src/config/site.js; nothing about rates, availability windows or a client roster is
+ * invented.
+ */
 
-  // African-inspired pattern
+const WHAT_TO_INCLUDE = [
+  'What the system has to do, and who uses it.',
+  'What it has to survive — number of records, peak load, connection quality.',
+  'Whether anything already exists, and what has to keep working.',
+  'When you need it running, and what "running" means to you.',
+];
 
-  return (
-    <section
-      ref={ref}
-      id="contact"
-      className="relative py-20 px-4 overflow-hidden"
-    >
-      {/* Background decorations */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-ink-700 rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 bg-signal rounded-full blur-3xl opacity-10"></div>
-        <div className="absolute top-10 right-10 w-32 h-32 bg-signal rounded-full mix-blend-multiply blur-xl opacity-10"></div>
-      </div>
+const ContactSection = () => (
+  <Panel id="contact" labelledBy="contact-heading">
+    {(printed) => (
+      <>
+        <PanelHead
+          id="contact-heading"
+          heading={PANELS.contact.heading}
+          jina={PANELS.contact.jina}
+          lead={PANELS.contact.lead}
+          printed={printed}
+        />
 
-      <div className="container mx-auto max-w-4xl relative z-10">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={isVisible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5 }}
-            className="inline-block mb-4"
-          >
-            <span className="px-4 py-2 rounded-full border-2 border-signal text-signal text-sm font-medium tracking-widest">
-              LET'S CONNECT
-            </span>
-          </motion.div>
-
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 text-ink-50">
-            Get In <span className="text-signal">Touch</span>
-          </h2>
-          
-          <p className="text-xl text-ink-200 max-w-2xl mx-auto">
-            Have a project in mind? Let's work together to bring your ideas to life with engineering precision.
-          </p>
-        </motion.div>
-
-        {/* Contact Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-ink-900/50 backdrop-blur-sm p-8 md:p-12 border border-ink-800 shadow-2xl"
-        >
-          <ContactForm />
-        </motion.div>
-
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isVisible ? { opacity: 1 } : { opacity: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center"
-        >
-          <div className="p-6 bg-ink-900/30 border border-ink-800">
-            <div className="text-signal mb-3 flex justify-center">
-              <svg
-                className="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-ink-50 font-semibold mb-2">Email Response</h3>
-            <p className="text-ink-300 text-sm">Within 24 hours</p>
+        <div className="mt-10 grid gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-7">
+            <ContactForm />
           </div>
 
-          <div className="p-6 bg-ink-900/30 border border-ink-800">
-            <div className="text-signal mb-3 flex justify-center">
-              <svg
-                className="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-ink-50 font-semibold mb-2">Based In</h3>
-            <p className="text-ink-300 text-sm">Nairobi, Kenya</p>
-          </div>
+          <aside className="lg:col-span-5">
+            <h3 className="font-display text-title font-bold text-mark-900">
+              What to put in the message
+            </h3>
+            <ol className="mt-4 list-none space-y-0 border-t border-cloth-300 p-0">
+              {WHAT_TO_INCLUDE.map((line, i) => (
+                <li key={line} className="flex gap-4 border-b border-cloth-300 py-3.5">
+                  <span className="tabular shrink-0 font-semibold text-pindo">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-mark-700">{line}</span>
+                </li>
+              ))}
+            </ol>
 
-          <div className="p-6 bg-ink-900/30 border border-ink-800">
-            <div className="text-signal mb-3 flex justify-center">
-              <svg
-                className="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-ink-50 font-semibold mb-2">Availability</h3>
-            <p className="text-ink-300 text-sm">Open for projects</p>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-};
+            <h3 className="mt-9 font-display text-title font-bold text-mark-900">
+              Or write directly
+            </h3>
+            <dl className="mt-4 space-y-0 border-t border-cloth-300">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-cloth-300 py-3.5">
+                <dt className="text-label uppercase text-mark-600">Email</dt>
+                <dd className="m-0">
+                  <a href={mailto('Project enquiry')} className="link break-all font-semibold">
+                    {SITE.email}
+                  </a>
+                </dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-cloth-300 py-3.5">
+                <dt className="text-label uppercase text-mark-600">Based in</dt>
+                <dd className="m-0 font-semibold text-mark-900">{SITE.location}</dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-cloth-300 py-3.5">
+                <dt className="text-label uppercase text-mark-600">LinkedIn</dt>
+                <dd className="m-0">
+                  <a
+                    href={SITE.social.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link font-semibold"
+                  >
+                    Ngowa Karisa
+                  </a>
+                </dd>
+              </div>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-cloth-300 py-3.5">
+                <dt className="text-label uppercase text-mark-600">Code</dt>
+                <dd className="m-0">
+                  <a
+                    href={SITE.social.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link font-semibold"
+                  >
+                    github.com/voyyani
+                  </a>
+                </dd>
+              </div>
+            </dl>
+
+            <p className="mt-6 bg-cloth-200 px-5 py-4 text-mark-700">
+              I take on a small number of client builds at a time, through {SITE.brand}, and
+              I&apos;m also open to a full-time engineering role. Say which one you have in
+              mind and the reply will be more useful.
+            </p>
+          </aside>
+        </div>
+      </>
+    )}
+  </Panel>
+);
 
 export default ContactSection;

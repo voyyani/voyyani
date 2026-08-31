@@ -43,15 +43,15 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Fallback UI
       return (
-        <div className="min-h-screen bg-ink-950 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-cloth-100 flex items-center justify-center px-4">
           <div className="max-w-2xl w-full">
-            <div className="bg-ink-900 border-2 border-red-500/30 p-8 shadow-2xl">
+            <div className="bg-cloth-50 border-2 border-red-500/30 p-8 shadow-2xl">
               {/* Error Icon */}
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center">
                   <svg 
                     xmlns="http://www.w3.org/2000/svg" 
-                    className="h-10 w-10 text-red-500" 
+                    className="h-10 w-10 text-alarm" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke="currentColor"
@@ -67,27 +67,27 @@ class ErrorBoundary extends React.Component {
               </div>
 
               {/* Error Message */}
-              <h1 className="text-3xl font-bold text-ink-50 text-center mb-4">
+              <h1 className="text-3xl font-bold text-mark-900 text-center mb-4">
                 Oops! Something went wrong
               </h1>
               
-              <p className="text-ink-300 text-center mb-6">
+              <p className="text-mark-600 text-center mb-6">
                 We apologize for the inconvenience. An unexpected error has occurred.
               </p>
 
               {/* Error Details (Development only) */}
               {import.meta.env.DEV && this.state.error && (
-                <div className="mb-6 p-4 bg-ink-950 border border-red-500/20">
-                  <h3 className="text-sm font-semibold text-red-400 mb-2">Error Details:</h3>
-                  <pre className="text-xs text-ink-300 overflow-x-auto">
+                <div className="mb-6 p-4 bg-cloth-100 border border-red-500/20">
+                  <h3 className="text-sm font-semibold text-alarm mb-2">Error Details:</h3>
+                  <pre className="text-xs text-mark-600 overflow-x-auto">
                     {this.state.error.toString()}
                   </pre>
                   {this.state.errorInfo && (
                     <details className="mt-2">
-                      <summary className="text-xs text-ink-400 cursor-pointer hover:text-ink-300">
+                      <summary className="text-xs text-mark-500 cursor-pointer hover:text-mark-600">
                         Stack Trace
                       </summary>
-                      <pre className="text-xs text-ink-400 mt-2 overflow-x-auto">
+                      <pre className="text-xs text-mark-500 mt-2 overflow-x-auto">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -99,24 +99,24 @@ class ErrorBoundary extends React.Component {
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleReset}
-                  className="px-6 py-3 bg-signal text-ink-950 font-semibold hover:opacity-90 transition-opacity"
+                  className="px-6 py-3 bg-pindo text-cloth-50 font-semibold hover:opacity-90 transition-opacity"
                 >
                   Try Again
                 </button>
                 <button
                   onClick={() => window.location.href = '/'}
-                  className="px-6 py-3 bg-ink-950 border-2 border-signal text-signal font-semibold hover:bg-ink-850 transition-colors"
+                  className="px-6 py-3 bg-cloth-100 border-2 border-pindo text-pindo font-semibold hover:bg-cloth-200 transition-colors"
                 >
                   Go to Homepage
                 </button>
               </div>
 
               {/* Contact Info */}
-              <p className="text-center text-ink-400 text-sm mt-6">
+              <p className="text-center text-mark-500 text-sm mt-6">
                 If this problem persists, please{' '}
                 <a 
                   href="#contact" 
-                  className="text-signal hover:underline"
+                  className="text-pindo hover:underline"
                 >
                   contact me
                 </a>

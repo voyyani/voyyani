@@ -8,12 +8,17 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     
+    <!-- Self-hosted display + text faces. Preloaded because the jina is the largest
+         thing in the first viewport and must not arrive after it. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/bricolage-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin.woff2" crossorigin />
+
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     
     <!-- Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0B0B0C" />
+    <meta name="theme-color" content="#F2EEE5" />
 
     <!--
       Title, description, canonical, Open Graph, Twitter card and JSON-LD are injected
@@ -30,6 +35,39 @@
     <!--%SEO_META%-->
   </head>
   <body>
+    <!--
+      DIRECTION CONTRACT — The Kanga Sheet
+
+      THESIS: Every section is a kanga — a printed border, a plain field of evidence,
+      and one large printed line (the jina) stating the claim out loud. It refuses this
+      category's default arrangement, a dark hero over a grid of hover-lifting project
+      cards, and refuses that default's opposite, the mono terminal, which this site
+      already was.
+
+      OWN-WORLD: Unbleached cotton ground #F2EEE5, ink #14171C, one accent — kanga
+      indigo #243D8F — spent only on the border and on evidence. The pindo is a real
+      nine-slice border-image at two weights. Square corners everywhere. Bricolage
+      Grotesque for the jina at true display scale, Archivo for everything else, no
+      monospace. State is a printed mark, never a hue.
+
+      STORY: A prospective client sees running client software before reading a claim
+      about it, understands that one accountable person built it end to end, and
+      writes with a brief the contact panel has already told them how to shape.
+
+      FIRST VIEWPORT: The heaviest pindo frames the whole lead panel. Right column (top,
+      on a phone): the live Neema Foundation platform at full scale under a "Live —
+      neemafoundationkilifi.org" mark. Left column: the 2px indigo seam, then the h1 as
+      the jina at up to 5.25rem, the positioning paragraph, the two actions, and the
+      measured band — 3s→1.2s, 2, B.Eng — each figure linking to its proof.
+
+      FORM: candidate 6 of the grounded list (East African kanga cloth), assigned by the
+      roll. Seed key cb3a2a7e. Raised by the hand it beat: state as mark not hue (the
+      cutting bench), the two-faced object (the packet rack), one binding seam and true
+      display scale (the Bazaar spread).
+
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish
+      review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+    -->
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

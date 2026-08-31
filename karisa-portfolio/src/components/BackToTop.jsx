@@ -1,116 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * Back to the top of the sheet.
+ *
+ * The previous version wrapped this in a 56px SVG ring that redrew the scroll
+ * percentage already shown by ScrollProgressIndicator — two indicators for one fact,
+ * and a progress ring standing in for content. What is left is a square control in the
+ * page's own border language, which appears once the reader is past the lead panel.
+ */
 const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      // Show button when page is scrolled more than 400px
-      if (window.scrollY > 400) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
-      }
-
-      // Calculate scroll progress
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY;
-      const totalHeight = documentHeight - windowHeight;
-      const progress = (scrollTop / totalHeight) * 100;
-      setScrollProgress(Math.min(100, Math.max(0, progress)));
-    };
-
-    // Throttle scroll event for better performance
     let ticking = false;
+    const update = () => setIsVisible(window.scrollY > 600);
+
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          toggleVisibility();
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      window.requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+      ticking = true;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Initial check
-    toggleVisibility();
-
+    update();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  };
-
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: 20 }}
-          transition={{ duration: 0.2 }}
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 group"
-          aria-label="Back to top"
-        >
-          <div className="relative">
-            {/* Progress circle */}
-            <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-              {/* Background circle */}
-              <circle
-                cx="28"
-                cy="28"
-                r="24"
-                fill="none"
-                stroke="rgba(0, 87, 146, 0.2)"
-                strokeWidth="3"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="28"
-                cy="28"
-                r="24"
-                fill="none"
-                stroke="#C8FF3D"
-                strokeWidth="3"
-                strokeDasharray={`${2 * Math.PI * 24}`}
-                strokeDashoffset={`${2 * Math.PI * 24 * (1 - scrollProgress / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-150"
-              />
-            </svg>
-
-            {/* Button content */}
-            <div
-              className="absolute inset-0 flex items-center justify-center border border-ink-700 bg-ink-900 transition-all duration-200 group-hover:scale-110"
-            >
-              <svg
-                className="w-6 h-6 text-signal group-hover:translate-y-[-2px] transition-transform"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M5 10l7-7m0 0l7 7m-7-7v18"
-                />
-              </svg>
-            </div>
-          </div>
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <button
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Back to top"
+      tabIndex={isVisible ? 0 : -1}
+      aria-hidden={isVisible ? undefined : 'true'}
+      className={`fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center border border-mark-900 bg-cloth-50 text-mark-900 transition-all duration-400 ease-press hover:bg-pindo hover:text-cloth-50 ${
+        isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'
+      }`}
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
   );
 };
 

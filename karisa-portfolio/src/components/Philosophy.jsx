@@ -1,132 +1,87 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import Panel from './Panel';
+import { PanelHead } from './Band';
+import { PANELS } from '../config/panels';
 
 /**
- * Phase 1 (docs/roadmapupdated.md task 5): trimmed to complement About rather than
- * repeat it.
+ * Four habits, set as a ruled ledger rather than four identical cards.
  *
- * What was removed and why:
- *  - Four invented metrics presented as "Performance Target" — "99.9% Accuracy",
- *    "Zero Downtime", "-40% Load Time", "100% Coverage". None were measured; none
- *    corresponded to anything on the site. Exactly the kind of unfalsifiable number
- *    Phase 1 exists to delete.
- *  - A duplicated full-size right-hand panel that restated whichever card was active.
- *  - A closing block quote that said the same thing as the About section, at length.
+ * The card grid was the wrong container: it made four independent claims of equal
+ * weight and gave each one a decorative icon. A habit is only worth stating here if it
+ * produced a specific decision in the work above, so the structure is the pairing —
+ * the habit on the left, the decision it caused on the right, and the project it
+ * happened in named underneath. That pairing is the argument; the cards were furniture.
  *
- * What's left is the one genuinely distinctive idea here: four engineering habits, each
- * tied to a specific decision visible in the case studies above.
+ * Every `where` below points at something else on this page.
  */
-const Philosophy = () => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.15, triggerOnce: true });
+const HABITS = [
+  {
+    habit: 'Design to a tolerance',
+    body:
+      'A spec that says "should be fast" cannot be checked. One that says "under 1.5s on a 3G connection" can. Raslipwani had a number attached to it before any of the optimisation work started.',
+    where: 'Raslipwani Properties',
+    href: '#projects',
+  },
+  {
+    habit: 'Put the constraint in the material',
+    body:
+      "A safety interlock belongs in the mechanism, not the operating manual. Neema's permissions are enforced by PostgreSQL Row-Level Security, so hiding a button in the UI isn't what's protecting the data.",
+    where: 'Neema Foundation',
+    href: '#projects',
+  },
+  {
+    habit: 'Load-test before you trust it',
+    body:
+      'The first version of a listings page is fine at 40 rows and painful at 400. Assume the second case and design the query for it, rather than discovering the limit in production.',
+    where: 'Server-side pagination, Raslipwani',
+    href: '#projects',
+  },
+  {
+    habit: 'Measure, then claim',
+    body:
+      "If I can't point at where a number came from, it doesn't go on the page. That rule removed several figures from this site — including some that flattered me.",
+    where: 'The commit history below',
+    href: '#activity',
+  },
+];
 
-  // Inline stroke icons on a 24px grid rather than emoji: emoji render differently on
-  // every platform, can't take the accent colour, and are a template tell.
-  const principles = [
-    {
-      icon: (
-        <>
-          <path d="M3 20h18" /><path d="M6 20V9l6-5 6 5v11" /><path d="M9 20v-5h6v5" />
-        </>
-      ),
-      title: 'Design to a tolerance',
-      body:
-        'A spec that says "should be fast" cannot be checked. One that says "under 1.5s on a 3G connection" can. Raslipwani had a number attached to it before any of the optimisation work started.',
-    },
-    {
-      icon: (
-        <>
-          <rect x="4" y="4" width="16" height="16" rx="1" /><path d="M9 12h6" /><path d="M12 9v6" />
-        </>
-      ),
-      title: 'Put the constraint in the material',
-      body:
-        "A safety interlock belongs in the mechanism, not the operating manual. Neema's permissions are enforced by PostgreSQL Row-Level Security, so hiding a button in the UI isn't what's protecting the data.",
-    },
-    {
-      icon: (
-        <>
-          <path d="M12 4v16" /><path d="M5 8h14" /><path d="M5 8l-2 6h4l-2-6z" /><path d="M19 8l-2 6h4l-2-6z" />
-        </>
-      ),
-      title: 'Load-test before you trust it',
-      body:
-        'The first version of a listings page is fine at 40 rows and painful at 400. Assume the second case and design the query for it, rather than discovering the limit in production.',
-    },
-    {
-      icon: (
-        <>
-          <circle cx="11" cy="11" r="7" /><path d="M20 20l-4.3-4.3" /><path d="M8 11h6" />
-        </>
-      ),
-      title: 'Measure, then claim',
-      body:
-        "If I can't point at where a number came from, it doesn't go on the page. That rule removed several figures from this site — including some that flattered me.",
-    },
-  ];
+const Philosophy = () => (
+  <Panel id="philosophy" labelledBy="philosophy-heading">
+    {(printed) => (
+      <>
+        <PanelHead
+          id="philosophy-heading"
+          heading={PANELS.philosophy.heading}
+          jina={PANELS.philosophy.jina}
+          lead={PANELS.philosophy.lead}
+          printed={printed}
+        />
 
-  return (
-    <motion.section
-      id="philosophy"
-      ref={ref}
-      initial="hidden"
-      animate={isVisible ? 'visible' : 'hidden'}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0.6, staggerChildren: 0.1 } },
-      }}
-      className="relative border-b border-ink-800 px-5 py-section md:px-10"
-      aria-labelledby="philosophy-heading"
-    >
-      <div className="mx-auto max-w-[1400px]">
-        <motion.div
-          variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-          className="mb-10"
-        >
-          <div className="eyebrow mb-5 text-signal">05 — How I work</div>
-
-          <h2 id="philosophy-heading" className="mb-5 max-w-[20ch] text-display font-bold text-ink-50">
-            Four habits that came from the workshop
-          </h2>
-
-          <p className="max-w-prose text-lg leading-relaxed text-ink-300">
-            Each of these shows up in a specific decision in the work above — not as a
-            metaphor, as the reason something is built the way it is.
-          </p>
-        </motion.div>
-
-        <div className="grid gap-px bg-ink-800 md:grid-cols-2">
-          {principles.map((principle, index) => (
-            <motion.article
-              key={principle.title}
-              variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-              transition={{ delay: index * 0.08 }}
-              className="bg-ink-900 p-6 transition-colors duration-250 ease-signal hover:bg-ink-850"
+        <ol className="mt-10 list-none border-t border-cloth-300 p-0">
+          {HABITS.map((item) => (
+            <li
+              key={item.habit}
+              className="grid gap-x-10 gap-y-3 border-b border-cloth-300 py-7 transition-colors duration-250 ease-press hover:bg-cloth-200 md:grid-cols-12"
             >
-              <div className="flex items-start gap-4">
-                <svg
-                  className="h-6 w-6 shrink-0 text-signal"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+              <h3 className="font-display text-title font-bold text-mark-900 md:col-span-4">
+                {item.habit}
+              </h3>
+
+              <div className="md:col-span-8">
+                <p className="max-w-prose leading-relaxed text-mark-700">{item.body}</p>
+                <a
+                  href={item.href}
+                  className="mt-3 inline-block text-label uppercase text-pindo no-underline hover:underline"
                 >
-                  {principle.icon}
-                </svg>
-                <div>
-                  <h3 className="mb-2 text-lg font-bold text-ink-50">{principle.title}</h3>
-                  <p className="text-sm leading-relaxed text-ink-200">{principle.body}</p>
-                </div>
+                  Where it shows up: {item.where}
+                </a>
               </div>
-            </motion.article>
+            </li>
           ))}
-        </div>
-      </div>
-    </motion.section>
-  );
-};
+        </ol>
+      </>
+    )}
+  </Panel>
+);
 
 export default Philosophy;

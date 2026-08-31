@@ -1,14 +1,141 @@
-/* Archivo (display + body) and JetBrains Mono (data, labels, status).
-   Replaces Rajdhani + Inter — see tailwind.config.js for the Phase 2 rationale. */
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+/* ===========================================================================
+   The Kanga Sheet — see tailwind.config.js for the identity rationale.
+
+   Faces are self-hosted from public/fonts. The previous system @import-ed two
+   families from fonts.googleapis.com, which is a render-blocking round trip to
+   two third-party origins (googleapis + gstatic) before a single glyph paints —
+   on an audience the product record explicitly places on constrained Kenyan
+   mobile connections. Both files here are variable, so one request per family
+   covers every weight the site uses.
+
+   JetBrains Mono is gone. It was carrying "technical" as a costume: it set
+   labels, captions, dates and repo names, none of which are code. Archivo has
+   tabular figures and does the measurement work honestly.
+   =========================================================================== */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/archivo-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/bricolage-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --pindo-full: url('/patterns/pindo-full.svg');
+    --pindo-rule: url('/patterns/pindo-rule.svg');
+  }
+
   html {
     scroll-behavior: smooth;
+    /* The navbar is fixed; anchored sections must not land under it. */
+    scroll-padding-top: 4.5rem;
+  }
+
+  body {
+    @apply bg-cloth-100 font-sans text-mark-900 antialiased;
+    line-height: 1.6;
+    overflow-x: hidden;
+    /* Cloth is printed, not lit. No gradient, no vignette, no texture image. */
+  }
+
+  /* ---- Browser surfaces --------------------------------------------------
+     The parts of the page nobody draws still carry the design. Left at their
+     defaults they are the loudest signal that a page was assembled. */
+
+  ::selection {
+    background: #243d8f;
+    color: #faf8f3;
+  }
+
+  :focus-visible {
+    outline: 2px solid #243d8f;
+    outline-offset: 2px;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c6beab #f2eee5;
+  }
+  /* WebKit */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f2eee5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c6beab;
+    border: 3px solid #f2eee5;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #243d8f;
+  }
+
+  input,
+  textarea,
+  select {
+    caret-color: #243d8f;
+  }
+
+  /* Every figure on this site is a measured value. Tabular by default so
+     columns of them line up and none of them jitters on hover. */
+  .tabular,
+  table td,
+  table th,
+  time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  a {
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: from-font;
+  }
+
+  ::placeholder {
+    color: #5b5f67; /* 5.5:1 on cloth-50 — placeholders are text */
+    opacity: 1;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -23,53 +150,239 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
 
-  body {
-    @apply bg-ink-950 font-sans text-ink-50 antialiased;
-    /* Flat ground, deliberately. The old body was a 135deg navy gradient. */
-    line-height: 1.6;
-    overflow-x: hidden;
+@layer components {
+  /* ---- The sheet --------------------------------------------------------- */
+
+  .sheet {
+    @apply mx-auto w-full max-w-sheet px-4 sm:px-6 lg:px-10;
   }
 
-  ::selection {
-    background: #c8ff3d;
-    color: #0b0b0c;
+  /* ---- The pindo: a kanga's printed border, as a real nine-slice ---------
+     Two weights of one language. The lead panel wears the full motif; every
+     other panel wears the quiet rule, so the frame is recognisably the same
+     border at a third of the ink. */
+
+  .pindo {
+    border: 12px solid transparent;
+    border-image-source: var(--pindo-rule);
+    border-image-slice: 16;
+    border-image-repeat: round;
+    border-image-width: 12px;
   }
 
-  /* One focus treatment everywhere, in the signal colour so it is unmissable. */
-  :focus-visible {
-    outline: 2px solid #c8ff3d;
-    outline-offset: 2px;
+  .pindo-full {
+    border: 14px solid transparent;
+    border-image-source: var(--pindo-full);
+    border-image-slice: 16;
+    border-image-repeat: round;
+    border-image-width: 14px;
+  }
+
+  @screen md {
+    .pindo {
+      border-width: 16px;
+      border-image-width: 16px;
+    }
+    .pindo-full {
+      border-width: 20px;
+      border-image-width: 20px;
+    }
+  }
+
+  /* ---- The jina: the printed line along the hem -------------------------- */
+
+  .jina {
+    @apply font-display text-jina text-mark-900;
+    text-wrap: balance;
+  }
+
+  .jina-lead {
+    @apply font-display text-jina-lead text-mark-900;
+    text-wrap: balance;
+  }
+
+  .jina-sm {
+    @apply font-display text-jina-sm text-mark-900;
+    text-wrap: balance;
+  }
+
+  /* The hem: the seam a kanga's jina sits under. One rule, one measure, at the
+     same place on every panel — this is the law that binds the whole sheet. */
+  .hem {
+    @apply border-t-2 border-pindo pt-6 md:pt-8;
+  }
+
+  /* ---- The band: the measured facts, always under the hem ---------------- */
+
+  .band {
+    @apply mt-7 grid gap-px border-t border-cloth-300 bg-cloth-300 pt-px;
+    /* Below sm the columns become rows: figure left, label right, on one
+       baseline. Three long labels in 105px columns is not a band, it is a
+       stack of orphans. */
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .band-cell {
+    @apply flex items-baseline justify-between gap-4 bg-cloth-100 py-3;
+  }
+
+  .band-figure {
+    @apply tabular font-display text-figure font-bold leading-none text-mark-900;
+  }
+
+  .band-label {
+    @apply block max-w-[22ch] text-right text-label uppercase text-mark-600;
+  }
+
+  @screen sm {
+    .band {
+      grid-template-columns: var(--band-cols, repeat(3, minmax(0, 1fr))) !important;
+    }
+
+    .band-cell {
+      @apply block pb-0 pr-4 pt-4;
+    }
+
+    .band-label {
+      @apply mt-2 max-w-none text-left;
+    }
+  }
+
+  /* ---- State as a printed mark, never as a hue --------------------------
+     Donated from the cutting-bench direction: the accent stays spent on
+     evidence, so status is carried by a struck mark plus its own word. */
+
+  .mark-state {
+    @apply inline-flex items-center gap-2 text-label uppercase tracking-[0.09em] text-mark-700;
+  }
+
+  .mark-state::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    flex: none;
+    background: #243d8f;
+  }
+
+  .mark-state[data-state='maintenance']::before {
+    background: none;
+    border: 1.5px solid #8a5a08;
+    transform: rotate(45deg);
+  }
+
+  .mark-state[data-state='maintenance'] {
+    @apply text-warn;
+  }
+
+  .mark-state[data-state='live']::before {
+    border-radius: 9999px;
+  }
+
+  /* ---- Controls ---------------------------------------------------------- */
+
+  .btn-pindo {
+    @apply inline-flex items-center justify-center gap-2.5 bg-pindo px-6 py-3.5 font-semibold
+           text-cloth-50 transition-colors duration-250 ease-press hover:bg-pindo-deep;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2.5 border-2 border-pindo px-6 py-3
+           font-semibold text-pindo transition-colors duration-250 ease-press
+           hover:bg-pindo hover:text-cloth-50;
+  }
+
+  .btn-quiet {
+    @apply inline-flex items-center justify-center gap-2 border border-cloth-400 px-4 py-2
+           text-sm font-medium text-mark-700 transition-colors duration-250 ease-press
+           hover:border-pindo hover:text-pindo;
+  }
+
+  .field {
+    @apply w-full border border-cloth-400 bg-cloth-50 px-4 py-3 text-mark-900
+           transition-colors duration-250 ease-press
+           focus:border-pindo focus:outline-none focus:ring-2 focus:ring-pindo/25;
+  }
+
+  .field[aria-invalid='true'] {
+    @apply border-alarm;
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold text-mark-700;
+  }
+
+  /* A link in running copy. Underlined by default — on cloth, colour alone is
+     not a strong enough affordance at body size. */
+  .link {
+    @apply text-pindo underline decoration-cloth-400 transition-colors duration-250 ease-press
+           hover:decoration-pindo;
+  }
+
+  /* ---- Skip link --------------------------------------------------------- */
+
+  .skip-link {
+    @apply absolute left-4 z-[100] -translate-y-24 bg-pindo px-4 py-3 font-semibold text-cloth-50
+           transition-transform duration-250 ease-press focus:translate-y-4;
+  }
+
+  /* ---- The one authored moment: ink meeting cloth ------------------------
+     A panel prints. The frame arrives, then the jina wipes left to right at
+     press speed, then the measured band settles under it. Applied once, per
+     panel, from a single orchestration — not scattered per element. */
+
+  .print-frame {
+    animation: settle 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .print-jina {
+    animation: print 620ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+  }
+
+  .print-band {
+    animation: settle 480ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+  }
+
+  .print-body {
+    animation: settle 480ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
   }
 }
 
 @layer components {
-  /* The recurring mono micro-label: "FIG. 01", "LIVE", "SELECTED WORK". */
-  .eyebrow {
-    @apply font-mono text-eyebrow uppercase text-ink-400;
+  /* ---- The packet: a two-faced object ------------------------------------
+     The signature interaction. A seed packet sells the painted harvest on the
+     front and April's discipline in tiny type on the back; a case study does
+     the same job — the running screenshot forward, the specification behind.
+     Both faces occupy one grid cell so the object keeps its height through the
+     turn, and the reverse is mounted only once someone asks for it. */
+
+  .packet-stack {
+    display: grid;
+    transform-style: preserve-3d;
+    transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Hairline panel. Square, bordered, flat — the system's default container. */
-  .panel {
-    @apply border border-ink-800 bg-ink-900;
+  .packet-stack > * {
+    grid-area: 1 / 1;
+    backface-visibility: hidden;
   }
 
-  .btn-signal {
-    @apply inline-flex items-center justify-center gap-2 bg-signal px-6 py-3.5 font-semibold text-ink-950
-           transition-colors duration-250 ease-signal hover:bg-signal-hover;
+  .packet-stack[data-turned='true'] {
+    transform: rotateY(180deg);
   }
 
-  /* Skip-to-content. Phase 5 accessibility pass — the site had no bypass mechanism, so a
-     keyboard or screen-reader user had to tab the entire navbar on every page.
-     Off-screen rather than `display:none` or `visibility:hidden`, both of which remove an
-     element from the focus order entirely and would defeat the purpose. */
-  .skip-link {
-    @apply absolute left-4 z-[100] -translate-y-24 bg-signal px-4 py-3 font-semibold text-ink-950
-           transition-transform duration-250 ease-signal focus:translate-y-4;
+  .packet-reverse {
+    transform: rotateY(180deg);
   }
 
-  .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 border border-ink-700 px-6 py-3.5 font-medium text-ink-50
-           transition-colors duration-250 ease-signal hover:border-ink-500 hover:bg-ink-900;
+  /* Without 3D support the turn is a cross-fade rather than a broken plane. */
+  @supports not (transform-style: preserve-3d) {
+    .packet-stack[data-turned='true'] {
+      transform: none;
+    }
+    .packet-reverse {
+      transform: none;
+    }
   }
 }

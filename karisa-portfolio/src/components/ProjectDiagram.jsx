@@ -14,30 +14,27 @@ import React from 'react';
  *                request land on the same RLS policy.
  *
  * Hand-authored inline SVG: no library, no runtime, scales with the container, and
- * `currentColor` keeps it on-theme. The single lime is reserved for the mark each
+ * `currentColor` keeps it on-theme. The single indigo is reserved for the mark each
  * figure is about.
  */
 
-/* These mirror the tailwind.config.js ink ramp. They are duplicated as literals because
-   SVG presentation attributes cannot read Tailwind classes — keep them in sync by hand.
-
-   MUTED was #6E6C74 until the Phase 5 accessibility pass. It labels 10-11px SVG text,
-   and measured 3.48:1 against the ink-850 card ground — below the 4.5:1 WCAG AA floor.
-   It now tracks ink-400's corrected value. */
-const INK = '#8B8890'; // ink-300 — graphical strokes (3:1 threshold), not text
-const EDGE = '#2E2E33';
-const TEXT = '#F2F1EE';
-const MUTED = '#828089'; // ink-400 — carries real text, so AA applies
-const SIGNAL = '#C8FF3D';
+/* These mirror the tailwind.config.js Kanga Sheet ramp. They are duplicated as literals
+   because SVG presentation attributes cannot read Tailwind classes — keep them in sync
+   by hand. Every value that carries text clears WCAG AA on the cloth-50 box ground. */
+const INK = '#5B5F67'; // mark-500 — graphical strokes
+const EDGE = '#C6BEAB'; // cloth-400 — box edges
+const TEXT = '#14171C'; // mark-900
+const MUTED = '#5B5F67'; // mark-500 — carries real text, so AA applies (5.5:1 on cloth)
+const SIGNAL = '#243D8F'; // pindo — the one accent, reserved for what each figure is about
 
 const Box = ({ x, y, w = 124, h = 52, label, sub, accent = false }) => (
   <>
-    <rect x={x} y={y} width={w} height={h} fill={accent ? 'rgba(200,255,61,0.08)' : '#17161A'} stroke={accent ? SIGNAL : EDGE} strokeWidth="1" />
+    <rect x={x} y={y} width={w} height={h} fill={accent ? 'rgba(36,61,143,0.07)' : '#FAF8F3'} stroke={accent ? SIGNAL : EDGE} strokeWidth="1" />
     <text x={x + w / 2} y={sub ? y + 23 : y + h / 2 + 4} textAnchor="middle" fill={TEXT} fontSize="12" fontWeight="600">
       {label}
     </text>
     {sub && (
-      <text x={x + w / 2} y={y + 39} textAnchor="middle" fill={accent ? SIGNAL : MUTED} fontSize="10" fontFamily="ui-monospace, monospace">
+      <text x={x + w / 2} y={y + 39} textAnchor="middle" fill={accent ? SIGNAL : MUTED} fontSize="10">
         {sub}
       </text>
     )}
@@ -48,7 +45,7 @@ const Arrow = ({ x1, x2, y, label, accent = false }) => (
   <>
     <line x1={x1} y1={y} x2={x2 - 7} y2={y} stroke={accent ? SIGNAL : INK} strokeWidth="1.5" markerEnd={accent ? 'url(#ah-signal)' : 'url(#ah)'} />
     {label && (
-      <text x={(x1 + x2) / 2} y={y - 9} textAnchor="middle" fill={accent ? SIGNAL : MUTED} fontSize="10" fontFamily="ui-monospace, monospace">
+      <text x={(x1 + x2) / 2} y={y - 9} textAnchor="middle" fill={accent ? SIGNAL : MUTED} fontSize="10">
         {label}
       </text>
     )}
@@ -77,7 +74,7 @@ const RaslipwaniDiagram = () => (
       <Defs />
 
       {/* BEFORE */}
-      <text x="16" y="28" fill={MUTED} fontSize="10" fontFamily="ui-monospace, monospace" letterSpacing="1.4">
+      <text x="16" y="28" fill={MUTED} fontSize="10" letterSpacing="1.4">
         BEFORE — ~3s TO FIRST PAINT
       </text>
       <Box x={16} y={44} label="Browser" sub="list view" />
@@ -89,7 +86,7 @@ const RaslipwaniDiagram = () => (
       <line x1="16" y1="128" x2="730" y2="128" stroke={EDGE} strokeWidth="1" />
 
       {/* AFTER */}
-      <text x="16" y="164" fill={SIGNAL} fontSize="10" fontFamily="ui-monospace, monospace" letterSpacing="1.4">
+      <text x="16" y="164" fill={SIGNAL} fontSize="10" letterSpacing="1.4">
         AFTER — ~1.2s
       </text>
       <Box x={16} y={180} label="Browser" sub="debounced 500ms" accent />
@@ -107,7 +104,7 @@ const RaslipwaniDiagram = () => (
         stops one firing per keystroke. Remove any one and the 3s comes back.
       </text>
     </svg>
-    <figcaption className="mt-3 text-xs text-ink-400">
+    <figcaption className="mt-3 text-xs text-mark-500">
       Where the three optimisations sit in the request path.
     </figcaption>
   </figure>
@@ -130,10 +127,10 @@ const NeemaDiagram = () => (
       <path d="M166 62 H250 V130" fill="none" stroke={INK} strokeWidth="1.5" />
       <path d="M166 202 H250 V130" fill="none" stroke={INK} strokeWidth="1.5" />
       <circle cx="250" cy="130" r="3" fill={INK} />
-      <text x="208" y="52" textAnchor="middle" fill={MUTED} fontSize="10" fontFamily="ui-monospace, monospace">
+      <text x="208" y="52" textAnchor="middle" fill={MUTED} fontSize="10">
         signed in
       </text>
-      <text x="208" y="192" textAnchor="middle" fill={MUTED} fontSize="10" fontFamily="ui-monospace, monospace">
+      <text x="208" y="192" textAnchor="middle" fill={MUTED} fontSize="10">
         same token
       </text>
 
@@ -153,7 +150,7 @@ const NeemaDiagram = () => (
         the check runs in the database, below both paths.
       </text>
     </svg>
-    <figcaption className="mt-3 text-xs text-ink-400">
+    <figcaption className="mt-3 text-xs text-mark-500">
       Why hiding a button is not access control.
     </figcaption>
   </figure>

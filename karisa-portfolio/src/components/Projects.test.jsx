@@ -304,7 +304,10 @@ describe('Projects Component', () => {
   describe('Data Integrity', () => {
     it('should render correct number of metrics in card (3)', () => {
       const { container } = render(<Projects />);
-      const firstCardMetrics = container.querySelector('.grid-cols-3');
+      // The measured band. It was `.grid-cols-3` when the card hard-coded its columns;
+      // the Kanga Sheet's <Band> sets them from a --band-cols custom property so the
+      // same component can carry three figures here and six in the modal.
+      const firstCardMetrics = container.querySelector('.band');
       expect(firstCardMetrics.children.length).toBe(3);
     });
 

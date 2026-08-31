@@ -57,21 +57,23 @@ export default defineConfig({
         name: 'Ngowa Karisa - Software Engineer',
         short_name: 'Karisa Portfolio',
         description: 'Portfolio website showcasing software engineering projects and skills',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#F2EEE5',
+        background_color: '#F2EEE5',
         display: 'standalone',
         scope: '/',
         start_url: '/',
         orientation: 'portrait-primary',
         icons: [
+          // These were /pwa-192x192.png and /pwa-512x512.png, neither of which exists
+          // in public/. The installed-app icon was a 404.
           {
-            src: '/pwa-192x192.png',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any maskable',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -82,32 +84,19 @@ export default defineConfig({
         // Cache configuration
         globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}'],
         runtimeCaching: [
+          // Fonts and the pindo border tiles are self-hosted and content-stable.
+          // The two rules that were here matched fonts.googleapis.com and
+          // fonts.gstatic.com, which this site no longer requests at all.
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            urlPattern: /\/(fonts|patterns)\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-cache',
+              cacheName: 'local-assets-cache',
               expiration: {
-                maxEntries: 10,
+                maxEntries: 20,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
@@ -168,11 +157,26 @@ export default defineConfig({
     
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'animation': ['framer-motion'],
-          'forms': ['react-hook-form', 'zod', '@hookform/resolvers', '@emailjs/browser'],
-          'ui': ['sonner'],
+        /**
+         * Function form, matching on the resolved module path.
+         *
+         * The object form above it matched bare specifiers, so `react-dom/client` —
+         * which is what src/main.jsx actually imports — never resolved to the
+         * `react-vendor` entry. React DOM landed in the entry chunk instead, which is
+         * why docs/AUDIT.md §4.2 measured `react-vendor` at 11KB while the entry chunk
+         * was 821KB. Matching path segments under node_modules cannot miss that way.
+         */
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined
+
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'react-vendor'
+          if (/[\\/]node_modules[\\/]react-router/.test(id)) return 'router'
+          if (/[\\/]node_modules[\\/](framer-motion|motion-dom|motion-utils)[\\/]/.test(id)) return 'animation'
+          if (/[\\/]node_modules[\\/](react-hook-form|zod|@hookform|@emailjs)[\\/]/.test(id)) return 'forms'
+          if (/[\\/]node_modules[\\/](@supabase|@sentry)[\\/]/.test(id)) return 'platform'
+          if (/[\\/]node_modules[\\/](sonner|dompurify)[\\/]/.test(id)) return 'ui'
+
+          return 'vendor'
         },
         // Optimize chunk file naming
         chunkFileNames: 'assets/[name]-[hash].js',

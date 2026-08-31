@@ -72,7 +72,7 @@ describe('GitHubActivity', () => {
       const texts = [...container.querySelectorAll('svg text')].map((t) => t.textContent);
       expect(texts).toContain(String(peak));
       // a value on every column would be chaos; count the bold direct labels
-      const direct = [...container.querySelectorAll('svg text.fill-ink-50')];
+      const direct = [...container.querySelectorAll('svg text.fill-mark-900')];
       expect(direct.length).toBe(1);
     });
   });

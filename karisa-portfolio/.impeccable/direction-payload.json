@@ -1,0 +1,110 @@
+{
+  "title": "Choose the visual world for voyani.tech",
+  "question": "You pinned a light, paper-ground, ink-type, one-restrained-accent editorial register. Within that pin, the roll assigned The Kanga Sheet. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Kanga Sheet",
+      "kicker": "THE ROLL",
+      "lineage": "East African kanga cloth — a bordered field (pindo) enclosing a plain ground (mji), captioned along the hem by a printed jina",
+      "thesis": "A kanga is not decorated cloth; it is a printed statement you can hold up. Its whole grammar is one border, one field, one line of large type that says the thing out loud. Every section of this site is a kanga: a ruled border, the evidence in the field, and a jina along the hem stating the claim in plain words. It refuses the arrangement this category always ships — a dark hero over a grid of hover-lifting project cards — and it refuses that arrangement's predictable opposite, the mono terminal, which this site already is.",
+      "palette": ["#F2EEE5", "#15181D", "#243D8F", "#CFC7B6", "#8C8677"],
+      "materials": ["unbleached cotton ground", "single-pigment indigo border repeat", "tabular ink figures", "hairline rules"],
+      "viewport": "One panel fills the screen. An indigo pindo runs the full frame; inside it, at true scale, the live Neema Foundation platform. Along the hem, set in display type across the whole width, the jina: what I built is running now. Under the hem, a tabular band — 3s→1.2s · 5 roles enforced in the database · schema through deploy — each figure a link to the artifact that proves it. The primary action sits in the border's right stile, where a kanga carries its maker's mark.",
+      "risk": "A textile grammar on an engineering portfolio can read as costume rather than argument. It survives only if the border is structural — if it does real work carrying state and hierarchy — and if the jina lines are Karisa's own words, in his own Swahili, not decorative. That wording needs his sign-off, and I will not invent proverbs and present them as traditional.",
+      "raised": [
+        {"from": "The Cutting Bench (declined)", "raise": "State is a mark, not a hue. Live, archived and in-maintenance read as printed marks struck into the border — so the one accent is never spent on decoration, only on evidence."},
+        {"from": "The Seed Packet Rack (competitive)", "raise": "Every case study is a two-faced object: the painted face is the running screenshot, the reverse is the specification set in tiny tabular type. The rack sells both at once."},
+        {"from": "The Bazaar Spread (competitive)", "raise": "One compositional law binds every panel — the hem seam sits at a fixed height and type and image cross it — and display type is set at true display scale, not heading scale."},
+        {"from": "The Orizuru Sequence (declined)", "raise": "A numbered margin index that never breaks: every panel is numbered in a fixed left rail, so the page reads as one continuous sheet rather than stacked sections."}
+      ],
+      "board": "https://impeccable.style/worlds/cards/vernacular-ephemera-seed-packet-rack.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "The Specification Sheet",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "ISO 7200 drawing title block, revision table, materials test certificate",
+      "thesis": "The page is one controlled document. A title block anchors the foot of every sheet — drawn by, checked, scale, revision — and every claim appears as a Required / Measured pair, the way a mill certificate states a result instead of asserting a quality. Karisa's own stated principle, measure then claim, becomes the literal page furniture.",
+      "palette": ["#F5F3EE", "#101215", "#1D4ED8", "#D6D2C7"],
+      "materials": ["drafting paper", "hairline rules and tick marks", "tabular figures", "revision stamps"],
+      "viewport": "A sheet: thin ruled border, sheet number top right, the running Neema platform as the drawing field, and a title block along the foot carrying name, discipline, location and revision. The measured band reads as two columns — required, measured — with the primary action set in the title block's rightmost cell.",
+      "risk": "This is the direction most runs land on once they leave the dark-terminal default, and it is one step from blueprint pastiche. Familiar and effective is a legitimate destination — but you would be choosing the safe one, and it is my own top-ranked candidate, which is exactly why the roll did not assign it."
+    },
+    {
+      "id": "challenger-seed-rack",
+      "label": "The Packet Rack",
+      "verdict": "competitive",
+      "lineage": "hardware-store seed packet rack",
+      "thesis": "The front is July's fattest tomato in gouache; the back is April's discipline in tiny type. Each project is a packet with a painted promise on the face and the sowing calendar on the reverse — screenshot forward, specification behind.",
+      "palette": ["#F6F1E3", "#171A12", "#2E6B3E", "#C9BFA6"],
+      "materials": ["gouache face", "kraft reverse", "6pt tabular back-copy"],
+      "viewport": "A rack of two packets at full height; the first is turned to show its reverse, the sowing calendar readable as real spec.",
+      "case": "Holds product clarity outright — the front/back duality is precisely Karisa's pitch. Loses audience identification: a Nairobi NGO director choosing a developer does not live in a garden-centre rack.",
+      "risk": "Charming enough to undercut the engineering claim it is meant to carry."
+    },
+    {
+      "id": "challenger-bazaar",
+      "label": "The Bazaar Spread",
+      "verdict": "competitive",
+      "lineage": "Brodovitch-era Harper's Bazaar, hairline display serif floating in white",
+      "thesis": "Content travels in spreads, not sections. The left page poses — the client's problem — and the right page answers with the built thing; the gutter holds the beat between them.",
+      "palette": ["#FBFAF7", "#111111", "#4A4A4A", "#B4232A"],
+      "materials": ["warm white paper", "photogravure greys", "hairline display serif", "one lipstick accent"],
+      "viewport": "A flat spread: the problem stated at display scale on the left, the running platform answering across the gutter on the right.",
+      "case": "Highest product clarity of the hand — pose/answer maps exactly onto problem/what I built. Loses audience identification: fashion-editorial luxury is the wrong register for engineering accountability, and it is also the closest card to the generic 'premium editorial' default.",
+      "risk": "Reads as a design studio's site, not an engineer's."
+    },
+    {
+      "id": "challenger-cutting-bench",
+      "label": "The Cutting Bench",
+      "verdict": "declined",
+      "lineage": "film editor's select rail and trim bin",
+      "palette": ["#0B0B0B", "#E8641C"],
+      "materials": ["film grain", "grease pencil", "tape flags"],
+      "case": "Loses both axes: black-and-orange contradicts the pinned light register, and a client does not identify with an editing bench.",
+      "kept": "State as a physical mark rather than a colour — donated to the assigned direction."
+    },
+    {
+      "id": "challenger-algorave",
+      "label": "The Source Floor",
+      "verdict": "declined",
+      "lineage": "algorave live-coded music, projected source as stage",
+      "palette": ["#000000", "#39FF6A", "#FF2EC4"],
+      "materials": ["phosphor", "projector black"],
+      "case": "Loses both axes: phosphor-on-black is the opposite of the pinned register, and the audience is deciding on trust, not watching a performance.",
+      "kept": "The mechanism runs in front of you rather than being described — the live-site status and GitHub activity carry that."
+    },
+    {
+      "id": "challenger-orizuru",
+      "label": "The Fold Sequence",
+      "verdict": "declined",
+      "lineage": "one uncut vermilion square, thirty-two numbered folds",
+      "palette": ["#D93A2B", "#F6F1E7", "#1A1A1A"],
+      "materials": ["kozo fibre", "crease white", "sumi ink"],
+      "case": "Loses both axes: 'one continuous sheet from flat to finished' is a metaphor for end-to-end delivery, and this site's own stated rule is that metaphor is not evidence.",
+      "kept": "A strict numbered step column in a fixed margin — donated as the margin index."
+    },
+    {
+      "id": "challenger-brine",
+      "label": "The Brine Calendar",
+      "verdict": "declined",
+      "lineage": "seasonal pickling shelf",
+      "palette": ["#EDE8DC", "#C9566A", "#4F7A3A"],
+      "materials": ["jar glass", "kraft labels", "stamped dates"],
+      "case": "Loses both axes: nothing about the product matures over a season, and the shelf metaphor has no purchase on software delivery.",
+      "kept": "A uniform data band on every object stating the same three facts in the same order."
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "The well-made light developer portfolio, played entirely straight: generous whitespace, a large grotesk headline, a two-column project list with real screenshots, one warm accent, restrained motion. Executed to the craft level of the best studio sites, with no irony and no smuggled quirk.",
+    "palette": ["#FFFFFF", "#111827", "#E8E5DE", "#C2410C"],
+    "materials": ["clean grid", "product screenshots", "system-adjacent grotesk"],
+    "viewport": "Big headline, supporting line, primary action, one screenshot below the fold-line.",
+    "risk": "Indistinguishable from every other well-made portfolio, by design. Chosen deliberately it is a legitimate destination; arrived at by default it is the failure this round exists to prevent."
+  },
+  "steer": true
+}

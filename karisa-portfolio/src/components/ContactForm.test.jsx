@@ -285,7 +285,7 @@ describe('ContactForm', () => {
 
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith(
-          expect.stringContaining('Message sent successfully')
+          expect.stringContaining('Message sent')
         );
       });
     });

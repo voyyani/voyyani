@@ -1,4 +1,4 @@
-import React, { useEffect, lazy, Suspense, useState } from 'react';
+import React, { useEffect, lazy, Suspense, useState, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import SEO from './components/SEO';
@@ -11,15 +11,34 @@ import CookieConsent from './components/CookieConsent';
 import NotFound from './components/NotFound';
 import { initGA, trackPageView } from './utils/analytics';
 import { initWebVitals } from './utils/webVitals';
-import { initSentry } from './utils/sentry';
-import { supabase, isSupabaseConfigured } from './lib/supabase';
 
-// Admin pages
-import AdminLayout from './admin/layout/AdminLayout';
-import AdminDashboard from './admin/pages/AdminDashboard';
-import SubmissionsPage from './admin/pages/SubmissionsPage';
-import AnalyticsPage from './admin/pages/AnalyticsPage';
-import AdminLogin from './admin/pages/AdminLogin';
+/**
+ * Supabase and Sentry are imported dynamically, never at module scope.
+ *
+ * Both used to sit at the top of this file, which put @supabase/supabase-js and
+ * @sentry/react — 183KB minified between them — into the graph every first-time visitor
+ * downloads before the homepage can paint. Neither is needed to read this site:
+ * Supabase serves only the private /admin session check, and Sentry only loads once a
+ * visitor has actually consented to it. PRODUCT.md records this audience as frequently
+ * on constrained Kenyan mobile connections, which makes that weight a product problem
+ * rather than a tidiness one.
+ */
+const loadSupabase = () => import('./lib/supabase');
+
+/**
+ * Admin pages are lazy, not eager.
+ *
+ * They were imported at the top of this module, which meant Supabase's client, the
+ * whole admin surface, its tables, modals and editors all landed in the entry chunk
+ * every first-time visitor downloads before the homepage can paint — for routes almost
+ * nobody who reaches this site can even open. docs/AUDIT.md §4.2 measured the entry
+ * chunk at 821KB raw because of this and the manualChunks miss.
+ */
+const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
+const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
+const SubmissionsPage = lazy(() => import('./admin/pages/SubmissionsPage'));
+const AnalyticsPage = lazy(() => import('./admin/pages/AnalyticsPage'));
+const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
 
 // Lazy load heavy sections for better initial load performance
 const About = lazy(() => import('./components/About'));
@@ -29,18 +48,19 @@ const Projects = lazy(() => import('./components/Projects'));
 const Philosophy = lazy(() => import('./components/Philosophy'));
 const ContactSection = lazy(() => import('./sections/ContactSection'));
 const Footer = lazy(() => import('./components/Footer'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 
 // Auth Guard Component
-const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) => {
-  if (!isSupabaseConfigured) {
+const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading, isConfigured }) => {
+  if (isConfigured === false) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-950 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-cloth-100 px-4">
         <div className="text-center max-w-md">
           <h1 className="mb-4 text-2xl font-bold text-warn">Admin area unavailable</h1>
-          <p className="mb-6 text-ink-200">
+          <p className="mb-6 text-mark-700">
             Supabase environment variables are not configured for this deployment.
           </p>
-          <a href="/" className="text-signal hover:text-signal-hover">Return to homepage</a>
+          <a href="/" className="text-pindo hover:text-pindo-deep">Return to homepage</a>
         </div>
       </div>
     );
@@ -48,10 +68,10 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-950">
+      <div className="flex min-h-screen items-center justify-center bg-cloth-100">
         <div className="text-center">
           <div className="animate-spin text-4xl mb-4">⌛</div>
-          <p className="text-ink-200">Loading…</p>
+          <p className="text-mark-700">Loading…</p>
         </div>
       </div>
     );
@@ -63,11 +83,11 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 
   if (!isAdmin) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-ink-950">
+      <div className="flex min-h-screen items-center justify-center bg-cloth-100">
         <div className="text-center">
-          <h1 className="mb-4 text-3xl font-bold text-red-500">Access Denied</h1>
-          <p className="mb-6 text-ink-200">You do not have admin permissions to access this area.</p>
-          <a href="/" className="text-signal hover:text-signal-hover">Return to homepage</a>
+          <h1 className="mb-4 text-3xl font-bold text-alarm">Access Denied</h1>
+          <p className="mb-6 text-mark-700">You do not have admin permissions to access this area.</p>
+          <a href="/" className="text-pindo hover:text-pindo-deep">Return to homepage</a>
         </div>
       </div>
     );
@@ -80,18 +100,19 @@ const ProtectedAdminRoute = ({ children, isAuthenticated, isAdmin, isLoading }) 
 const HomePage = () => (
   <>
     <SEO />
-    <div className="relative min-h-screen overflow-x-hidden bg-ink-950 text-ink-50">
+    <div className="relative min-h-screen overflow-x-hidden bg-cloth-100 text-mark-900">
       <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: '#17161A',
-            color: '#F2F1EE',
-            border: '1px solid #2E2E33',
+            background: '#FAF8F3',
+            color: '#14171C',
+            border: '1px solid #14171C',
             borderRadius: '0px',
+            fontFamily: 'Archivo, system-ui, sans-serif',
           },
-          success: { iconTheme: { primary: '#C8FF3D', secondary: '#0B0B0C' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#0B0B0C' } },
+          success: { iconTheme: { primary: '#243D8F', secondary: '#FAF8F3' } },
+          error: { iconTheme: { primary: '#A32014', secondary: '#FAF8F3' } },
         }}
       />
 
@@ -172,9 +193,11 @@ function App() {
         try {
           const preferences = JSON.parse(consent);
 
-          initSentry();
-
+          // Sentry used to initialise here on ANY stored decision, "Reject all"
+          // included. It rides the same preference as the rest of the measurement now,
+          // which is what the consent panel says it does.
           if (preferences.analytics) {
+            import('./utils/sentry').then(({ initSentry }) => initSentry());
             initGA();
             trackPageView(window.location.pathname, document.title);
             initWebVitals();
@@ -191,6 +214,7 @@ function App() {
       const preferences = event.detail;
 
       if (preferences.analytics) {
+        import('./utils/sentry').then(({ initSentry }) => initSentry());
         initGA();
         trackPageView(window.location.pathname, document.title);
         initWebVitals();
@@ -204,68 +228,90 @@ function App() {
     };
   }, []);
 
-  // Check authentication status
+  // Check authentication status.
+  //
+  // Only on an /admin path. On the public homepage there is no session to check and no
+  // reason to pay for the client that would check it.
+  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(null);
+  const supabaseRef = useRef(null);
+
   useEffect(() => {
-    // Admin auth needs Supabase; the public site does not. Bail out quietly rather
-    // than letting a missing admin credential break the whole page.
-    if (!isSupabaseConfigured) {
+    if (!window.location.pathname.startsWith('/admin')) {
       setIsLoading(false);
-      return;
+      return undefined;
     }
 
-    const checkAuth = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+    let subscription;
+    let cancelled = false;
 
-        if (error) throw error;
-
-        if (session?.user) {
-          // Accept admin role from app/user metadata to match RLS policies.
-          const role = resolveUserRole(session.user);
-          const hasAdminAccess = ALLOWED_ADMIN_ROLES.includes(role);
-
-          setUser(session.user);
-          setIsAuthenticated(true);
-          setIsAdmin(hasAdminAccess);
-
-          if (!hasAdminAccess) {
-            console.warn('User authenticated but lacks admin role:', role);
-          }
-        } else {
-          setIsAuthenticated(false);
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setIsAuthenticated(false);
-        setIsAdmin(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+    const applySession = (session) => {
+      if (session?.user) {
+        // Accept admin role from app/user metadata to match RLS policies.
         const role = resolveUserRole(session.user);
         const hasAdminAccess = ALLOWED_ADMIN_ROLES.includes(role);
 
         setUser(session.user);
         setIsAuthenticated(true);
         setIsAdmin(hasAdminAccess);
-      } else if (event === 'SIGNED_OUT') {
+
+        if (!hasAdminAccess) {
+          console.warn('User authenticated but lacks admin role:', role);
+        }
+      } else {
         setUser(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
       }
-    });
+    };
 
-    return () => subscription?.unsubscribe();
+    loadSupabase()
+      .then(async ({ supabase, isSupabaseConfigured: configured }) => {
+        if (cancelled) return;
+
+        setIsSupabaseConfigured(configured);
+        supabaseRef.current = supabase;
+
+        // Admin auth needs Supabase; the public site does not. Bail out quietly rather
+        // than letting a missing admin credential break the whole page.
+        if (!configured) {
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error) throw error;
+          if (!cancelled) applySession(session);
+        } catch (error) {
+          console.error('Auth check error:', error);
+          if (!cancelled) {
+            setIsAuthenticated(false);
+            setIsAdmin(false);
+          }
+        } finally {
+          if (!cancelled) setIsLoading(false);
+        }
+
+        subscription = supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') applySession(session);
+        }).data.subscription;
+      })
+      .catch((error) => {
+        console.error('Could not load the admin session client:', error);
+        if (!cancelled) {
+          setIsSupabaseConfigured(false);
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      subscription?.unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {
+    const supabase = supabaseRef.current;
     if (!supabase) return;
     try {
       await supabase.auth.signOut();
@@ -281,16 +327,38 @@ function App() {
       {/* Public Routes */}
       <Route path="/" element={<HomePage />} />
 
+      {/*
+        The privacy policy had a component but no route, so every link to it — the
+        cookie banner's included — resolved to the 404 page.
+      */}
+      <Route
+        path="/privacy-policy"
+        element={
+          <Suspense fallback={<SectionLoader />}>
+            <PrivacyPolicy />
+          </Suspense>
+        }
+      />
+
       {/* Admin Routes */}
-      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin/login"
+        element={
+          <Suspense fallback={<SectionLoader />}>
+            <AdminLogin />
+          </Suspense>
+        }
+      />
 
       <Route
         path="/admin"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
-            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
-              <AdminDashboard supabaseClient={supabase} />
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
+            <Suspense fallback={<SectionLoader />}>
+            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
+              <AdminDashboard supabaseClient={supabaseRef.current} />
             </AdminLayout>
+            </Suspense>
           </ProtectedAdminRoute>
         }
       />
@@ -298,10 +366,12 @@ function App() {
       <Route
         path="/admin/submissions"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
-            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
-              <SubmissionsPage client={supabase} />
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
+            <Suspense fallback={<SectionLoader />}>
+            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
+              <SubmissionsPage client={supabaseRef.current} />
             </AdminLayout>
+            </Suspense>
           </ProtectedAdminRoute>
         }
       />
@@ -309,10 +379,12 @@ function App() {
       <Route
         path="/admin/analytics"
         element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading}>
-            <AdminLayout supabaseClient={supabase} user={user} onLogout={handleLogout}>
-              <AnalyticsPage client={supabase} />
+          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
+            <Suspense fallback={<SectionLoader />}>
+            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
+              <AnalyticsPage client={supabaseRef.current} />
             </AdminLayout>
+            </Suspense>
           </ProtectedAdminRoute>
         }
       />
