@@ -604,8 +604,8 @@ The rest needs Karisa specifically — these are the blockers no one else can cl
 
 1. ✅ **Contact email done** (2026-08-31). `voyani.tech` now has SPF, DKIM and MX
    records, the site publishes `karisa@voyani.tech`, and inbound mail is forwarded to
-   `voyanitech@gmail.com`. Remaining for Karisa: add the `_dmarc` TXT record, deploy the
-   edge functions, and run the live send/receive test. See
+   `voyanitech@gmail.com`. DNS is complete (SPF, DKIM, DMARC, both MX). Remaining for
+   Karisa: deploy the edge functions and run the live send/receive test. See
    [`EMAIL_ROADMAP.md`](./EMAIL_ROADMAP.md) — Tasks 8, 9 and 11.
 2. **Record a screen capture of the CAD Web Viewer** (5–10s of the viewer rotating a
    model is enough). It's the single strongest piece of evidence for the ME→dev story

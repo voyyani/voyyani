@@ -19,10 +19,11 @@ Executes [`EMAIL_ROADMAP.md`](./EMAIL_ROADMAP.md). Phase 0 removed every undeliv
 address the site published; this makes the domain itself able to send and receive, and
 publishes `karisa@voyani.tech` on the back of it.
 
-**Not yet verified live.** The code below is committed and type-checked, but the edge
+**Not yet verified live.** DNS is complete — SPF, DKIM, DMARC and both MX records
+resolve as of 2026-08-31 — and the code below is committed and type-checked. But the edge
 functions have not been redeployed and the end-to-end send/receive test (roadmap Task 11,
-Steps 1–5) has not been run. `_dmarc.voyani.tech` is also still empty. Until those are
-done, treat the published address as configured-but-unproven.
+Steps 1–5) has not been run. Until those are done, treat the published address as
+configured-but-unproven.
 
 ### Added
 - `supabase/functions/_shared/inbound.ts` + tests (25) — one pure, Deno-free module that

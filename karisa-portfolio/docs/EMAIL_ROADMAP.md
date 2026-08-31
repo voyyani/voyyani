@@ -15,8 +15,8 @@
 | Task | State |
 |---|---|
 | 0. Credential scaffold | ✅ `.env.example`, `scripts/push-email-secrets.sh` |
-| 1. Verify sending domain | ⚠️ DKIM, SPF and `send` MX resolve (eu-west-1). **`_dmarc` TXT is still missing** (Step 4). Resend's "Verified" badge and the test send (Steps 6–8) are unconfirmed. |
-| 2. Inbound MX + webhooks | ⚠️ Root MX resolves to `inbound-smtp.eu-west-1.amazonaws.com`. Webhook registration (Steps 5–6) is unconfirmed — dashboard access needed. |
+| 1. Verify sending domain | ⚠️ DKIM, SPF, `send` MX and `_dmarc` all resolve (eu-west-1), all records "DNS only". Resend's "Verified" badge and the test send (Steps 6–8) are unconfirmed. |
+| 2. Inbound MX + webhooks | ⚠️ Root MX resolves to `inbound-smtp.eu-west-1.amazonaws.com` — an SES inbound endpoint, not the `*.resend.com` host this document predicted. Confirm it against what the Resend dashboard prints. Webhook registration (Steps 5–6) is unconfirmed. |
 | 3–7. Code | ✅ Done, committed, type-checked, 30 new tests passing. |
 | 8. Migration + bucket | ⬜ Needs the Supabase dashboard. |
 | 9. Secrets + deploy | ⬜ Needs `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET` and the project ref. |
@@ -111,7 +111,7 @@ Manual — Resend dashboard + Cloudflare. No code. Produces a verified sending d
 **Interfaces:**
 - Produces: a verified domain in Resend; a `RESEND_API_KEY` value for Task 9.
 
-- [ ] **Step 1: Confirm Cloudflare Email Routing is off**
+- [x] **Step 1: Confirm Cloudflare Email Routing is off**
 
   Cloudflare dashboard → `voyani.tech` → **Email** → **Email Routing**. If it is enabled, disable it. If it has already inserted MX records pointing at `*.mx.cloudflare.net`, delete them. Leaving this on will break Task 2.
 
@@ -129,7 +129,7 @@ Manual — Resend dashboard + Cloudflare. No code. Produces a verified sending d
 
   Note the sending MX sits on the **`send.` subdomain**, not the root. That is why Resend Inbound (Task 2, root MX) does not conflict with it.
 
-- [ ] **Step 3: Add the records in Cloudflare**
+- [x] **Step 3: Add the records in Cloudflare**
 
   Cloudflare → `voyani.tech` → **DNS** → **Records** → **Add record**, once per row.
 
@@ -137,7 +137,7 @@ Manual — Resend dashboard + Cloudflare. No code. Produces a verified sending d
   - Paste the DKIM value as a single unbroken string. Cloudflare handles the 255-char chunking itself; do not add quotes or split it.
   - Proxy status does not apply to MX/TXT. If any record shows an orange cloud, set it to **DNS only**.
 
-- [ ] **Step 4: Add DMARC**
+- [x] **Step 4: Add DMARC**
 
   Cloudflare → Add record → TXT, Name `_dmarc`, Value:
 
@@ -147,7 +147,7 @@ Manual — Resend dashboard + Cloudflare. No code. Produces a verified sending d
 
   `p=none` is deliberate for launch — it reports without quarantining, so a misconfiguration does not silently eat mail. Tighten to `p=quarantine` only after a week of clean reports.
 
-- [ ] **Step 5: Verify propagation**
+- [x] **Step 5: Verify propagation**
 
   ```bash
   dig +short TXT resend._domainkey.voyani.tech
