@@ -299,12 +299,13 @@ const Projects = () => {
 
           {/*
             Order by evidence, not by id.
-            The panel's jina is "What I built is still running", and the array's own
-            order put Raslipwani first — whose client site is in a maintenance window
-            and has no capture, so the first object under that claim was a
-            "capture pending" rectangle. A project that can show the running product
-            leads. The index on each card is its identifier, not its position, so it
-            travels with the project.
+            The panel's jina is "What I built is still running", so a project that can
+            show the running product leads and one without a capture goes last. As of
+            2026-09-16 both have captures, so the sort is a no-op and array order holds:
+            Raslipwani (01) first, Neema (02) second. The rule stays so a future project
+            added without screenshots cannot land under that claim as a "capture
+            pending" rectangle. The index on each card is its identifier, not its
+            position, so it travels with the project.
           */}
           <div className="mt-10 grid gap-8 lg:grid-cols-2">
             {[...PROJECTS]

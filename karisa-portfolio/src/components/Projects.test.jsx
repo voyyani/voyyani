@@ -98,20 +98,23 @@ describe('Projects Component', () => {
 
     // Only figures carrying a `source` reach display scale now (Product Principle 1:
     // a number links to the artifact that proves it, or it does not go on the page).
-    // "100+ Active Users" and "95/100 Mobile Lighthouse" have no recorded provenance
-    // and are retained in the data but no longer rendered.
+    // The 2026-09-14 audit (docs/RASLIPWANI_GO_LIVE.md) found "3s → 1.2s" and the
+    // "90%" target had no artifact either; they joined "100+" and "95/100" in the
+    // retained-but-unrendered set. The bundle budget and coverage report replaced them.
     it('should display only the metrics that carry their provenance', () => {
       render(<Projects />);
-      expect(screen.getByText('3s → 1.2s')).toBeDefined(); // Page Load, sourced
-      expect(screen.getByText(/Before and after, in the case study/i)).toBeDefined();
+      expect(screen.getByText('−49%')).toBeDefined(); // First-load JS, sourced
+      expect(screen.getByText(/bundle-budget\.json/i)).toBeDefined();
+      expect(screen.queryByText('3s → 1.2s')).toBeNull(); // Page Load, unsourced
+      expect(screen.queryByText('90%')).toBeNull(); // Coverage target, unsourced
       expect(screen.queryByText('100+')).toBeNull(); // Active Users, unsourced
       expect(screen.queryByText('95/100')).toBeNull(); // Mobile Lighthouse, unsourced
     });
 
     it('should label metrics in words rather than emoji', () => {
       render(<Projects />);
-      expect(screen.getByText('Page Load')).toBeDefined();
-      expect(screen.getByText('Test coverage target')).toBeDefined();
+      expect(screen.getByText('First-load JS')).toBeDefined();
+      expect(screen.getByText('Test coverage')).toBeDefined();
       expect(screen.queryByText('👥')).toBeNull();
       expect(screen.queryByText('⚡')).toBeNull();
     });
@@ -126,8 +129,8 @@ describe('Projects Component', () => {
 
     it('should show "+N more" badge for remaining technologies', () => {
       render(<Projects />);
-      // Project has 14 technologies, showing 4, so should show +10 more
-      expect(screen.getByText('+10 more')).toBeDefined();
+      // Project has 17 technologies, showing 4, so should show +13 more
+      expect(screen.getByText('+13 more')).toBeDefined();
     });
 
     it('should display "Explore Full Details" CTA', () => {
@@ -233,18 +236,18 @@ describe('Projects Component', () => {
       });
     });
 
-    // Raslipwani is flagged liveStatus.state === 'maintenance', so the modal must warn
-    // the visitor rather than promising a live platform behind the link.
-    it('should link to the live site and disclose the maintenance window', async () => {
+    // Raslipwani went live on 2026-09-16 (liveStatus.state === 'live'), so the modal
+    // promises the platform plainly and carries no maintenance warning.
+    it('should link to the live site without a maintenance notice', async () => {
       await waitFor(() => {
-        const liveLink = screen.getByText(/Visit Site Anyway/i);
+        const liveLink = screen.getByText(/View Live Platform/i);
         expect(liveLink).toBeDefined();
         expect(liveLink.closest('a')).toBeDefined();
         expect(liveLink.closest('a').getAttribute('href')).toBe('https://raslipwani.co.ke');
       });
 
-      expect(screen.getByText(/scheduled maintenance window/i)).toBeDefined();
-      expect(screen.queryByText(/View Live Platform/i)).toBeNull();
+      expect(screen.queryByText(/maintenance/i)).toBeNull();
+      expect(screen.queryByText(/Visit Site Anyway/i)).toBeNull();
     });
 
     it.skip('should display GitHub URL link', async () => {
@@ -322,7 +325,7 @@ describe('Projects Component', () => {
     it('should render correct number of tech tags in card (4 + more badge)', () => {
       const { container } = render(<Projects />);
       // Should have 4 tech tags + 1 "more" badge
-      const techElements = screen.getAllByText(/React 18.3|Vite 6.3|Supabase|PostgreSQL|\+10 more/);
+      const techElements = screen.getAllByText(/React 18.3|Vite 6.3|Supabase|PostgreSQL|\+13 more/);
       expect(techElements.length).toBeGreaterThan(4);
     });
 
@@ -332,9 +335,9 @@ describe('Projects Component', () => {
       // Verify core project data is present
       expect(screen.getByText('Raslipwani Properties')).toBeDefined();
       expect(screen.getByText('Real estate booking & client management')).toBeDefined();
-      // '100+' was this assertion's metric sample; it is now unsourced and unrendered.
-      // '3s → 1.2s' is the sourced figure that reaches the card in its place.
-      expect(screen.getByText('3s → 1.2s')).toBeDefined();
+      // '100+' and later '3s → 1.2s' were this assertion's metric sample; both are now
+      // unsourced and unrendered. The bundle figure is the sourced one on the card.
+      expect(screen.getByText('−49%')).toBeDefined();
       expect(screen.getByText('React 18.3')).toBeDefined();
     });
   });

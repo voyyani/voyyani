@@ -1,8 +1,8 @@
 /**
  * The two client platforms, extracted verbatim from Projects.jsx during the Kanga Sheet
- * rebuild. Nothing here changed: every figure, caption and status note was verified in
- * a prior pass and re-verifying them is not this pass's job. Presentation moved; the
- * record did not.
+ * rebuild. Neema's figures were verified in a prior pass. Raslipwani's were re-verified
+ * on 2026-09-14 against the repo at `d3e978b` and on 2026-09-16 against the live site —
+ * see docs/RASLIPWANI_GO_LIVE.md §7 for every source.
  *
  * `liveStatus.checkedOn` is a real date someone opened the site. If you change a status,
  * change the date with it.
@@ -14,7 +14,11 @@ export const PROJECTS = [
       tagline: "Real estate booking & client management",
       // Shown on the card. Two sentences, plain language, no adjectives I can't defend.
       summary: "A property platform where buyers book viewings and staff run the whole pipeline — listings, bookings and client history — from one dashboard.",
-      description: "A property management platform for a Kenyan real-estate agency. The public side lets buyers search listings and book viewings; the admin side is where the agency actually works — managing properties, rescheduling bookings, tracking which client asked about which property, and keeping a record of every conversation.",
+      description: "A property management platform for a Kenyan real-estate agency based at Kikambala on the coast. The public side lets buyers search listings and book viewings; the admin side is where the agency actually works — managing properties, rescheduling bookings, tracking which client asked about which property, and keeping a record of every conversation.",
+      // Verified against package.json @ d3e978b (2026-09-14). Clerk was removed in
+      // raslipwani commit 14ac8e5 (auth is Supabase Auth); EmailJS was never in the
+      // dependency tree (email is Resend via a Vercel serverless function). Cloudinary
+      // is used as a hosted media CDN, not via an SDK.
       technologies: [
         "React 18.3",
         "Vite 6.3",
@@ -22,143 +26,191 @@ export const PROJECTS = [
         "PostgreSQL",
         "Tailwind CSS",
         "React Query",
+        "React Router",
+        "React Hook Form",
+        "Zod",
         "FullCalendar",
         "Framer Motion",
-        "Clerk Auth",
+        "Supabase Auth",
+        "Resend",
         "Vercel Analytics",
-        "EmailJS",
         "Cloudinary",
         "Vitest",
         "React Testing Library"
       ],
-      // "Load Time 1.2s" and "Performance 60% ↑" were the same fact stated twice.
-      // Merged into one metric that shows the before-and-after the case study explains.
       /**
        * `source` is what makes a figure printable.
        *
        * Product Principle 1: a number on the page links to the artifact that proves it,
-       * or it does not go on the page. The card and the modal now render ONLY the
-       * metrics carrying a `source`, so an unsourced figure cannot reach display scale
-       * by accident. Nothing has been deleted — the entries below without a `source`
-       * are retained verbatim, and need one before they can be shown again.
+       * or it does not go on the page. The card and the modal render ONLY the metrics
+       * carrying a `source`, so an unsourced figure cannot reach display scale by
+       * accident. Nothing has been deleted — the entries below without a `source` are
+       * retained verbatim, and need one before they can be shown again.
        *
-       * "Test Coverage 90%" was also mislabelled: `technicalHighlights` calls it a
-       * coverage TARGET, and a target printed as a result is a different claim.
+       * 2026-09-14 audit (docs/RASLIPWANI_GO_LIVE.md §7): "3s → 1.2s" only ever appeared
+       * in self-authored status docs with no report behind it, and "90%" is not stated
+       * anywhere in the repo — both lost their `source`. The two figures that do have an
+       * artifact are the bundle budget and the coverage ratchet.
        */
       metrics: [
         {
-          label: "Page Load",
-          value: "3s → 1.2s",
-          source: "Before and after, in the case study"
+          label: "First-load JS",
+          value: "−49%",
+          source: "220.7 → 112.8 kB gzip, bundle-budget.json in the repo, measured 2026-09-08 and enforced in CI"
         },
         {
-          label: "Test coverage target",
-          value: "90%",
-          source: "Vitest, stated target"
+          label: "Test coverage",
+          value: "58%",
+          source: "Lines, from the committed coverage report of 2026-09-08; CI floor is 57%"
         },
-        // No recorded provenance for either of these. See docs — they need a measured
-        // source (who ran it, against what, on what date) or they stay off the page.
+        {
+          label: "A11y gate",
+          value: "≥ 95",
+          source: "lighthouserc.json — Lighthouse CI fails the build below 0.95 accessibility, on every push"
+        },
+        // Unsourced — retained, not shown. Each needs a measured source (who ran it,
+        // against what, on what date) before it can go back on the page.
+        { label: "Page Load", value: "3s → 1.2s" },
+        { label: "Test coverage target", value: "90%" },
         { label: "Active Users", value: "100+" },
         { label: "Mobile Lighthouse", value: "95/100" }
       ],
       category: "Full-Stack",
-      challenge: "The first version loaded every property and every booking on page load. That was fine with 40 listings and painful by 400 — around 3 seconds to first paint, and the agency's staff were the ones paying for it, all day, on slow connections.",
-      solution: "Three changes did most of the work. Server-side pagination so a page fetches 20 rows instead of the whole table. A 500ms debounce on search, which stopped firing a query per keystroke. And React Query with a 5-minute stale time, so navigating back to a list you just left is instant instead of a refetch. Load time went to roughly 1.2s. Optimistic updates with rollback came later, once the data layer was predictable enough to trust.",
+      challenge: "The first version loaded every property and every booking on page load. That was fine with 40 listings and painful by 400, and the agency's staff were the ones paying for it, all day, on slow connections.",
+      solution: "Three changes did most of the work. Server-side pagination so a page fetches 20 rows instead of the whole table. A 500ms debounce on search, which stopped firing a query per keystroke. And React Query with a tiered stale time — 30 seconds for live data, 5 minutes as the default, 30 minutes for static content — so navigating back to a list you just left is instant instead of a refetch. Optimistic updates with rollback came later, once the data layer was predictable enough to trust. The first-load bundle went from 221 kB to 113 kB gzipped, and that budget is now enforced in CI.",
+      // Each bullet points at a file in the raslipwani repo (docs/RASLIPWANI_GO_LIVE.md §7.5).
+      // Dropped 2026-09-14: "International market support (UN Housing portal)" — the routes
+      // are shelved (commented out in src/App.jsx, commit 8075b2f), so it is not shipped.
       features: [
-        "Advanced property search & filtering system",
-        "Intelligent appointment scheduling with calendar views",
+        "Property search & filtering by purpose, type, location and budget",
+        "Property segments for diplomatic, corporate and student housing",
+        "Viewing booking flow with in-person, virtual and 3D options",
         "Complete CRM with client lifecycle tracking",
         "Property interest tracking & communication timeline",
-        "Drag-and-drop booking management",
-        "Real-time analytics dashboard with 8+ metrics",
-        "Automated email notifications & reminders",
+        "FullCalendar booking management with optimistic rescheduling",
+        "Transactional email to admin and customer via Resend",
         "Multi-status workflow system (pending → confirmed → completed)",
-        "Role-based access control (RBAC) with Clerk",
-        "CSV export functionality for all data",
-        "Internal admin notes & comments system",
-        "Configurable settings with email templates",
-        "Business hours management & scheduling",
-        "International market support (UN Housing portal)",
-        "Responsive mobile-first design",
-        "SEO optimized with React Helmet",
-        "Comprehensive testing suite (Vitest + RTL)"
+        "Role-based admin access (admin / agent) on Supabase Auth",
+        "Row-level security on every table, gated by a SECURITY DEFINER is_admin()",
+        "CSV export for bookings and clients",
+        "Internal admin notes on bookings",
+        "Configurable settings with Quill-edited email templates",
+        "Business hours management that drives the booking calendar",
+        "Responsive mobile-first design with a bottom nav for admins",
+        "SEO optimized with react-helmet-async and a sitemap",
+        "Comprehensive testing suite (Vitest + RTL + axe-core)"
       ],
+      // Verified in code 2026-09-14 — file references in docs/RASLIPWANI_GO_LIVE.md §7.3.
+      // "Full-text search with PostgreSQL indexes" was dropped: there is no tsvector or
+      // textSearch anywhere in the repo; search is ilike filtering.
       technicalHighlights: [
-        "Server-side pagination (20 items/page, 95% data reduction)",
-        "Debounced search (500ms, 80% fewer API calls)",
-        "React Query caching (5min stale time, instant UX)",
-        "Optimistic UI updates with automatic rollback",
-        "Full-text search with PostgreSQL indexes",
-        "Image optimization via Cloudinary CDN",
-        "Lazy loading with React.lazy() for code splitting",
-        "Vitest testing with 90% coverage target",
-        "Vercel Analytics & Speed Insights integration",
+        "Server-side pagination (20 items/page, src/hooks/usePagination.js)",
+        "Debounced search (500ms, src/hooks/useDebounce.js)",
+        "React Query three-tier cache policy (30s live / 5min standard / 30min static)",
+        "Optimistic UI updates with automatic rollback on booking reschedule",
+        "Image delivery via Cloudinary CDN with an admin-configurable upload preset",
+        "Every public and admin route lazy-loaded with React.lazy()",
+        "Vitest coverage ratchet in CI (floor 57% lines, never lowered)",
+        "Vercel Analytics & Speed Insights, both lazy-loaded",
+        "Lighthouse CI on every push: accessibility ≥ 0.95 is a hard error",
+        "Design-system budgets enforced by ESLint rules (palette, labels, file size, bundle)",
         "Comprehensive error boundaries & fallbacks"
       ],
       architecture: [
         "Frontend: React 18, built with Vite",
         "State: React Query for server state, Context for UI state",
-        "Backend: Supabase (PostgreSQL + PostgREST + Auth)",
+        "Backend: Supabase (PostgreSQL + PostgREST + Auth + RLS)",
         "Storage: Cloudinary for optimized image delivery",
-        "Auth: Clerk for secure authentication & RBAC",
-        "Deployment: Vercel with edge functions & CDN",
-        "Testing: Vitest + React Testing Library + jsdom",
-        "CI/CD: GitHub Actions for automated deployments"
+        "Auth: Supabase Auth with an admin_users role table",
+        "Email: Resend via Vercel serverless functions",
+        "Deployment: Vercel with serverless functions & CDN",
+        "Testing: Vitest + React Testing Library + axe-core + jsdom",
+        "CI/CD: GitHub Actions — lint, coverage, budgets, a11y, build, Lighthouse"
       ],
       // Structured rather than pre-formatted strings: this is tabular data and the modal
-      // now renders it as a table, so the shape belongs in the data, not in punctuation.
+      // renders it as a table, so the shape belongs in the data, not in punctuation.
+      // Counts are the net of CREATE TABLE + ADD COLUMN − DROP COLUMN across
+      // supabase/migrations/000–013, parsed 2026-09-14 (docs/RASLIPWANI_GO_LIVE.md §7.4).
       databaseSchema: [
-        { name: "properties", shape: "15 cols · 4 idx", holds: "Listings and their availability" },
-        { name: "bookings", shape: "25 cols · 7 idx", holds: "Viewings, reschedules, status history" },
-        { name: "clients", shape: "28 cols · 6 idx", holds: "CRM profiles" },
-        { name: "client_property_interests", shape: "7 cols · 3 idx", holds: "Which client asked about which property" },
-        { name: "client_communications", shape: "10 cols · 4 idx", holds: "Conversation timeline and internal notes" },
-        { name: "admin_settings", shape: "20+ cols", holds: "Business hours, email templates, config" }
+        { name: "properties", shape: "25 cols · 5 idx", holds: "Listings, availability and market segment" },
+        { name: "bookings", shape: "26 cols · 12 idx", holds: "Viewings, reschedules, status history" },
+        { name: "booking_notes", shape: "7 cols · 3 idx", holds: "Internal admin notes per booking" },
+        { name: "clients", shape: "27 cols · 6 idx", holds: "CRM profiles" },
+        { name: "client_property_interests", shape: "8 cols · 3 idx", holds: "Which client asked about which property" },
+        { name: "client_communications", shape: "11 cols · 4 idx", holds: "Call, email and WhatsApp log per client" },
+        { name: "email_templates", shape: "9 cols · 2 idx", holds: "Quill-edited transactional templates" },
+        { name: "admin_users", shape: "4 cols", holds: "Supabase-Auth-linked admin and agent roles" },
+        { name: "admin_settings", shape: "~70 cols · 1 idx", holds: "Single-row site config: Cloudinary, email, business hours, branding" }
       ],
       // Kept to things that are distinct from each other and from the sections above.
       keyAchievements: [
-        "Cut page load from ~3s to ~1.2s via pagination, debounced search and query caching",
+        "Halved the first-load bundle (221 → 113 kB gzip) and locked it in with a CI budget",
         "Replaced the agency's spreadsheet-based client tracking with a real CRM",
         "Booking pipeline handles reschedules and status changes without losing history",
-        "Full-text search over listings using PostgreSQL indexes rather than client-side filtering"
+        "Access control lives in PostgreSQL row-level security, not just the admin UI"
       ],
       adminFeatures: [
-        "Comprehensive dashboard with 8+ real-time metrics",
+        "Dashboard with booking and client metrics",
         "FullCalendar integration (day/week/month/list views)",
         "Client management with search, filters & pagination",
-        "Property management with bulk operations",
-        "Booking workflow with drag-and-drop rescheduling",
+        "Property management with paginated, debounced search",
+        "Booking workflow with drag-and-drop rescheduling and rollback",
         "Communication timeline for all client interactions",
         "Email template editor with Quill rich text",
-        "Business hours configuration with timezone support",
-        "Settings panel with 6+ configuration modules",
-        "CSV export for properties, bookings & clients",
-        "Real-time activity feed tracking system events",
-        "Status workflow management with visual badges"
+        "Business hours configuration",
+        "Cloudinary upload settings with a test button",
+        "CSV export for bookings & clients",
+        "Booking notes and status badges",
+        "Mobile bottom navigation for staff on the move"
       ],
+      // Only the first line has an artifact behind it (bundle-budget.json). The rest are
+      // retained as recorded but have no report; the modal does not render this array.
       performanceMetrics: [
-        "Initial Load: 1.2s (60% faster than baseline)",
-        "Time to Interactive: <2s on 3G networks",
-        "First Contentful Paint: <1s",
-        "API Response Time: <200ms average",
-        "Database Query Time: <50ms with indexes",
-        "95th Percentile Load Time: <2.5s",
-        "Mobile Performance Score: 95/100",
-        "Desktop Performance Score: 98/100"
+        "First-load JS: 220.7 kB → 112.8 kB gzip (bundle-budget.json, 2026-09-08)",
+        "Lighthouse CI thresholds on mobile: performance ≥ 0.90, accessibility ≥ 0.95 (error), best practices ≥ 0.90, SEO ≥ 0.90",
+        "Initial Load: 1.2s (60% faster than baseline) — unsourced",
+        "Time to Interactive: <2s on 3G networks — unsourced",
+        "First Contentful Paint: <1s — unsourced",
+        "API Response Time: <200ms average — unsourced",
+        "Database Query Time: <50ms with indexes — unsourced",
+        "Mobile Performance Score: 95/100 — unsourced",
+        "Desktop Performance Score: 98/100 — unsourced"
       ],
       liveUrl: "https://raslipwani.co.ke",
       githubUrl: "https://github.com/voyyani/raslipwani",
-      // Checked 2026-08-29: every route serves the client's scheduled-maintenance page,
-      // so the "View Live Platform" button would land a visitor on a countdown screen.
-      // Say so rather than let them find out. Clear this once the window closes.
-      liveStatus: {
-        state: "maintenance",
-        label: "Client site is in a scheduled maintenance window",
-        checkedOn: "29 Aug 2026"
-      },
-      // No product screenshots yet — the live site is behind the maintenance page and
-      // the admin dashboard needs Karisa's own login to capture. See docs/CHANGELOG.md.
-      screenshots: [],
+      // Checked 2026-09-16 in headless Chromium: /, /properties, /services,
+      // /services/viewing, /about, /contact and /admin/login all return 200 and render
+      // the product. The maintenance window that ran through August is over.
+      liveStatus: { state: "live", checkedOn: "16 Sep 2026" },
+      // Captured from the live site on 2026-09-16 at 1440x900 @2x. The admin dashboard
+      // needs Karisa's own login and is not captured.
+      screenshots: [
+        {
+          src: "/images/projects/raslipwani/home.jpg",
+          alt: "Raslipwani Properties home page: hero photo of a coastal villa at dusk with the headline 'Kenyan property, handled properly.' and a search panel for location, property type and budget",
+          caption: "Home — search by location, purpose and budget straight from the hero"
+        },
+        {
+          src: "/images/projects/raslipwani/properties.jpg",
+          alt: "Listings page showing '12 Properties Found' as a grid of property cards with price, location, beds and baths, beside a filter panel for purpose, property type and sort order",
+          caption: "Listings — server-side paginated grid with purpose, type and sort filters"
+        },
+        {
+          src: "/images/projects/raslipwani/property.jpg",
+          alt: "Property detail modal for 'Vipingo Prime Land for Sale – 900 Acres' at Ksh 3,500,000, with a photo carousel, description and 'Book a viewing' and 'Contact agent' buttons",
+          caption: "Property detail — lazy-loaded modal with carousel and a direct route to booking"
+        },
+        {
+          src: "/images/projects/raslipwani/viewing.jpg",
+          alt: "Viewing booking page headed 'Choose Your Viewing Experience' with three options: In-Person Viewing, Virtual Tour and 3D Viewing Experience",
+          caption: "Booking — the public side of the viewing pipeline the admin calendar manages"
+        },
+        {
+          src: "/images/projects/raslipwani/services.jpg",
+          alt: "Services page headed 'Kenya Real Estate Services' with 'Book a Viewing' and 'Get Consultation' calls to action above a grid of service cards",
+          caption: "Services — sales, acquisition, valuation and management, each linking into the booking flow"
+        }
+      ],
       index: "01"
     },
     {

@@ -25,8 +25,10 @@ const Hero = () => {
 
   const proofPoints = [
     {
-      value: '3s → 1.2s',
-      label: 'Page load, Raslipwani',
+      // The bundle budget is the one Raslipwani figure with an artifact behind it
+      // (bundle-budget.json, enforced in CI). The old "3s → 1.2s" had no report.
+      value: '−49%',
+      label: 'First-load JS, Raslipwani (221 → 113 kB)',
       href: '#projects',
       onClick: (e) => {
         e.preventDefault();

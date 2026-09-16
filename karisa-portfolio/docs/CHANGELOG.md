@@ -1,7 +1,7 @@
 # Changelog
 
 **Status:** Live
-**Last updated:** 2026-08-31
+**Last updated:** 2026-09-16
 
 All notable changes to the Ngowa Karisa portfolio (voyani.tech), newest first.
 Format follows [Keep a Changelog](https://keepachangelog.com); dates come from git history.
@@ -13,7 +13,62 @@ file or with the code, the code wins.
 
 ---
 
-## [Unreleased] — 2026-08-31 — Email: Resend on a real `voyani.tech`
+## [Unreleased] — 2026-09-16 — Raslipwani: live, captured, and re-sourced
+
+Executes §6 of [`RASLIPWANI_GO_LIVE.md`](./RASLIPWANI_GO_LIVE.md). The client's
+maintenance window is over: on 2026-09-16 every public route (`/`, `/properties`,
+`/services`, `/services/viewing`, `/about`, `/contact`, `/admin/login`) returned 200 and
+rendered the product in headless Chromium. `curl` still gets a 429 "Vercel Security
+Checkpoint" — that is bot protection, not the app, and a real browser passes it.
+
+### Added
+- Five screenshots of the live site, captured 2026-09-16 at 1440×900 @2x and served as
+  jpg + webp + avif from `public/images/projects/raslipwani/` (home, listings, property
+  modal, viewing booking, services). The admin dashboard needs Karisa's login and is not
+  captured.
+- `scripts/convert-screenshots.mjs` — the Sharp conversion step from
+  `IMAGE_OPTIMIZATION.md`, as a runnable script (needs `npm i --no-save sharp`).
+- Three schema rows the card had never listed: `booking_notes`, `email_templates`,
+  `admin_users`.
+
+### Changed
+- `liveStatus` → `{ state: "live", checkedOn: "16 Sep 2026" }`; the modal now says
+  "View Live Platform" with no maintenance notice, and the test asserts that.
+- Every Raslipwani figure re-checked against the repo at `d3e978b` (2026-09-14, §7 of
+  the go-live doc). The card's sourced metrics are now the first-load bundle
+  (−49 %: 220.7 → 112.8 kB gzip, `bundle-budget.json`), line coverage (58 %, committed report;
+  CI floor 57 %) and the Lighthouse CI accessibility gate (≥ 0.95, `lighthouserc.json`).
+- Hero proof point: "3s → 1.2s page load" → "−49 % first-load JS (221 → 113 kB)". The load-time
+  figure only ever appeared in self-authored status docs with no report behind it.
+- Stack: Clerk Auth → Supabase Auth (Clerk was removed in raslipwani `14ac8e5`); EmailJS
+  → Resend (EmailJS was never in the dependency tree); added React Router, React Hook
+  Form and Zod. Skills panel updated to match.
+- Schema counts corrected from migrations 000–013: properties 25·5, bookings 26·12,
+  clients 27·6, client_property_interests 8·3, client_communications 11·4,
+  admin_settings ~70·1.
+- Features: dropped "International market support (UN Housing portal)" — the routes are
+  shelved (commented out in `src/App.jsx`, commit `8075b2f`). Added property segments,
+  RLS, booking notes, the mobile admin nav and the a11y gate.
+- Technical highlights: dropped "Full-text search with PostgreSQL indexes" — there is no
+  `tsvector` or `textSearch` in the repo; search is `ilike` filtering. Stale time is now
+  described as the three-tier policy it actually is (30 s / 5 min / 30 min).
+- Project ordering comment rewritten: both projects now have captures, so the
+  evidence-first sort is a no-op and Raslipwani (01) leads.
+
+### Retained, unsourced, not rendered
+- "3s → 1.2s", "90 % coverage target", "100+ active users", "95/100 mobile Lighthouse",
+  and every line of `performanceMetrics` except the bundle figure. They stay in the data
+  with no `source` until someone produces the artifact.
+
+### Known issues
+- Two captures (`properties`, `services`) were taken on a machine with no emoji font,
+  so the site's emoji glyphs (📍, 🛏) render as boxes. Retake after
+  `apt install fonts-noto-color-emoji`.
+- The raslipwani property modal keeps its image at `opacity-0` when the image is already
+  cached (the fade-in is bound to `onLoad`, which has fired before React attaches it).
+  Worked around for the capture; the fix belongs in raslipwani.
+
+## [2026-08-31] — Email: Resend on a real `voyani.tech`
 
 Executes [`EMAIL_ROADMAP.md`](./EMAIL_ROADMAP.md). Phase 0 removed every undeliverable
 address the site published; this makes the domain itself able to send and receive, and
@@ -164,9 +219,9 @@ existed but were never wired in. No visual redesign — that is Phase 2.
   `docs/archive/PHASE3_SECURITY_IMPLEMENTATION_REPORT.md`.
 
 ### Known issues
-- No screenshots exist for Raslipwani (client site in maintenance until ~5 Sept 2026)
-  or CAD Web Viewer (private client deployment). Both cards show an explicit
-  "capture pending" state rather than a fake or borrowed image.
+- No screenshots exist for CAD Web Viewer (private client deployment); its card shows an
+  explicit "capture pending" state rather than a fake or borrowed image. *(Raslipwani was
+  in the same state until 2026-09-16 — see the entry above.)*
 - 15 tests still fail, all pre-existing and unrelated to the public site: 7 in
   `ContactForm.test.jsx`, 3 in `Hero.test.jsx` (scroll indicator), 3 in email utils,
   2 in `Projects.test.jsx`.

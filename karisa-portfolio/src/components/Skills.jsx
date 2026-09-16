@@ -33,9 +33,9 @@ const SKILL_GROUPS = {
     items: [
       { name: 'PostgreSQL', where: 'Both client platforms' },
       { name: 'Supabase', where: 'Both client platforms + this site' },
-      { name: 'Row-Level Security', where: 'Neema Foundation, 5-tier roles' },
-      { name: 'Supabase Auth', where: 'Neema Foundation' },
-      { name: 'Clerk Auth', where: 'Raslipwani Properties' },
+      { name: 'Row-Level Security', where: 'Both client platforms' },
+      { name: 'Supabase Auth', where: 'Both client platforms' },
+      { name: 'Resend', where: 'Raslipwani + this site' },
       { name: 'Edge Functions (Deno)', where: "This site's contact pipeline" },
       { name: 'Node.js', where: 'Tooling and build scripts' },
     ],
