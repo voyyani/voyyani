@@ -1,7 +1,7 @@
 // supabase/functions/send-notification/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { buildFrom } from '../_shared/mail.ts';
+import { buildFrom, buildReplyAddress } from '../_shared/mail.ts';
 
 interface NotificationPayload {
   type: string;
@@ -21,7 +21,6 @@ const fromAddress = Deno.env.get('MAIL_FROM_ADDRESS') || `karisa@${mailDomain}`;
 const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
 const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'voyanitech@gmail.com';
 const portfolioUrl = Deno.env.get('PORTFOLIO_URL') || 'https://voyani.tech';
-const dashboardUrl = Deno.env.get('DASHBOARD_URL') || `${portfolioUrl}/admin/submissions`;
 
 // Get origin from request, fallback to portfolio URL for production
 const getOrigin = (req: Request) => {
@@ -72,7 +71,8 @@ function submissionEmailTemplate(
   senderEmail: string,
   phone: string | undefined,
   subject: string,
-  message: string
+  message: string,
+  threadUrl: string
 ): string {
   // African pattern SVG - matches homepage design
   const africanPattern = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D4A017' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
@@ -410,7 +410,8 @@ function submissionEmailTemplate(
 
         <!-- CTA -->
         <div class="cta-container">
-          <a href="${dashboardUrl}" class="button">→ Reply in Dashboard</a>
+          <a href="${threadUrl}" class="button">Open this thread</a>
+          <p style="margin:12px 0 0;font-size:13px;color:#5B5F67">Or just reply to this email — your answer goes to ${escapeHtml(senderName)} and is kept in the thread.</p>
         </div>
       </div>
 
@@ -772,6 +773,7 @@ async function sendEmailViaResend(
   to: string,
   subject: string,
   html: string,
+  replyTo: string,
   retries = 3
 ): Promise<{ id: string }> {
   let lastError: Error | null = null;
@@ -787,6 +789,7 @@ async function sendEmailViaResend(
         body: JSON.stringify({
           from: buildFrom(fromName, fromAddress),
           to,
+          reply_to: replyTo,
           subject,
           html,
         }),
@@ -857,6 +860,9 @@ serve(async (req) => {
       throw new Error(`Database insert failed: ${dbError.message}`);
     }
 
+    const threadUrl = `${portfolioUrl}/admin/submissions/${submission.id}`;
+    const replyTo = buildReplyAddress(submission.id, mailDomain);
+
     // Send admin notification to voyanitech@gmail.com
     if (resendApiKey) {
       const adminHtml = submissionEmailTemplate(
@@ -864,14 +870,16 @@ serve(async (req) => {
         payload.email,
         payload.phone,
         payload.subject,
-        payload.message
+        payload.message,
+        threadUrl
       );
 
       try {
         await sendEmailViaResend(
           adminEmail,
           `New Portfolio Inquiry: ${payload.subject}`,
-          adminHtml
+          adminHtml,
+          replyTo
         );
         console.log(`[send-notification] Admin email sent to ${adminEmail}`);
       } catch (emailError) {
@@ -887,7 +895,8 @@ serve(async (req) => {
         await sendEmailViaResend(
           payload.email,
           `We received your message: ${payload.subject}`,
-          confirmationHtml
+          confirmationHtml,
+          replyTo
         );
         console.log(`[send-notification] Confirmation email sent to ${payload.email}`);
       } catch (emailError) {
