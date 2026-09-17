@@ -1,127 +1,60 @@
-# Hi, I'm Karisa! 👋
+<div align="center">
 
-### Mechanical Engineer → Full-Stack Developer | Crafting High-Performance Web Solutions
+# Ngowa Karisa
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-4285F4?style=for-the-badge\&logo=google-chrome\&logoColor=white)](https://voyani.tech)
-[![Email](https://img.shields.io/badge/Email-EA4335?style=for-the-badge\&logo=gmail\&logoColor=white)](mailto:karisa@thebikecollector.tech)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=for-the-badge\&logo=linkedin\&logoColor=white)](https://linkedin.com/in/yourprofile)
+**Mechanical Engineer → Full-Stack Developer** · Nairobi, Kenya
 
----
+[voyani.tech](https://www.voyani.tech) · [karisa@voyani.tech](mailto:karisa@voyani.tech) · [LinkedIn](https://linkedin.com/in/karisa-ngowa-b7630111b/) · [Résumé](https://www.voyani.tech/Ngowa-Karisa-Resume.pdf)
 
-```mermaid
-graph LR
-    A[Engineering Mindset] --> B(Precision Systems)
-    A --> C(Performance Optimization)
-    A --> D(Technical Problem-Solving)
-    B --> E[Web Applications]
-    C --> F[React Performance]
-    D --> G[Full-Stack Solutions]
-```
+</div>
 
 ---
 
-## 🛠️ Technical Arsenal
+I build production web platforms end to end — database schema, auth and permissions, API layer, frontend, deploy pipeline — for organisations that need the thing to still work at 11pm on a slow connection.
 
-### ⚛️ Frontend Mastery
+I trained as a mechanical engineer (B.Eng, Shenyang Agricultural University; thesis on optimising mechanical systems with computational methods). Engineering leaves you with one habit: design to a tolerance, then verify. It's why I'd rather cut a feature than ship one I can't measure, why "it feels fast" isn't a number, and why the permission checks in my client work live in the database, not the UI.
 
-![React](https://img.shields.io/badge/React-20232A?style=flat\&logo=react\&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat\&logo=typescript\&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat\&logo=vite\&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat\&logo=tailwind-css\&logoColor=white)
+## Shipped
 
-### 🛠️ Backend & Database
+Two client platforms, both live and maintained. Every figure below links to the artifact that proves it — nothing is quoted from memory.
 
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat\&logo=supabase\&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat\&logo=postgresql\&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat\&logo=nodedotjs\&logoColor=white)
-![Heroku](https://img.shields.io/badge/Heroku-430098?style=flat\&logo=heroku\&logoColor=white)
+### [Raslipwani Properties](https://raslipwani.co.ke) — real-estate booking & client management
+Buyers search listings and book viewings; agency staff run the whole pipeline — properties, reschedules, client history, every conversation — from one dashboard.
 
-### ⚙️ Engineering Toolkit
+| | |
+|---|---|
+| **Stack** | React 18 · Vite · Supabase (Postgres, Auth, RLS) · Tailwind · React Query · FullCalendar · Resend · Cloudinary · Vitest |
+| **Measured** | First-load JS **−49 %** (220.7 → 112.8 kB gzip, budget enforced in CI) · **58 %** line coverage (CI floor 57 %) · Lighthouse a11y gate **≥ 95** |
+| **Code** | [github.com/voyyani/raslipwani](https://github.com/voyyani/raslipwani) |
 
-![MATLAB](https://img.shields.io/badge/MATLAB-0076A8?style=flat\&logo=mathworks\&logoColor=white)
-![CATIA](https://img.shields.io/badge/CATIA-005386?style=flat\&logo=ds-airbus\&logoColor=white)
-![AutoCAD](https://img.shields.io/badge/AutoCAD-0696D7?style=flat\&logo=autodesk\&logoColor=white)
+### [Neema Foundation Kilifi](https://neemafoundationkilifi.org) — non-profit site with a CMS their team actually runs
+Everything a visitor sees — hero copy, programmes, stories, events, gallery, donation routes — is editable by staff who don't write code. The brief was less about the website than about who maintains it.
 
----
+| | |
+|---|---|
+| **Stack** | React 19 · TypeScript · Vite 7 · Supabase · Tailwind · React Query v5 · TipTap · Three.js · DND Kit · Zod |
+| **Live** | **3** active programmes · **2,950+** people reached · **5**-tier RBAC |
+| **Code** | [github.com/voyyani/Neema-Foundation-Kilifi](https://github.com/voyyani/Neema-Foundation-Kilifi) |
 
-## 🚀 Featured Projects
+## Stack
 
-### 🏠 Full-Stack Property Platform
+| | |
+|---|---|
+| **Frontend** | React, TypeScript, Vite, Tailwind CSS, React Query, React Hook Form + Zod, Framer Motion, TipTap |
+| **Backend** | PostgreSQL, Supabase (Auth, Row-Level Security, Edge Functions / Deno), Node.js, Resend |
+| **Quality & Ops** | Vitest, React Testing Library, Playwright, ESLint, Sentry, GitHub Actions, Vercel |
+| **Engineering** | MATLAB, CATIA, AutoCAD, Finite Element Analysis |
 
-**Real estate management system with booking engine and admin dashboard**
-**Tech:** React (Vite) • Supabase • Tailwind CSS
-**Solved:** Complex state management for real-time bookings
+## Now
 
-### 🛠️ Mechanical CAD Web Viewer
-
-**3D model visualization for engineering components (commissioned)**
-**Tech:** Three.js • React • Custom WebGL Shaders
-**Solved:** Browser-based rendering of complex CAD models
-⭐ **Impact:** Reduced client review cycles by 65%
-
-### 🚲 Bike Collector Analytics
-
-**Inventory management system for bicycle collections**
-**Tech:** TypeScript • PostgreSQL • Express.js
-**Solved:** Predictive maintenance scheduling algorithm
+- Maintaining both client platforms above.
+- [voyani.tech](https://www.voyani.tech) — this portfolio: React 19 + Vite, contact pipeline on Supabase Edge Functions + Resend, GitHub activity synced weekly by Actions.
+- Open to a full-time role with a team that designs to a tolerance and verifies.
 
 ---
 
-## 🎓 Education & Credentials
+<div align="center">
 
-**B.Eng Mechanical Engineering**
-Shenyang Agricultural University
-Thesis: *"Optimization of Mechanical Systems Using Computational Methods"*
+Contract or full-time — [karisa@voyani.tech](mailto:karisa@voyani.tech) · [www.voyani.tech](https://www.voyani.tech)
 
-
----
-
-## 💡 Engineering-Driven Development Philosophy
-
-> *"Applying mechanical precision to digital solutions: I build web applications with the same rigor I'd engineer physical systems. Performance optimization isn't just about faster code — it's about creating efficient, maintainable systems that withstand real-world demands."*
-
----
-
-## 📈 GitHub Analytics
-
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=yourusername&show_icons=true&theme=tokyonight&hide_border=true" width="48%"/>
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=yourusername&layout=compact&theme=tokyonight&hide_border=true" width="48%"/>
-</p>
-<p align="center">
-  <img src="https://komarev.com/ghpvc/?username=yourusername&label=Profile%20Views&color=blueviolet&style=flat" alt="Profile views" />
-</p>
-
----
-
-## 🧠 My Development Process
-
-```mermaid
-journey
-    title My Development Process
-    section Design
-      Requirements Analysis: 5: Me
-      Architecture Planning: 4: Me
-    section Build
-      Frontend Development: 8: Me
-      Backend Development: 8: Me
-    section Optimize
-      Performance Tuning: 7: Me
-      Scalability Review: 6: Me
-```
-
----
-
-## 🔧 My Ideal Stack
-
-```mermaid
-graph TD
-    A[Frontend] --> A1[Vite + React + TypeScript]
-    B[Backend] --> B1[Node.js + Express]
-    C[Database] --> C1[Supabase + PostgreSQL]
-    D[Infrastructure] --> D1[Heroku + AWS]
-    E[Engineering] --> E1[MATLAB for data analysis]
-```
-
-
-> Let's build something powerful together. Feel free to reach out via [email](mailto:karisa@thebikecollector.tech) or check out [voyani.tech](https://voyani.tech).
+</div>
