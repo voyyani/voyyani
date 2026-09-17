@@ -47,11 +47,15 @@ export default function LabelsManager({ client }) {
         {(labels ?? []).map((l) => (
           <li key={l.id} className="flex flex-wrap items-center gap-3 py-2">
             {editing?.id === l.id ? (
-              <form onSubmit={(e) => { e.preventDefault(); save(editing); }} className="flex flex-1 flex-wrap items-center gap-2">
-                <label className="sr-only" htmlFor={`name-${l.id}`}>Name</label>
-                <input id={`name-${l.id}`} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className="field-sm w-48" />
-                <label className="sr-only" htmlFor={`color-${l.id}`}>Colour</label>
-                <input id={`color-${l.id}`} type="color" value={editing.color} onChange={(e) => setEditing({ ...editing, color: e.target.value })} className="h-8 w-10 border border-cloth-400 bg-cloth-50 p-0" />
+              <form onSubmit={(e) => { e.preventDefault(); save(editing); }} className="flex flex-1 flex-wrap items-end gap-2">
+                <div>
+                  <label htmlFor={`name-${l.id}`} className="field-label mb-1 text-xs">Name</label>
+                  <input id={`name-${l.id}`} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} className="field-sm w-48" />
+                </div>
+                <div>
+                  <label htmlFor={`color-${l.id}`} className="field-label mb-1 text-xs">Colour</label>
+                  <input id={`color-${l.id}`} type="color" value={editing.color} onChange={(e) => setEditing({ ...editing, color: e.target.value })} className="h-9 w-12 border border-cloth-400 bg-cloth-50 p-0" />
+                </div>
                 <button type="submit" className="btn-quiet"><Icon name="check" className="h-4 w-4" />Save</button>
                 <button type="button" onClick={() => setEditing(null)} className="btn-quiet">Cancel</button>
               </form>
