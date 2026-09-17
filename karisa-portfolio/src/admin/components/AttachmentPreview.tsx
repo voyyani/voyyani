@@ -5,7 +5,6 @@ import {
   validateAttachment,
   getRiskColor,
   formatFileSize,
-  getMimeTypeIcon,
 } from '@/utils/emailValidation';
 import { getAttachmentDownloadUrl, logAttachmentDownload } from '@/hooks/useInboundEmails';
 
@@ -115,7 +114,6 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                 <div className="flex-1 min-w-0">
                   {/* File info */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg">{getMimeTypeIcon(attachment.mime_type)}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-mark-900 truncate">
                         {attachment.file_name}

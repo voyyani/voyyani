@@ -77,7 +77,7 @@ export default function ReplyComposer({ submission, client, onSent }) {
         {...register('reply_message')}
         aria-invalid={errors.reply_message ? 'true' : undefined}
         aria-describedby={errors.reply_message ? 'reply-error' : undefined}
-        className="field text-[0.9375rem]"
+        className="field text-base"
         placeholder={`Reply to ${submission.name}…`}
       />
       {errors.reply_message && <p id="reply-error" className="mt-2 text-sm text-alarm">{errors.reply_message.message}</p>}

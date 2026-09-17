@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import StateMark from './StateMark';
-import Icon from './Icon';
 import AttachmentPreview from './AttachmentPreview';
 import { formatDateTime } from '../data/format';
 import { sanitizeEmailHTML } from '@/utils/emailSanitizer';
@@ -17,7 +16,7 @@ function Entry({ who, at, mark, children, tone = 'field' }) {
           <time dateTime={at} className="text-xs text-mark-500">{formatDateTime(at)}</time>
         </div>
       </header>
-      <div className="px-4 py-3 text-[0.9375rem] leading-relaxed text-mark-900">{children}</div>
+      <div className="px-4 py-3 text-base leading-relaxed text-mark-900">{children}</div>
     </article>
   );
 }

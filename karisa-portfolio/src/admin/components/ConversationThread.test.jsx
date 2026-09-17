@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMockClient } from '../../test/mockSupabase';
 import ConversationThread from './ConversationThread';
 
@@ -23,12 +24,14 @@ describe('ConversationThread', () => {
     expect(entries[4]).toHaveTextContent('Bounced');
   });
 
-  it('collapses held mail behind its reason and never injects script', () => {
+  it('collapses held mail behind its reason and never injects script', async () => {
     render(<ConversationThread items={items} client={createMockClient()} userId="u1" />);
     const held = screen.getAllByRole('article')[3];
     expect(held).toHaveTextContent(/held/i);
     expect(held).toHaveTextContent(/keywords/i);
+    expect(screen.queryByText(/lottery/)).toBeNull();   // collapsed until opened
+    await userEvent.click(screen.getByRole('button', { name: /show held message/i }));
     expect(held.querySelector('script')).toBeNull();
-    expect(screen.queryByText('lottery')).toBeNull();   // collapsed until opened
+    expect(held).toHaveTextContent(/lottery/);
   });
 });

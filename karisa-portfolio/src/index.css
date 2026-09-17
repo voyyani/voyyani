@@ -471,7 +471,7 @@
      Email arrives with its own inline styles; this only sets the type it
      falls back to. */
 
-  .prose-email { @apply text-[0.9375rem] leading-relaxed text-mark-900; }
+  .prose-email { @apply text-base leading-relaxed text-mark-900; }
   .prose-email a { @apply link; }
   .prose-email blockquote { @apply my-2 border-l-2 border-cloth-400 pl-3 text-mark-600; }
   .prose-email img { @apply max-w-full; }
