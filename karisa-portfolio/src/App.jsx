@@ -37,6 +37,7 @@ const loadSupabase = () => import('./lib/supabase');
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
 const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
 const SubmissionsPage = lazy(() => import('./admin/pages/SubmissionsPage'));
+const SubmissionDetailPage = lazy(() => import('./admin/pages/SubmissionDetailPage'));
 const AnalyticsPage = lazy(() => import('./admin/pages/AnalyticsPage'));
 const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
 
@@ -355,39 +356,16 @@ function App() {
         element={
           <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
             <Suspense fallback={<SectionLoader />}>
-            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
-              <AdminDashboard supabaseClient={supabaseRef.current} />
-            </AdminLayout>
+              <AdminLayout user={user} onLogout={handleLogout} />
             </Suspense>
           </ProtectedAdminRoute>
         }
-      />
-
-      <Route
-        path="/admin/submissions"
-        element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
-            <Suspense fallback={<SectionLoader />}>
-            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
-              <SubmissionsPage client={supabaseRef.current} />
-            </AdminLayout>
-            </Suspense>
-          </ProtectedAdminRoute>
-        }
-      />
-
-      <Route
-        path="/admin/analytics"
-        element={
-          <ProtectedAdminRoute isAuthenticated={isAuthenticated} isAdmin={isAdmin} isLoading={isLoading} isConfigured={isSupabaseConfigured}>
-            <Suspense fallback={<SectionLoader />}>
-            <AdminLayout supabaseClient={supabaseRef.current} user={user} onLogout={handleLogout}>
-              <AnalyticsPage client={supabaseRef.current} />
-            </AdminLayout>
-            </Suspense>
-          </ProtectedAdminRoute>
-        }
-      />
+      >
+        <Route index element={<Suspense fallback={<SectionLoader />}><AdminDashboard client={supabaseRef.current} /></Suspense>} />
+        <Route path="submissions" element={<Suspense fallback={<SectionLoader />}><SubmissionsPage client={supabaseRef.current} /></Suspense>} />
+        <Route path="submissions/:id" element={<Suspense fallback={<SectionLoader />}><SubmissionDetailPage client={supabaseRef.current} /></Suspense>} />
+        <Route path="analytics" element={<Suspense fallback={<SectionLoader />}><AnalyticsPage client={supabaseRef.current} /></Suspense>} />
+      </Route>
 
       {/*
         Fallback. This was `<Navigate to="/" replace />`, which turned every unmatched

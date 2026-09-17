@@ -1,538 +1,203 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
-import SubmissionDetailPanel from '../components/SubmissionDetailPanel';
+import PageHead from '../components/PageHead';
+import StateMark from '../components/StateMark';
+import Icon from '../components/Icon';
+import { TableSkeleton } from '../components/Skeleton';
 import BulkActionsBar from '../components/BulkActionsBar';
-import LabelsManager from '../components/LabelsManager';
+import { parseFilters, serializeFilters, applyFilters, decorateRow, SUBMISSIONS_SELECT, DEFAULT_FILTERS } from '../data/submissionsQuery';
+import { formatRelative } from '../data/format';
+
+const POLL_MS = 60000;
 
 export const SubmissionsPage = ({ client }) => {
-  const [submissions, setSubmissions] = useState([]);
-  const [filteredSubmissions, setFilteredSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [showLabelsManager, setShowLabelsManager] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filters = useMemo(() => parseFilters(searchParams), [searchParams]);
+  const [rows, setRows] = useState(null);           // null = loading
   const [labels, setLabels] = useState([]);
-  const [archiveFilter, setArchiveFilter] = useState('active');
+  const [selected, setSelected] = useState(() => new Set());
+  const [loadError, setLoadError] = useState(null);
 
-  // Fetch submissions
+  const setFilters = (next) => setSearchParams(serializeFilters({ ...filters, ...next }), { replace: true });
+
+  const fetchRows = useCallback(async () => {
+    if (!client) return;
+    const { data, error } = await client.from('submissions').select(SUBMISSIONS_SELECT).order('created_at', { ascending: false });
+    if (error) { setLoadError(error.message); return; }
+    setLoadError(null);
+    setRows((data ?? []).map(decorateRow));
+  }, [client]);
+
   useEffect(() => {
-    fetchLabels();
-    fetchSubmissions();
-    // Refresh every 10 seconds
-    const interval = setInterval(fetchSubmissions, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    if (!client) return undefined;
+    fetchRows();
+    client.from('labels').select('id, name, color').order('name').then(({ data }) => setLabels(data ?? []));
+    const channel = client
+      .channel('admin-submissions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'submissions' }, fetchRows)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'inbound_replies' }, fetchRows)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'submission_replies' }, fetchRows)
+      .subscribe();
+    const poll = setInterval(fetchRows, POLL_MS);
+    return () => { clearInterval(poll); client.removeChannel(channel); };
+  }, [client, fetchRows]);
 
-  const fetchLabels = async () => {
-    try {
-      const { data, error } = await client.from('labels').select('*');
-      if (error) throw error;
-      setLabels(data || []);
-    } catch (error) {
-      console.error('Error fetching labels:', error);
-    }
+  const visible = useMemo(() => (rows ? applyFilters(rows, filters) : []), [rows, filters]);
+  const awaitingCount = useMemo(() => (rows ?? []).filter((r) => !r.archived && r.awaiting).length, [rows]);
+  const isFiltered = serializeFilters(filters).toString() !== '';
+
+  const toggle = (id, on) => setSelected((prev) => { const n = new Set(prev); on ? n.add(id) : n.delete(id); return n; });
+  const toggleAll = (on) => setSelected(on ? new Set(visible.map((r) => r.id)) : new Set());
+
+  const bulk = async (label, fn) => {
+    const ids = Array.from(selected);
+    const { error } = await fn(ids);
+    if (error) { toast.error(`${label} failed: ${error.message}`); return; }
+    toast.success(`${label} ${ids.length} submission${ids.length === 1 ? '' : 's'}`);
+    setSelected(new Set());
+    fetchRows();
   };
 
-  const fetchSubmissions = async () => {
-    try {
-      if (!client) return;
-
-      const { data, error } = await client
-        .from('submissions')
-        .select(`
-          *,
-          submission_replies:submission_replies(count),
-          submission_labels(label_id)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setSubmissions(data || []);
-    } catch (error) {
-      console.error('Error fetching submissions:', error);
-      toast.error('Failed to load submissions');
-    } finally {
-      setLoading(false);
-    }
+  const bulkActions = {
+    onStatus: (status) => bulk('Updated', (ids) => client.from('submissions').update({ status }).in('id', ids)),
+    onArchive: () => bulk('Archived', (ids) => client.from('submissions').update({ archived: true, archived_at: new Date().toISOString() }).in('id', ids)),
+    onDelete: () => bulk('Deleted', (ids) => client.from('submissions').delete().in('id', ids)),
+    onLabel: (labelId) => bulk('Labelled', (ids) => client.from('submission_labels').upsert(ids.map((id) => ({ submission_id: id, label_id: labelId })), { onConflict: 'submission_id,label_id' })),
+    onClear: () => setSelected(new Set()),
   };
 
-  // Filter and search
-  useEffect(() => {
-    let result = submissions;
-
-    // Apply archive filter
-    if (archiveFilter === 'active') {
-      result = result.filter(s => !s.archived);
-    } else if (archiveFilter === 'archived') {
-      result = result.filter(s => s.archived);
-    }
-
-    // Apply status filter
-    if (filter !== 'all') {
-      result = result.filter(s => s.status === filter);
-    }
-
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(s =>
-        s.name.toLowerCase().includes(term) ||
-        s.email.toLowerCase().includes(term) ||
-        s.subject.toLowerCase().includes(term)
-      );
-    }
-
-    // Apply sort
-    if (sortBy === 'newest') {
-      result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    } else if (sortBy === 'oldest') {
-      result.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    } else if (sortBy === 'unanswered') {
-      result = result.filter(s => s.status === 'new');
-    }
-
-    setFilteredSubmissions(result);
-  }, [submissions, filter, searchTerm, sortBy, archiveFilter]);
-
-  const getStatusColor = (status) => {
-    const colors = {
-      'new': 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-      'in_progress': 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-      'responded': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-      'closed': 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
-    };
-    return colors[status] || colors.new;
-  };
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      'new': 'New',
-      'in_progress': 'In Progress',
-      'responded': 'Responded',
-      'closed': 'Closed',
-    };
-    return labels[status] || status;
-  };
-
-  // Multi-select handlers
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      setSelectedIds(new Set(filteredSubmissions.map(s => s.id)));
-    } else {
-      setSelectedIds(new Set());
-    }
-  };
-
-  const handleSelectOne = (id, checked) => {
-    const newSelected = new Set(selectedIds);
-    if (checked) {
-      newSelected.add(id);
-    } else {
-      newSelected.delete(id);
-    }
-    setSelectedIds(newSelected);
-  };
-
-  // Bulk action handlers
-  const handleBulkStatusChange = async (status) => {
-    try {
-      const ids = Array.from(selectedIds);
-      const { error } = await client
-        .from('submissions')
-        .update({ status })
-        .in('id', ids);
-
-      if (error) throw error;
-      await fetchSubmissions();
-      setSelectedIds(new Set());
-      toast.success(`Updated ${ids.length} submissions`);
-    } catch (error) {
-      console.error('Error updating submissions:', error);
-      toast.error('Failed to update submissions');
-    }
-  };
-
-  const handleBulkArchive = async () => {
-    try {
-      const ids = Array.from(selectedIds);
-      const { error } = await client
-        .from('submissions')
-        .update({ archived: true, archived_at: new Date().toISOString() })
-        .in('id', ids);
-
-      if (error) throw error;
-      await fetchSubmissions();
-      setSelectedIds(new Set());
-      toast.success(`Archived ${ids.length} submissions`);
-    } catch (error) {
-      console.error('Error archiving submissions:', error);
-      toast.error('Failed to archive submissions');
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    try {
-      const ids = Array.from(selectedIds);
-      const { error } = await client
-        .from('submissions')
-        .delete()
-        .in('id', ids);
-
-      if (error) throw error;
-      await fetchSubmissions();
-      setSelectedIds(new Set());
-      toast.success(`Deleted ${ids.length} submissions`);
-    } catch (error) {
-      console.error('Error deleting submissions:', error);
-      toast.error('Failed to delete submissions');
-    }
-  };
-
-  const handleBulkAddLabel = async (labelId) => {
-    try {
-      const ids = Array.from(selectedIds);
-      const labelInserts = ids.map(id => ({ submission_id: id, label_id: labelId }));
-
-      const { error } = await client
-        .from('submission_labels')
-        .insert(labelInserts);
-
-      if (error) throw error;
-      await fetchSubmissions();
-      toast.success(`Added label to ${ids.length} submissions`);
-    } catch (error) {
-      console.error('Error adding label:', error);
-      toast.error('Failed to add label');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="animate-spin text-4xl mb-4">⌛</div>
-          <p className="text-gray-300">Loading submissions...</p>
-        </div>
-      </div>
-    );
-  }
+  const labelById = useMemo(() => Object.fromEntries(labels.map((l) => [l.id, l])), [labels]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 md:space-y-8 pb-24">
-      {/* Header with Labels Manager Button - responsive layout */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4"
-      >
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">Submissions</h1>
-          <p className="text-sm sm:text-base text-gray-400">Manage and respond to contact inquiries</p>
-        </div>
-        <button
-          onClick={() => setShowLabelsManager(true)}
-          className="w-full sm:w-auto px-4 py-2.5 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-400 rounded-lg transition-colors text-sm sm:text-base font-medium flex-shrink-0"
-        >
-          🏷️ Manage Labels
-        </button>
-      </motion.div>
-
-      {/* Controls - responsive grid: full-width mobile → stacked on small tablets → full grid on desktop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-5 gap-2 sm:gap-3"
-      >
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="md:col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm sm:text-base"
-        />
-
-        <select
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
-        >
-          <option value="all" className="bg-[#0a1929]">All Statuses</option>
-          <option value="new" className="bg-[#0a1929]">New</option>
-          <option value="in_progress" className="bg-[#0a1929]">In Progress</option>
-          <option value="responded" className="bg-[#0a1929]">Responded</option>
-          <option value="closed" className="bg-[#0a1929]">Closed</option>
-        </select>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
-        >
-          <option value="newest" className="bg-[#0a1929]">Newest First</option>
-          <option value="oldest" className="bg-[#0a1929]">Oldest First</option>
-          <option value="unanswered" className="bg-[#0a1929]">Unanswered</option>
-        </select>
-
-        <select
-          value={archiveFilter}
-          onChange={(e) => setArchiveFilter(e.target.value)}
-          className="px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#61DAFB]/50 text-sm"
-        >
-          <option value="active" className="bg-[#0a1929]">Active</option>
-          <option value="archived" className="bg-[#0a1929]">Archived</option>
-          <option value="all" className="bg-[#0a1929]">All</option>
-        </select>
-      </motion.div>
-
-      {/* Submissions List - responsive: card view on mobile, table on desktop */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white/5 backdrop-blur border border-white/10 rounded-lg overflow-hidden"
-      >
-        {filteredSubmissions.length === 0 ? (
-          <div className="p-8 text-center text-gray-400">
-            <p className="text-lg mb-2">No submissions found</p>
-            <p className="text-sm">Try adjusting your filters</p>
-          </div>
-        ) : (
-          <>
-            {/* Mobile card view */}
-            <div className="md:hidden space-y-2 p-3 sm:p-4">
-              {filteredSubmissions.map((submission) => {
-                const submissionLabels = labels.filter(
-                  l => submission.submission_labels?.some(sl => sl.label_id === l.id)
-                );
-                return (
-                  <motion.div
-                    key={submission.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="bg-white/5 border border-white/5 rounded-lg p-3 sm:p-4 hover:bg-white/10 transition-colors space-y-2"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <input
-                          type="checkbox"
-                          checked={selectedIds.has(submission.id)}
-                          onChange={(e) => handleSelectOne(submission.id, e.target.checked)}
-                          className="w-4 h-4 cursor-pointer mr-2 inline-block"
-                        />
-                        <span className="text-white font-medium text-sm">{submission.name}</span>
-                      </div>
-                      <span className={`inline-block px-2 py-1 rounded text-xs font-semibold flex-shrink-0 ${getStatusColor(submission.status)}`}>
-                        {getStatusLabel(submission.status)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500">{submission.email}</p>
-                    <p className="text-sm text-gray-300 line-clamp-2">{submission.subject}</p>
-                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <span>📅 {new Date(submission.created_at).toLocaleDateString()}</span>
-                        <span>💬 {submission.submission_replies?.[0]?.count || 0}</span>
-                      </div>
-                      <button
-                        onClick={() => setSelectedSubmission(submission)}
-                        className="text-[#61DAFB] hover:text-[#61DAFB]/80 text-sm font-medium transition-colors"
-                      >
-                        View →
-                      </button>
-                    </div>
-                    {submissionLabels.length > 0 && (
-                      <div className="flex gap-1 flex-wrap pt-1">
-                        {submissionLabels.slice(0, 3).map((label) => (
-                          <span
-                            key={label.id}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs text-white"
-                            style={{ backgroundColor: label.color + '33' }}
-                          >
-                            <div
-                              className="w-1.5 h-1.5 rounded-full"
-                              style={{ backgroundColor: label.color }}
-                            />
-                            {label.name}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Desktop table view */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10 bg-white/5">
-                    <th className="px-4 py-4 text-left">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.size === filteredSubmissions.length && filteredSubmissions.length > 0}
-                        onChange={(e) => handleSelectAll(e.target.checked)}
-                        className="w-4 h-4 cursor-pointer"
-                      />
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Name</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Subject</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Status</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Priority</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Labels</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Replies</th>
-                    <th className="px-4 py-4 text-left text-xs sm:text-sm font-semibold text-gray-300">Date</th>
-                    <th className="px-4 py-4 text-right text-xs sm:text-sm font-semibold text-gray-300">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <AnimatePresence>
-                    {filteredSubmissions.map((submission) => {
-                      const submissionLabels = labels.filter(
-                        l => submission.submission_labels?.some(sl => sl.label_id === l.id)
-                      );
-
-                      return (
-                        <motion.tr
-                          key={submission.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                        >
-                          <td className="px-4 py-4">
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.has(submission.id)}
-                              onChange={(e) => handleSelectOne(submission.id, e.target.checked)}
-                              className="w-4 h-4 cursor-pointer"
-                            />
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex flex-col">
-                              <span className="font-medium text-white text-sm">{submission.name}</span>
-                              <span className="text-xs text-gray-400">{submission.email}</span>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-200 truncate max-w-xs">{submission.subject}</td>
-                          <td className="px-4 py-4">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(submission.status)}`}>
-                              {getStatusLabel(submission.status)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                              submission.priority === 'urgent' ? 'bg-red-600/30 text-red-400' :
-                              submission.priority === 'high' ? 'bg-orange-600/30 text-orange-400' :
-                              submission.priority === 'normal' ? 'bg-blue-600/30 text-blue-400' :
-                              'bg-gray-600/30 text-gray-400'
-                            }`}>
-                              {submission.priority || 'normal'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-4">
-                            <div className="flex gap-1 flex-wrap">
-                              {submissionLabels.slice(0, 2).map((label) => (
-                                <span
-                                  key={label.id}
-                                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs text-white"
-                                  style={{ backgroundColor: label.color + '33' }}
-                                >
-                                  <div
-                                    className="w-2 h-2 rounded-full"
-                                    style={{ backgroundColor: label.color }}
-                                  />
-                                  {label.name}
-                                </span>
-                              ))}
-                              {submissionLabels.length > 2 && (
-                                <span className="text-xs text-gray-400">+{submissionLabels.length - 2}</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-400">
-                            {submission.submission_replies?.[0]?.count || 0}
-                          </td>
-                          <td className="px-4 py-4 text-sm text-gray-400">
-                            {new Date(submission.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="px-4 py-4 text-right">
-                            <button
-                              onClick={() => setSelectedSubmission(submission)}
-                              className="text-[#61DAFB] hover:text-[#61DAFB]/80 text-sm font-medium transition-colors"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </motion.tr>
-                      );
-                    })}
-                  </AnimatePresence>
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </motion.div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total', count: submissions.filter(s => !s.archived).length, color: 'from-blue-500/20 to-blue-600/20', accent: 'text-blue-400' },
-          { label: 'New', count: submissions.filter(s => s.status === 'new' && !s.archived).length, color: 'from-emerald-500/20 to-emerald-600/20', accent: 'text-emerald-400' },
-          { label: 'In Progress', count: submissions.filter(s => s.status === 'in_progress' && !s.archived).length, color: 'from-amber-500/20 to-amber-600/20', accent: 'text-amber-400' },
-          { label: 'Responded', count: submissions.filter(s => s.status === 'responded' && !s.archived).length, color: 'from-purple-500/20 to-purple-600/20', accent: 'text-purple-400' },
-        ].map((stat) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`bg-gradient-to-br ${stat.color} backdrop-blur border border-white/10 rounded-lg p-4`}
-          >
-            <p className="text-sm text-gray-400 mb-1">{stat.label}</p>
-            <p className={`text-3xl font-bold ${stat.accent}`}>{stat.count}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Detail Panel */}
-      {selectedSubmission && (
-        <SubmissionDetailPanel
-          submission={selectedSubmission}
-          onClose={() => setSelectedSubmission(null)}
-          client={client}
-          onRefresh={fetchSubmissions}
-        />
-      )}
-
-      {/* Labels Manager Modal */}
-      <LabelsManager
-        isOpen={showLabelsManager}
-        onClose={() => {
-          setShowLabelsManager(false);
-          fetchLabels();
-        }}
-        client={client}
-        onLabelsUpdate={fetchLabels}
+    <div className="pb-24">
+      <PageHead
+        title="Submissions"
+        meta={rows ? `${visible.length} shown · ${awaitingCount} awaiting you` : null}
+        actions={<button type="button" onClick={fetchRows} className="btn-quiet"><Icon name="refresh" className="h-4 w-4" />Refresh</button>}
       />
 
-      {/* Bulk Actions Bar */}
-      {selectedIds.size > 0 && (
-        <BulkActionsBar
-          selectedCount={selectedIds.size}
-          onBulkStatusChange={handleBulkStatusChange}
-          onBulkArchive={handleBulkArchive}
-          onBulkDelete={handleBulkDelete}
-          onBulkAddLabel={handleBulkAddLabel}
-          labels={labels}
-          onClose={() => setSelectedIds(new Set())}
-        />
+      <form role="search" onSubmit={(e) => e.preventDefault()} className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto]">
+        <div>
+          <label htmlFor="q" className="field-label">Search</label>
+          <input id="q" type="search" value={filters.q} onChange={(e) => setFilters({ q: e.target.value })} placeholder="Name, email or subject" className="field-sm" />
+        </div>
+        <div>
+          <label htmlFor="status" className="field-label">Status</label>
+          <select id="status" value={filters.status} onChange={(e) => setFilters({ status: e.target.value })} className="field-sm">
+            <option value="all">All statuses</option>
+            <option value="new">New</option>
+            <option value="in_progress">In progress</option>
+            <option value="responded">Responded</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="box" className="field-label">Box</label>
+          <select id="box" value={filters.box} onChange={(e) => setFilters({ box: e.target.value })} className="field-sm">
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="sort" className="field-label">Order</label>
+          <select id="sort" value={filters.sort} onChange={(e) => setFilters({ sort: e.target.value })} className="field-sm">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </div>
+        <label className="flex items-end gap-2 pb-2 text-sm text-mark-700">
+          <input type="checkbox" checked={filters.waiting} onChange={(e) => setFilters({ waiting: e.target.checked })} className="h-4 w-4 accent-pindo" />
+          Awaiting me only
+        </label>
+      </form>
+
+      {loadError && <p role="alert" className="mb-4 border border-alarm px-4 py-3 text-sm text-alarm">Could not load submissions: {loadError}. <button type="button" onClick={fetchRows} className="link">Try again</button></p>}
+
+      {rows === null ? (
+        <TableSkeleton rows={6} cols={5} />
+      ) : visible.length === 0 ? (
+        <div className="adm-card px-6 py-12 text-center">
+          <p className="text-mark-700">{isFiltered ? 'No submissions match these filters.' : 'No submissions yet. The contact form on the site lands here.'}</p>
+          {isFiltered && <button type="button" onClick={() => setSearchParams(serializeFilters(DEFAULT_FILTERS), { replace: true })} className="btn-quiet mt-4">Clear filters</button>}
+        </div>
+      ) : (
+        <>
+          {/* Stacked rows below md — tabular content is never a horizontal scroller. */}
+          <ul className="divide-y divide-cloth-300 border-t border-cloth-300 md:hidden">
+            {visible.map((r) => (
+              <li key={r.id} className="flex gap-3 py-3">
+                <input type="checkbox" aria-label={`Select ${r.name}`} checked={selected.has(r.id)} onChange={(e) => toggle(r.id, e.target.checked)} className="mt-1 h-4 w-4 accent-pindo" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <Link to={`/admin/submissions/${r.id}`} className="truncate font-medium text-mark-900 hover:text-pindo">{r.name}</Link>
+                    <time dateTime={r.created_at} className="shrink-0 text-xs text-mark-500">{formatRelative(r.created_at)}</time>
+                  </div>
+                  <p className="truncate text-sm text-mark-700">{r.subject}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1">
+                    <StateMark state={r.status} />
+                    {r.awaiting && <StateMark state="waiting" />}
+                    {r.inboundUnread > 0 && <span className="tabular text-xs text-mark-600">{r.inboundUnread} unread</span>}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hidden md:block">
+            <table className="adm-table">
+              <caption className="sr-only">Contact submissions</caption>
+              <thead>
+                <tr>
+                  <th scope="col" className="w-8"><input type="checkbox" aria-label="Select all shown" checked={selected.size > 0 && selected.size === visible.length} onChange={(e) => toggleAll(e.target.checked)} className="h-4 w-4 accent-pindo" /></th>
+                  <th scope="col">From</th>
+                  <th scope="col">Subject</th>
+                  <th scope="col">State</th>
+                  <th scope="col">Priority</th>
+                  <th scope="col">Labels</th>
+                  <th scope="col" className="text-right">Replies</th>
+                  <th scope="col">Received</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visible.map((r) => (
+                  <tr key={r.id}>
+                    <td><input type="checkbox" aria-label={`Select ${r.name}`} checked={selected.has(r.id)} onChange={(e) => toggle(r.id, e.target.checked)} className="h-4 w-4 accent-pindo" /></td>
+                    <td>
+                      <Link to={`/admin/submissions/${r.id}`} className="font-medium text-mark-900 hover:text-pindo">{r.name}</Link>
+                      <p className="text-xs text-mark-500">{r.email}</p>
+                    </td>
+                    <td className="max-w-xs"><p className="truncate" title={r.subject}>{r.subject}</p></td>
+                    <td>
+                      <div className="flex flex-col gap-1">
+                        <StateMark state={r.status} />
+                        {r.awaiting && <StateMark state="waiting" />}
+                      </div>
+                    </td>
+                    <td className="capitalize text-mark-700">{r.priority || 'normal'}</td>
+                    <td>
+                      <div className="flex flex-wrap gap-1">
+                        {r.labelIds.slice(0, 2).map((id) => labelById[id] && (
+                          <span key={id} className="adm-chip"><span className="h-2 w-2" style={{ background: labelById[id].color }} aria-hidden="true" />{labelById[id].name}</span>
+                        ))}
+                        {r.labelIds.length > 2 && <span className="text-xs text-mark-500">+{r.labelIds.length - 2}</span>}
+                      </div>
+                    </td>
+                    <td className="text-right">
+                      {r.replyCount}
+                      {r.inboundUnread > 0 && <span className="ml-2 text-xs text-pindo">{r.inboundUnread} unread</span>}
+                    </td>
+                    <td><time dateTime={r.created_at} className="text-mark-700">{formatRelative(r.created_at)}</time></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
+
+      {selected.size > 0 && <BulkActionsBar count={selected.size} labels={labels} {...bulkActions} />}
     </div>
   );
 };

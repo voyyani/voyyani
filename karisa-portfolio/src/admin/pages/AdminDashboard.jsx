@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
-const AdminDashboard = ({ supabaseClient }) => {
+const AdminDashboard = ({ client }) => {
   const [stats, setStats] = useState({
     totalSubmissions: 0,
     newSubmissions: 0,
@@ -20,17 +20,17 @@ const AdminDashboard = ({ supabaseClient }) => {
 
   const fetchDashboardData = async () => {
     try {
-      if (!supabaseClient) return;
+      if (!client) return;
 
       // Fetch stats
-      const { data: submissions, error: submissionsError } = await supabaseClient
+      const { data: submissions, error: submissionsError } = await client
         .from('submissions')
         .select('id, status, created_at');
 
       if (submissionsError) throw submissionsError;
 
       // Fetch recent submissions
-      const { data: recent, error: recentError } = await supabaseClient
+      const { data: recent, error: recentError } = await client
         .from('submissions')
         .select('id, name, email, subject, status, created_at')
         .order('created_at', { ascending: false })
