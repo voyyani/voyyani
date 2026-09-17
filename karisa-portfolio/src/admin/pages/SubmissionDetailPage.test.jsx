@@ -7,8 +7,9 @@ import SubmissionDetailPage from './SubmissionDetailPage';
 
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-const submission = { id: 's1', name: 'Amina', email: 'amina@example.com', phone: null, subject: 'Clinic site', message: 'Hello there', status: 'new', priority: 'normal', notes: '', archived: false, responded_at: null, created_at: '2026-09-10T10:00:00Z' };
-const inbound = [{ id: 'i1', submission_id: 's1', from_email: 'amina@example.com', from_name: 'Amina', subject: 'Re', body_text: 'Great', body_html: null, received_at: '2026-09-11T09:00:00Z', is_read: false, is_important: false, status: 'processed', spam_score: 0, spam_reasons: null, sender_verified: true, inbound_attachments: [] }];
+const ID = '11111111-1111-4111-8111-111111111111';
+const submission = { id: ID, name: 'Amina', email: 'amina@example.com', phone: null, subject: 'Clinic site', message: 'Hello there', status: 'new', priority: 'normal', notes: '', archived: false, responded_at: null, created_at: '2026-09-10T10:00:00Z' };
+const inbound = [{ id: 'i1', submission_id: ID, from_email: 'amina@example.com', from_name: 'Amina', subject: 'Re', body_text: 'Great', body_html: null, received_at: '2026-09-11T09:00:00Z', is_read: false, is_important: false, status: 'processed', spam_score: 0, spam_reasons: null, sender_verified: true, inbound_attachments: [] }];
 
 const renderPage = (tables = {}) => {
   const client = createMockClient({
@@ -22,7 +23,7 @@ const renderPage = (tables = {}) => {
     },
   });
   render(
-    <MemoryRouter initialEntries={['/admin/submissions/s1']}>
+    <MemoryRouter initialEntries={[`/admin/submissions/${ID}`]}>
       <Routes><Route path="/admin/submissions/:id" element={<SubmissionDetailPage client={client} />} /></Routes>
     </MemoryRouter>
   );
@@ -50,7 +51,7 @@ describe('SubmissionDetailPage', () => {
     const [url, init] = global.fetch.mock.calls[0];
     expect(url).toMatch(/\/functions\/v1\/send-reply$/);
     expect(init.headers.Authorization).toBe('Bearer token');
-    expect(JSON.parse(init.body)).toMatchObject({ submission_id: 's1', reply_type: 'manual' });
+    expect(JSON.parse(init.body)).toMatchObject({ submission_id: ID, reply_type: 'manual' });
     expect(log.mock.calls.flat().join(' ')).not.toMatch(/token/i);
     log.mockRestore();
   });

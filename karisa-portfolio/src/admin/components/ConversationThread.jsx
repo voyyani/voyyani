@@ -59,9 +59,9 @@ function InboundEntry({ item, client }) {
             <p className="whitespace-pre-wrap">{item.bodyText}</p>
           )}
           {item.attachments.length > 0 && (
-            <ul className="mt-3 space-y-2 border-t border-cloth-300 pt-3">
-              {item.attachments.map((a) => <li key={a.id}><AttachmentPreview attachment={a} client={client} /></li>)}
-            </ul>
+            <div className="mt-3 border-t border-cloth-300 pt-3">
+              <AttachmentPreview attachments={item.attachments} replyId={item.id} client={client} />
+            </div>
           )}
         </>
       )}
