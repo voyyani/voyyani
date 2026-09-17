@@ -1,0 +1,18 @@
+# Per-function gateway settings. `supabase functions deploy <name>` reads these, so the
+# JWT policy is versioned here instead of depending on which flag someone remembered.
+#
+# verify_jwt = false  → caller presents no Supabase session (public form, Resend webhooks);
+#                       the function does its own check (CSRF + rate limit, or HMAC signature).
+# verify_jwt = true   → gateway verifies the session signature before the function runs.
+
+[functions.send-notification]
+verify_jwt = false
+
+[functions.handle-inbound-email]
+verify_jwt = false
+
+[functions.handle-resend-webhook]
+verify_jwt = false
+
+[functions.send-reply]
+verify_jwt = true

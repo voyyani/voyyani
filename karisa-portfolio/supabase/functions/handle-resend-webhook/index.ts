@@ -3,7 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const resendWebhookSecret = Deno.env.get("RESEND_WEBHOOK_SECRET") || "";
+// Resend issues a distinct signing secret per webhook endpoint. This function sits on
+// its own endpoint (delivery events), separate from handle-inbound-email (email.received),
+// so it needs its own secret. Falls back to the shared name for the single-endpoint setup.
+const resendWebhookSecret =
+  Deno.env.get("RESEND_STATUS_WEBHOOK_SECRET") || Deno.env.get("RESEND_WEBHOOK_SECRET") || "";
 
 // Verify webhook signature using HMAC-SHA256
 async function verifyWebhookSignature(
