@@ -37,6 +37,7 @@ const loadSupabase = () => import('./lib/supabase');
 const AdminLayout = lazy(() => import('./admin/layout/AdminLayout'));
 const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
 const SubmissionsPage = lazy(() => import('./admin/pages/SubmissionsPage'));
+const SubmissionDetailPage = lazy(() => import('./admin/pages/SubmissionDetailPage'));
 const AnalyticsPage = lazy(() => import('./admin/pages/AnalyticsPage'));
 const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
 
@@ -362,6 +363,7 @@ function App() {
       >
         <Route index element={<Suspense fallback={<SectionLoader />}><AdminDashboard client={supabaseRef.current} /></Suspense>} />
         <Route path="submissions" element={<Suspense fallback={<SectionLoader />}><SubmissionsPage client={supabaseRef.current} /></Suspense>} />
+        <Route path="submissions/:id" element={<Suspense fallback={<SectionLoader />}><SubmissionDetailPage client={supabaseRef.current} /></Suspense>} />
         <Route path="analytics" element={<Suspense fallback={<SectionLoader />}><AnalyticsPage client={supabaseRef.current} /></Suspense>} />
       </Route>
 

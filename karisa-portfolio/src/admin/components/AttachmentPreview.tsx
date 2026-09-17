@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { motion } from 'framer-motion';
 import {
   InboundAttachment,
   validateAttachment,
@@ -94,45 +93,34 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
   };
 
   return (
-    <motion.div
-      className="space-y-3"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.1 }}
-    >
-      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-        📎 Attachments ({attachments.length})
+    <div className="space-y-3">
+      <div className="text-sm font-medium text-mark-900">
+        Attachments ({attachments.length})
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-700 dark:text-red-400">⚠️ {error}</p>
+        <div className="border border-alarm bg-cloth-50 p-3">
+          <p className="text-sm text-alarm">{error}</p>
         </div>
       )}
 
       <div className="space-y-2">
-        {attachments.map((attachment, index) => {
+        {attachments.map((attachment) => {
           const validation = validateAttachment(attachment);
           const isDownloading = downloading.has(attachment.id);
 
           return (
-            <motion.div
-              key={attachment.id}
-              className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-            >
+            <div key={attachment.id} className="border border-cloth-300 bg-cloth-50 p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   {/* File info */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-lg">{getMimeTypeIcon(attachment.mime_type)}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-mark-900 truncate">
                         {attachment.file_name}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                      <p className="text-xs text-mark-500">
                         {formatFileSize(attachment.file_size)}
                       </p>
                     </div>
@@ -141,44 +129,44 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                   {/* Safety status */}
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     {attachment.is_executable && (
-                      <span className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
-                        🚨 Executable
+                      <span className="border border-alarm px-2 py-1 text-xs font-medium text-alarm">
+                        Executable
                       </span>
                     )}
 
                     {attachment.virus_scan_status === 'clean' && (
-                      <span className="px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
-                        ✅ Clean
+                      <span className="px-2 py-1 text-xs font-medium text-mark-500">
+                        Clean
                       </span>
                     )}
 
                     {attachment.virus_scan_status === 'infected' && (
-                      <span className="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full">
-                        ❌ Infected
+                      <span className="border border-alarm px-2 py-1 text-xs font-medium text-alarm">
+                        Infected
                       </span>
                     )}
 
                     {attachment.virus_scan_status === 'suspicious' && (
-                      <span className="px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
-                        ⚠️ Suspicious
+                      <span className="px-2 py-1 text-xs font-medium text-warn">
+                        Suspicious
                       </span>
                     )}
 
                     {attachment.virus_scan_status === 'pending' && (
-                      <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
-                        ⏳ Scanning
+                      <span className="px-2 py-1 text-xs font-medium text-mark-500">
+                        Scanning
                       </span>
                     )}
 
                     {attachment.is_inline && (
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">
-                        🖼️ Inline
+                      <span className="px-2 py-1 text-xs font-medium text-mark-500">
+                        Inline
                       </span>
                     )}
 
                     {validation.warnings.length > 0 && (
-                      <span className="px-2 py-1 text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full">
-                        ⚠️ {validation.warnings[0]}
+                      <span className="px-2 py-1 text-xs font-medium text-warn">
+                        {validation.warnings[0]}
                       </span>
                     )}
                   </div>
@@ -187,8 +175,8 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                   {validation.errors.length > 0 && (
                     <div className="space-y-1">
                       {validation.errors.map((error, i) => (
-                        <p key={i} className="text-xs text-red-600 dark:text-red-400">
-                          🚫 {error}
+                        <p key={i} className="text-xs text-alarm">
+                          {error}
                         </p>
                       ))}
                     </div>
@@ -199,41 +187,24 @@ export const AttachmentPreview: React.FC<AttachmentPreviewProps> = ({
                 <button
                   onClick={() => handleDownload(attachment)}
                   disabled={isDownloading || !validation.isSafe}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    !validation.isSafe
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-                  }`}
+                  className="btn-quiet px-3 py-1 text-xs disabled:cursor-not-allowed disabled:text-mark-500"
                   title={!validation.isSafe ? 'Cannot download unsafe attachment' : 'Download'}
                 >
-                  {isDownloading ? (
-                    <span className="flex items-center gap-1">
-                      <motion.span
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                        className="inline-block"
-                      >
-                        ⏳
-                      </motion.span>
-                      Downloading
-                    </span>
-                  ) : (
-                    '⬇️ Download'
-                  )}
+                  {isDownloading ? 'Downloading' : 'Download'}
                 </button>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
 
       {/* Download count info */}
-      <div className="text-xs text-gray-500 dark:text-gray-400">
-        💾 {attachments.reduce((sum, a) => sum + a.download_count, 0)} download{
+      <div className="text-xs text-mark-500">
+        {attachments.reduce((sum, a) => sum + a.download_count, 0)} download{
           attachments.reduce((sum, a) => sum + a.download_count, 0) !== 1 ? 's' : ''
         } total
       </div>
-    </motion.div>
+    </div>
   );
 };
 
