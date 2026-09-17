@@ -146,7 +146,7 @@ function cleanEmailBody(text: string): string {
   for (const line of lines) {
     // Stop at common quote markers
     if (
-      line.match(/^On\s+.+written:/) || // "On Mon, ... wrote:"
+      line.match(/^On\s+.+wrote:/) || // "On Mon, ... wrote:"
       line.match(/^>/) || // Gmail quote
       line.match(/^-+\s*$/) || // Divider
       line.match(/^--$/) // Signature separator
@@ -326,8 +326,9 @@ async function calculateSpamScore(
  * Re-send an inbound message to the mailbox Karisa actually reads.
  *
  * `from` must stay on the verified domain — Resend will not send as the original
- * sender — so the original address goes in reply_to, which makes hitting Reply in
- * Gmail do the right thing.
+ * sender — so the reply address goes in reply_to instead: the thread address
+ * (reply+{id}@) for a threaded submission reply, or the human's own address for
+ * direct mail, so hitting Reply in Gmail does the right thing either way.
  */
 async function forwardToAdmin(
   payload: ResendWebhookPayload,
@@ -411,14 +412,23 @@ async function handleDirectMail(
  * reply with email_metadata.source = 'email_relay' so the thread can say "via Gmail".
  */
 async function relayAdminReply(
-  submission: { id: string; email: string; name: string; responded_at: string | null },
+  submission: { id: string; email: string; name: string; subject: string; responded_at: string | null },
   payload: ResendWebhookPayload,
   submissionId: string
 ): Promise<Response> {
+  if (!supabase) {
+    console.error('[relay] Supabase client not configured');
+    return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+
   const text = cleanEmailBody(payload.text || extractTextFromHtml(payload.html || ''));
   if (!text.trim()) {
     console.warn('[relay] Empty admin reply; nothing to send');
     return new Response(JSON.stringify({ success: true, handled: 'admin-empty' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  if (payload.attachments?.length) {
+    console.warn('[relay] Admin reply had', payload.attachments.length, 'attachment(s); relay sends text only');
   }
 
   const html = `<div style="font-family:Archivo,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;color:#14171C;white-space:pre-wrap">${
@@ -438,7 +448,7 @@ async function relayAdminReply(
         from: buildFrom(fromName, fromAddress),
         to: submission.email,
         reply_to: buildReplyAddress(submissionId, mailDomain),
-        subject: payload.subject || `Re: your enquiry`,
+        subject: `Re: ${submission.subject}`,
         html,
         headers: { 'X-Submission-ID': submissionId, 'Message-ID': buildThreadMessageId(submissionId, mailDomain) },
       }),
