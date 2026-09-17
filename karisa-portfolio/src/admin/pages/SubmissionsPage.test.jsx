@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { createMockClient } from '../../test/mockSupabase';
@@ -47,7 +47,8 @@ describe('SubmissionsPage', () => {
     renderPage('?q=zzz');
     expect(await screen.findByText(/no submissions match/i)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /clear filters/i }));
-    expect(await screen.findByText('Amina Yusuf')).toBeInTheDocument();
+    const table = await screen.findByRole('table');
+    expect(within(table).getByText('Amina Yusuf')).toBeInTheDocument();
   });
 
   it('subscribes to live changes and polls as a fallback', async () => {
@@ -60,9 +61,8 @@ describe('SubmissionsPage', () => {
   it('asks before a bulk delete', async () => {
     const client = renderPage();
     const table = await screen.findByRole('table');
-    await userEvent.click(within(table).getAllByRole('checkbox', { name: /select/i })[0]);
+    await userEvent.click(within(table).getByRole('checkbox', { name: /select amina/i }));
     await userEvent.click(screen.getByRole('button', { name: /^delete$/i }));
-    expect(client.from).not.toHaveBeenCalledWith('submissions_deleted_sentinel');
-    expect(screen.getByRole('button', { name: /confirm delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /confirm delete 1/i })).toBeInTheDocument();
   });
 });
