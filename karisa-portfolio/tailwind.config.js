@@ -23,10 +23,8 @@
  *   4. The jina is set at true display scale — 5.25rem at the top end — because on
  *      cloth the printed line is the largest thing on the object.
  *
- * The `ink` / `signal` ramp below is NOT part of this world. It is the previous dark
- * system, kept intact solely because the private /admin area is built on it and is out
- * of scope for a public-site redesign. Nothing under src/components or src/sections
- * may use it. If the admin is ever redesigned, delete that block with it.
+ * The private /admin area runs on the same tokens in Operate mode — denser, fixed
+ * rem type, one family, no entrance orchestration. See DESIGN.md → "The admin sheet".
  */
 module.exports = {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
@@ -70,26 +68,6 @@ module.exports = {
         warn: '#8A5A08',
         // Destructive only — form errors. 5.0:1 on cloth-100 / 5.4:1 on cloth-50.
         alarm: '#A32014',
-
-        /* ---- Legacy dark ramp: /admin only. Do not use on the public site. */
-        ink: {
-          950: '#0B0B0C',
-          900: '#100F12',
-          850: '#17161A',
-          800: '#1E1E21',
-          700: '#2E2E33',
-          600: '#34333A',
-          500: '#55545A',
-          400: '#828089',
-          300: '#8B8890',
-          200: '#A5A29B',
-          50: '#F2F1EE',
-        },
-        signal: {
-          DEFAULT: '#C8FF3D',
-          hover: '#A9DD23',
-          dim: '#7A9E28',
-        },
       },
       fontFamily: {
         // Self-hosted (public/fonts) — the previous system pulled two families from
