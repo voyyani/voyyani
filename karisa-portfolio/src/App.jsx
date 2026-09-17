@@ -39,6 +39,7 @@ const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
 const SubmissionsPage = lazy(() => import('./admin/pages/SubmissionsPage'));
 const SubmissionDetailPage = lazy(() => import('./admin/pages/SubmissionDetailPage'));
 const AnalyticsPage = lazy(() => import('./admin/pages/AnalyticsPage'));
+const SettingsPage = lazy(() => import('./admin/pages/SettingsPage'));
 const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
 
 // Lazy load heavy sections for better initial load performance
@@ -365,6 +366,7 @@ function App() {
         <Route path="submissions" element={<Suspense fallback={<SectionLoader />}><SubmissionsPage client={supabaseRef.current} /></Suspense>} />
         <Route path="submissions/:id" element={<Suspense fallback={<SectionLoader />}><SubmissionDetailPage client={supabaseRef.current} /></Suspense>} />
         <Route path="analytics" element={<Suspense fallback={<SectionLoader />}><AnalyticsPage client={supabaseRef.current} /></Suspense>} />
+        <Route path="settings" element={<Suspense fallback={<SectionLoader />}><SettingsPage client={supabaseRef.current} user={user} /></Suspense>} />
       </Route>
 
       {/*

@@ -134,13 +134,6 @@ module.exports = {
   plugins: [
     function ({ addComponents }) {
       addComponents({
-        // Kept: ResponsiveModal and MobileDrawer (admin) both use this.
-        '.safe-area': {
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingRight: 'env(safe-area-inset-right)',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
-        },
         'button, a, input, textarea, select': {
           WebkitTapHighlightColor: 'transparent',
         },
