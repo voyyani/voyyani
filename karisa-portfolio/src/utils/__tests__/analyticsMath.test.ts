@@ -34,8 +34,8 @@ describe('bucketByDay', () => {
       { date: '2026-09-14', count: 0 }, { date: '2026-09-15', count: 2 }, { date: '2026-09-16', count: 0 }, { date: '2026-09-17', count: 1 },
     ]);
   });
-  it('caps all-time at the last 90 days', () => {
-    expect(bucketByDay([], new Date(0), now)).toHaveLength(90);
+  it('caps all-time at the last 91 days', () => {
+    expect(bucketByDay([], new Date(0), now)).toHaveLength(91);
   });
 });
 

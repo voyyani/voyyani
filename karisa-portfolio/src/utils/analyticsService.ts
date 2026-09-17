@@ -34,8 +34,9 @@ export class AnalyticsService {
     ]);
     for (const q of [s, r, i]) if (q.error) throw new Error(q.error.message);
     const subs = s.data ?? []; const reps = r.data ?? []; const inb = i.data ?? [];
-    const inWindow = subs.filter((x: { created_at: string }) => x.created_at >= w.start.toISOString());
-    const repsInWindow = reps.filter((x: { created_at: string }) => x.created_at >= w.start.toISOString());
+    const startIso = w.start.toISOString(); const endIso = w.end.toISOString();
+    const inWindow = subs.filter((x: { created_at: string }) => x.created_at >= startIso && x.created_at < endIso);
+    const repsInWindow = reps.filter((x: { created_at: string }) => x.created_at >= startIso && x.created_at < endIso);
     return {
       range,
       window: w,

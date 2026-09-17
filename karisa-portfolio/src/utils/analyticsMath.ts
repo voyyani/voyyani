@@ -26,8 +26,10 @@ export function deltaPct(current: number, previous: number): number | null {
 function utcDay(d: Date): string { return d.toISOString().slice(0, 10); }
 
 export function bucketByDay<T extends Record<string, unknown>>(rows: T[], start: Date, end: Date, key = 'created_at'): Array<{ date: string; count: number }> {
-  const days = Math.min(90, Math.max(1, Math.ceil((end.getTime() - start.getTime()) / DAY_MS)));
-  const first = new Date(end.getTime() - (days - 1) * DAY_MS);
+  const dayStart = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  // Calendar days, not 24h steps: an N-day window touches N+1 UTC days. Cap 91 so '90d' keeps its partial first day.
+  const days = Math.min(91, Math.max(1, Math.round((dayStart(end) - dayStart(start)) / DAY_MS) + 1));
+  const first = new Date(dayStart(end) - (days - 1) * DAY_MS);
   const counts = new Map<string, number>();
   for (let i = 0; i < days; i++) counts.set(utcDay(new Date(first.getTime() + i * DAY_MS)), 0);
   for (const r of rows) {
