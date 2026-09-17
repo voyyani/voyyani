@@ -6,6 +6,7 @@ import {
   buildMessageId,
   buildInboundReplyRow,
   buildAttachmentRow,
+  classifyInboundSender,
 } from './inbound';
 
 const UUID = '550e8400-e29b-41d4-a716-446655440000';
@@ -172,5 +173,16 @@ describe('buildAttachmentRow', () => {
 
   it('never writes the generated file_extension column', () => {
     expect(buildAttachmentRow(input)).not.toHaveProperty('file_extension');
+  });
+});
+
+describe('classifyInboundSender', () => {
+  it('knows the visitor, the admin, and everyone else — case-insensitively, with display names', () => {
+    expect(classifyInboundSender('Amina <Amina@Example.com>', 'amina@example.com', 'voyanitech@gmail.com')).toBe('visitor');
+    expect(classifyInboundSender('Karisa <VoyaniTech@gmail.com>', 'amina@example.com', 'voyanitech@gmail.com')).toBe('admin');
+    expect(classifyInboundSender('x@spam.io', 'amina@example.com', 'voyanitech@gmail.com')).toBe('stranger');
+  });
+  it('the visitor wins if the visitor is the admin (self-test submissions)', () => {
+    expect(classifyInboundSender('voyanitech@gmail.com', 'voyanitech@gmail.com', 'voyanitech@gmail.com')).toBe('visitor');
   });
 });

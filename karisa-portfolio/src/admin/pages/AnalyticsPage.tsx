@@ -1,257 +1,130 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { AnalyticsService, AnalyticsMetrics, exportToCSV } from '../../utils/analyticsService';
+import PageHead from '../components/PageHead';
+import { Skeleton } from '../components/Skeleton';
+import Icon from '../components/Icon';
+import DailyChart from '../components/DailyChart';
+import { AnalyticsService, downloadText, type AnalyticsMetrics } from '../../utils/analyticsService';
+import { formatDuration, type Range } from '../../utils/analyticsMath';
 
-interface AnalyticsPageProps {
-  client: any;
+const RANGES: Array<[Range, string]> = [['7d', '7 days'], ['30d', '30 days'], ['90d', '90 days'], ['all', 'All time']];
+const WORDS: Record<string, string> = { new: 'New', in_progress: 'In progress', responded: 'Responded', closed: 'Closed', low: 'Low', normal: 'Normal', high: 'High', urgent: 'Urgent' };
+
+function Delta({ delta, range }: { delta: number | null; range: Range }) {
+  if (range === 'all') return <span className="text-xs text-mark-500">all time</span>;
+  const period = RANGES.find((r) => r[0] === range)?.[1];
+  if (delta === null) return <span className="text-xs text-mark-500">no previous {period}</span>;
+  return <span className="tabular text-xs text-mark-600">{delta > 0 ? '+' : ''}{delta}% vs previous {period}</span>;
 }
 
-export default function AnalyticsPage({ client }: AnalyticsPageProps) {
+function Figure({ value, label, children }: { value: React.ReactNode; label: string; children?: React.ReactNode }) {
+  return (
+    <div className="bg-cloth-100 px-4 py-4">
+      <p className="adm-figure">{value}</p>
+      <p className="mt-2 text-label uppercase tracking-[0.09em] text-mark-500">{label}</p>
+      {children && <p className="mt-1">{children}</p>}
+    </div>
+  );
+}
+
+function Breakdown({ title, rows, total }: { title: string; rows: Array<{ key: string; count: number }>; total: number }) {
+  return (
+    <div className="adm-card p-4">
+      <h3 className="mb-3 text-sm font-semibold">{title}</h3>
+      <table className="w-full text-sm">
+        <caption className="sr-only">{title}</caption>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.key} className="border-t border-cloth-300">
+              <th scope="row" className="py-2 pr-3 text-left font-normal text-mark-700">{WORDS[r.key] ?? r.key}</th>
+              <td className="w-full py-2"><div className="h-2 bg-cloth-200"><div className="h-2 bg-pindo" style={{ width: total ? `${(r.count / total) * 100}%` : 0 }} /></div></td>
+              <td className="tabular py-2 pl-3 text-right">{r.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function AnalyticsPage({ client }: { client: any }) {
+  const [range, setRange] = useState<Range>('30d');
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
+  const [error, setError] = useState<string | null>(null);
 
-  const getDateFilter = () => {
-    const now = new Date();
-    let startDate: Date;
+  const load = useCallback(async () => {
+    setMetrics(null);
+    try { setMetrics(await new AnalyticsService(client).getMetrics(range)); setError(null); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Unknown error'); }
+  }, [client, range]);
 
-    switch (dateRange) {
-      case '7d':
-        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        break;
-      case '90d':
-        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        break;
-      case 'all':
-        startDate = new Date(0);
-        break;
-      default:
-        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    }
+  useEffect(() => { load(); }, [load]);
 
-    return { startDate, endDate: now };
-  };
-
-  useEffect(() => {
-    fetchMetrics();
-  }, [dateRange]);
-
-  const fetchMetrics = async () => {
-    setLoading(true);
+  const exportCsv = async () => {
     try {
-      const analyticsService = new AnalyticsService(client);
-      const filter = getDateFilter();
-      const data = await analyticsService.getMetrics(filter);
-      setMetrics(data);
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      toast.error('Failed to load analytics');
-    } finally {
-      setLoading(false);
-    }
+      const csv = await new AnalyticsService(client).exportSubmissionsCsv(range);
+      downloadText(csv, `submissions-${range}-${new Date().toISOString().slice(0, 10)}.csv`);
+      toast.success('CSV downloaded');
+    } catch (e) { toast.error(`Export failed: ${e instanceof Error ? e.message : 'unknown error'}`); }
   };
 
-  const handleExport = async () => {
-    try {
-      const { data: submissions } = await client
-        .from('submissions')
-        .select('*')
-        .gte('created_at', getDateFilter().startDate.toISOString())
-        .lte('created_at', new Date().toISOString());
-
-      if (submissions) {
-        exportToCSV(submissions, `submissions-${new Date().toISOString().split('T')[0]}.csv`);
-        toast.success('Submissions exported to CSV');
-      }
-    } catch (error) {
-      console.error('Error exporting:', error);
-      toast.error('Failed to export data');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin text-4xl mb-4">⌛</div>
-          <p className="text-gray-300">Loading analytics...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const m = metrics;
+  const f = m?.replies.funnel;
+  const pct = (n: number, d: number) => (d ? `${Math.round((n / d) * 100)}%` : '—');
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="space-y-4 sm:space-y-6 md:space-y-8 p-4 sm:p-6 md:p-0"
-    >
-      {/* Header - responsive layout */}
-      <motion.div
-        variants={itemVariants}
-        className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4"
-      >
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">Analytics & Insights</h1>
-        <button
-          onClick={handleExport}
-          className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base rounded-lg transition-colors font-medium flex-shrink-0"
-        >
-          📥 Export to CSV
-        </button>
-      </motion.div>
+    <div>
+      <PageHead title="Analytics" actions={<button type="button" onClick={exportCsv} className="btn-quiet"><Icon name="paperclip" className="h-4 w-4" />Export CSV</button>} />
 
-      {/* Date Range Filter - responsive wrapping */}
-      <motion.div variants={itemVariants} className="flex gap-2 flex-wrap">
-        {(['7d', '30d', '90d', 'all'] as const).map((range) => (
-          <button
-            key={range}
-            onClick={() => setDateRange(range)}
-            className={`px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg transition-colors ${
-              dateRange === range
-                ? 'bg-blue-600 text-white'
-                : 'bg-white/10 text-gray-300 hover:bg-white/20'
-            }`}
-          >
-            {range === '7d' ? '7 days' : range === '30d' ? '30 days' : range === '90d' ? '90 days' : 'All time'}
-          </button>
+      <div role="group" aria-label="Period" className="mb-6 flex flex-wrap gap-2">
+        {RANGES.map(([value, word]) => (
+          <button key={value} type="button" aria-pressed={range === value} onClick={() => setRange(value)} className={`btn-quiet ${range === value ? 'border-pindo bg-pindo-wash text-pindo' : ''}`}>{word}</button>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Main Metrics Grid - responsive: 1 col mobile → 2 col tablet → 4 col desktop */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Total Submissions */}
-        <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 border border-blue-500/30 rounded-lg p-4 sm:p-5 md:p-6 hover:border-blue-500/50 transition-colors">
-          <p className="text-xs sm:text-sm text-gray-400 font-semibold">Total Submissions</p>
-          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-2">{metrics?.totalSubmissions || 0}</p>
-          <p className="text-green-400 text-xs sm:text-sm mt-2">+12% vs last period</p>
-        </div>
+      {error && <p role="alert" className="mb-4 border border-alarm px-4 py-3 text-sm text-alarm">Could not load analytics: {error}. <button type="button" onClick={load} className="link">Try again</button></p>}
 
-        {/* Total Replies */}
-        <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 border border-purple-500/30 rounded-lg p-4 sm:p-5 md:p-6 hover:border-purple-500/50 transition-colors">
-          <p className="text-xs sm:text-sm text-gray-400 font-semibold">Total Replies</p>
-          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-2">{metrics?.totalReplies || 0}</p>
-          <p className="text-cyan-400 text-xs sm:text-sm mt-2">Rate: {metrics?.totalSubmissions ? Math.round((metrics.totalReplies / metrics.totalSubmissions) * 100) : 0}%</p>
-        </div>
+      <div className="grid gap-px border-y border-cloth-300 bg-cloth-300 sm:grid-cols-2 lg:grid-cols-4">
+        {m ? (
+          <>
+            <Figure value={m.submissions.current} label="Submissions"><Delta delta={m.submissions.delta} range={range} /></Figure>
+            <Figure value={m.inbound.current} label="Replies received"><Delta delta={m.inbound.delta} range={range} /></Figure>
+            <Figure value={m.replies.current} label="Replies sent"><Delta delta={m.replies.delta} range={range} /></Figure>
+            <Figure value={formatDuration(m.responseMinutes)} label="Median first reply"><span className="text-xs text-mark-500">from enquiry to your first reply</span></Figure>
+          </>
+        ) : Array.from({ length: 4 }).map((_, i) => <div key={i} className="bg-cloth-100 px-4 py-4"><Skeleton className="h-8 w-14" /><Skeleton className="mt-3 h-3 w-24" /></div>)}
+      </div>
 
-        {/* Avg Response Time */}
-        <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 border border-green-500/30 rounded-lg p-4 sm:p-5 md:p-6 hover:border-green-500/50 transition-colors">
-          <p className="text-xs sm:text-sm text-gray-400 font-semibold">Avg Response Time</p>
-          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-2">{metrics?.averageResponseTime || 0}m</p>
-          <p className="text-amber-400 text-xs sm:text-sm mt-2">Minutes to reply</p>
-        </div>
+      <section aria-labelledby="chart-h" className="mt-8">
+        <h2 id="chart-h" className="mb-3 text-lg font-semibold">Submissions per day</h2>
+        {m ? <DailyChart data={m.submissions.byDay} label="Submissions per day" /> : <Skeleton className="h-44 w-full" />}
+      </section>
 
-        {/* Email Delivery Rate */}
-        <div className="bg-gradient-to-br from-orange-500/20 to-orange-600/20 border border-orange-500/30 rounded-lg p-4 sm:p-5 md:p-6 hover:border-orange-500/50 transition-colors">
-          <p className="text-xs sm:text-sm text-gray-400 font-semibold">Email Delivery</p>
-          <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mt-2">{metrics?.emailDeliveryRate || 0}%</p>
-          <p className="text-red-400 text-xs sm:text-sm mt-2">Delivered</p>
-        </div>
-      </motion.div>
+      {m && (
+        <>
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <Breakdown title="By status" rows={m.submissions.byStatus} total={m.submissions.current} />
+            <Breakdown title="By priority" rows={m.submissions.byPriority} total={m.submissions.current} />
+          </div>
 
-      {/* Status & Priority Breakdown - responsive: 1 col mobile → 2 col desktop */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-        {/* Status Breakdown */}
-        <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Status Breakdown</h3>
-          <div className="space-y-3">
-            {Object.entries(metrics?.statusBreakdown || {}).map(([status, count]) => (
-              <div key={status} className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-gray-300 capitalize text-sm">{status}</span>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-16 sm:w-24 bg-white/10 rounded-full h-2">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        status === 'new' ? 'bg-emerald-500' :
-                        status === 'in_progress' ? 'bg-amber-500' :
-                        status === 'responded' ? 'bg-blue-500' :
-                        'bg-gray-500'
-                      }`}
-                      style={{
-                        width: `${((count / (metrics?.totalSubmissions || 1)) * 100).toFixed(0)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-white font-semibold text-sm w-8 text-right">{count}</span>
-                </div>
+          <section aria-labelledby="delivery-h" className="mt-8">
+            <h2 id="delivery-h" className="mb-3 text-lg font-semibold">Delivery of replies you sent</h2>
+            {f && f.total === 0 ? (
+              <p className="border border-cloth-300 px-4 py-8 text-center text-sm text-mark-700">No replies sent in this period.</p>
+            ) : f && (
+              <div className="grid gap-px border-y border-cloth-300 bg-cloth-300 sm:grid-cols-3 lg:grid-cols-5">
+                <Figure value={f.sent} label="Sent"><span className="tabular text-xs text-mark-500">{pct(f.sent, f.total)} of {f.total}</span></Figure>
+                <Figure value={f.delivered} label="Delivered"><span className="tabular text-xs text-mark-500">{pct(f.delivered, f.sent)} of sent</span></Figure>
+                <Figure value={f.opened} label="Opened"><span className="tabular text-xs text-mark-500">{pct(f.opened, f.delivered)} of delivered</span></Figure>
+                <Figure value={f.bounced + f.failed} label="Bounced or failed"><span className="text-xs text-mark-500">check the address</span></Figure>
+                <Figure value={f.pending} label="Queued"><span className="text-xs text-mark-500">awaiting Resend</span></Figure>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Priority Breakdown */}
-        <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Priority Distribution</h3>
-          <div className="space-y-3">
-            {Object.entries(metrics?.priorityBreakdown || {}).map(([priority, count]) => (
-              <div key={priority} className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-gray-300 capitalize text-sm">{priority}</span>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-16 sm:w-24 bg-white/10 rounded-full h-2">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        priority === 'urgent' ? 'bg-red-600' :
-                        priority === 'high' ? 'bg-orange-500' :
-                        priority === 'normal' ? 'bg-blue-500' :
-                        'bg-gray-500'
-                      }`}
-                      style={{
-                        width: `${((count / (metrics?.totalSubmissions || 1)) * 100).toFixed(0)}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-white font-semibold text-sm w-8 text-right">{count}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Email Performance - responsive: 1 col mobile → 3 col desktop */}
-      <motion.div variants={itemVariants} className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Email Performance</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 rounded-lg p-4">
-            <p className="text-xs sm:text-sm text-gray-400">Open Rate</p>
-            <p className="text-2xl sm:text-3xl font-bold text-cyan-400 mt-2">{metrics?.emailOpenRate || 0}%</p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 rounded-lg p-4">
-            <p className="text-xs sm:text-sm text-gray-400">Total Sent</p>
-            <p className="text-2xl sm:text-3xl font-bold text-purple-400 mt-2">{metrics?.totalReplies || 0}</p>
-          </div>
-          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/30 rounded-lg p-4">
-            <p className="text-xs sm:text-sm text-gray-400">Avg Response</p>
-            <p className="text-2xl sm:text-3xl font-bold text-green-400 mt-2">{metrics?.averageResponseTime || 0}m</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Activity Timeline */}
-      <motion.div variants={itemVariants} className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Recent Activity</h3>
-        <div className="h-48 sm:h-64 flex items-center justify-center text-gray-400">
-          <p className="text-xs sm:text-sm">Chart visualization coming in next update</p>
-        </div>
-      </motion.div>
-    </motion.div>
+            )}
+            <p className="mt-2 text-xs text-mark-500">Delivery and open events arrive through the Resend status webhook; "Opened" undercounts clients that block tracking pixels.</p>
+          </section>
+        </>
+      )}
+    </div>
   );
 }

@@ -1,209 +1,65 @@
-// Analytics utilities for Phase 4
+import { type Range, rangeWindow, countBetween, deltaPct, bucketByDay, medianResponseMinutes, deliveryFunnel, countBy, toCsv } from './analyticsMath';
 
+export interface Series { current: number; previous: number; delta: number | null }
 export interface AnalyticsMetrics {
-  totalSubmissions: number;
-  totalReplies: number;
-  averageResponseTime: number; // in minutes
-  statusBreakdown: Record<string, number>;
-  submissionsByDate: Array<{ date: string; count: number }>;
-  replysByDate: Array<{ date: string; count: number }>;
-  emailDeliveryRate: number; // percentage
-  emailOpenRate: number; // percentage
-  priorityBreakdown: Record<string, number>;
+  range: Range;
+  window: ReturnType<typeof rangeWindow>;
+  submissions: Series & { byDay: Array<{ date: string; count: number }>; byStatus: Array<{ key: string; count: number }>; byPriority: Array<{ key: string; count: number }> };
+  inbound: Series;
+  replies: Series & { funnel: ReturnType<typeof deliveryFunnel> };
+  responseMinutes: number | null;
 }
 
-export interface AnalyticsFilter {
-  startDate?: Date;
-  endDate?: Date;
-  status?: string;
-  priority?: string;
+const STATUS_ORDER = ['new', 'in_progress', 'responded', 'closed'];
+const PRIORITY_ORDER = ['low', 'normal', 'high', 'urgent'];
+const CSV_COLUMNS = ['id', 'created_at', 'name', 'email', 'phone', 'subject', 'status', 'priority', 'responded_at', 'archived'];
+
+function series(rows: Record<string, unknown>[], w: ReturnType<typeof rangeWindow>, key: string): Series {
+  const current = countBetween(rows, w.start, w.end, key);
+  const previous = countBetween(rows, w.prevStart, w.prevEnd, key);
+  return { current, previous, delta: deltaPct(current, previous) };
 }
 
 export class AnalyticsService {
-  constructor(private supabaseClient: any) {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(private client: any) {}
 
-  async getMetrics(filter?: AnalyticsFilter): Promise<AnalyticsMetrics> {
-    const startDate =
-      filter?.startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = filter?.endDate || new Date();
-
-    try {
-      // Get submissions count
-      let submissionsQuery = this.supabaseClient
-        .from("submissions")
-        .select("id, status, priority, created_at, responded_at", {
-          count: "exact",
-        })
-        .gte("created_at", startDate.toISOString())
-        .lte("created_at", endDate.toISOString());
-
-      if (filter?.status) {
-        submissionsQuery = submissionsQuery.eq("status", filter.status);
-      }
-
-      const { data: submissions, count: totalSubmissions } =
-        await submissionsQuery;
-
-      // Get replies and email stats
-      const { data: replies } = await this.supabaseClient
-        .from("submission_replies")
-        .select("id, created_at, email_status", {
-          count: "exact",
-        })
-        .gte("created_at", startDate.toISOString())
-        .lte("created_at", endDate.toISOString());
-
-      // Calculate metrics
-      const metrics: AnalyticsMetrics = {
-        totalSubmissions: totalSubmissions || 0,
-        totalReplies: replies?.length || 0,
-        averageResponseTime: this.calculateAverageResponseTime(submissions),
-        statusBreakdown: this.groupByStatus(submissions),
-        submissionsByDate: this.groupByDate(submissions, "submissions"),
-        replysByDate: this.groupByDate(replies, "replies"),
-        emailDeliveryRate: this.calculateEmailDeliveryRate(replies),
-        emailOpenRate: this.calculateEmailOpenRate(replies),
-        priorityBreakdown: this.groupByPriority(submissions),
-      };
-
-      return metrics;
-    } catch (error) {
-      console.error("Error fetching analytics metrics:", error);
-      throw error;
-    }
-  }
-
-  private calculateAverageResponseTime(submissions: any[]): number {
-    if (!submissions || submissions.length === 0) return 0;
-
-    const responseTimes = submissions
-      .filter((s) => s.responded_at)
-      .map((s) => {
-        const created = new Date(s.created_at).getTime();
-        const responded = new Date(s.responded_at).getTime();
-        return (responded - created) / (1000 * 60); // Convert to minutes
-      });
-
-    if (responseTimes.length === 0) return 0;
-
-    const sum = responseTimes.reduce((a, b) => a + b, 0);
-    return Math.round(sum / responseTimes.length);
-  }
-
-  private groupByStatus(
-    submissions: any[]
-  ): Record<string, number> {
-    const breakdown: Record<string, number> = {
-      new: 0,
-      in_progress: 0,
-      responded: 0,
-      closed: 0,
+  async getMetrics(range: Range, now: Date = new Date()): Promise<AnalyticsMetrics> {
+    const w = rangeWindow(range, now);
+    const since = w.prevStart.toISOString();
+    const [s, r, i] = await Promise.all([
+      this.client.from('submissions').select('id, status, priority, created_at, responded_at').gte('created_at', since),
+      this.client.from('submission_replies').select('id, created_at, email_status').gte('created_at', since),
+      this.client.from('inbound_replies').select('id, received_at, status').gte('received_at', since).in('status', ['received', 'processing', 'processed']),
+    ]);
+    for (const q of [s, r, i]) if (q.error) throw new Error(q.error.message);
+    const subs = s.data ?? []; const reps = r.data ?? []; const inb = i.data ?? [];
+    const startIso = w.start.toISOString(); const endIso = w.end.toISOString();
+    const inWindow = subs.filter((x: { created_at: string }) => x.created_at >= startIso && x.created_at < endIso);
+    const repsInWindow = reps.filter((x: { created_at: string }) => x.created_at >= startIso && x.created_at < endIso);
+    return {
+      range,
+      window: w,
+      submissions: { ...series(subs, w, 'created_at'), byDay: bucketByDay(inWindow, w.start, w.end), byStatus: countBy(inWindow, 'status', STATUS_ORDER), byPriority: countBy(inWindow, 'priority', PRIORITY_ORDER) },
+      inbound: series(inb, w, 'received_at'),
+      replies: { ...series(reps, w, 'created_at'), funnel: deliveryFunnel(repsInWindow) },
+      responseMinutes: medianResponseMinutes(inWindow),
     };
-
-    submissions?.forEach((s) => {
-      if (s.status in breakdown) {
-        breakdown[s.status]++;
-      }
-    });
-
-    return breakdown;
   }
 
-  private groupByPriority(
-    submissions: any[]
-  ): Record<string, number> {
-    const breakdown: Record<string, number> = {
-      low: 0,
-      normal: 0,
-      high: 0,
-      urgent: 0,
-    };
-
-    submissions?.forEach((s) => {
-      if (s.priority && s.priority in breakdown) {
-        breakdown[s.priority]++;
-      } else if (s.priority) {
-        breakdown[s.priority] = 1;
-      }
-    });
-
-    return breakdown;
-  }
-
-  private groupByDate(
-    items: any[],
-    type: "submissions" | "replies"
-  ): Array<{ date: string; count: number }> {
-    const dateMap = new Map<string, number>();
-
-    items?.forEach((item) => {
-      const date = new Date(item.created_at)
-        .toISOString()
-        .split("T")[0];
-      dateMap.set(date, (dateMap.get(date) || 0) + 1);
-    });
-
-    return Array.from(dateMap.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, count]) => ({ date, count }));
-  }
-
-  private calculateEmailDeliveryRate(replies: any[]): number {
-    if (!replies || replies.length === 0) return 0;
-
-    const delivered = replies.filter(
-      (r) => r.email_status === "delivered" || r.email_status === "opened" || r.email_status === "clicked"
-    ).length;
-
-    return Math.round((delivered / replies.length) * 100);
-  }
-
-  private calculateEmailOpenRate(replies: any[]): number {
-    if (!replies || replies.length === 0) return 0;
-
-    const opened = replies.filter(
-      (r) => r.email_status === "opened" || r.email_status === "clicked"
-    ).length;
-
-    return Math.round((opened / replies.length) * 100);
+  /** Exported columns are deliberate: internal notes and message bodies stay in the CRM. */
+  async exportSubmissionsCsv(range: Range, now: Date = new Date()): Promise<string> {
+    const w = rangeWindow(range, now);
+    const { data, error } = await this.client.from('submissions').select(CSV_COLUMNS.join(', ')).gte('created_at', w.start.toISOString()).order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return toCsv(data ?? [], CSV_COLUMNS);
   }
 }
 
-export async function exportToCSV(
-  data: any[],
-  filename: string = "export.csv"
-): Promise<void> {
-  if (!data || data.length === 0) {
-    console.warn("No data to export");
-    return;
-  }
-
-  const headers = Object.keys(data[0]);
-  const csvContent = [
-    headers.join(","),
-    ...data.map((row) =>
-      headers
-        .map((header) => {
-          const value = row[header];
-          // Escape quotes and wrap in quotes if contains comma
-          if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value;
-        })
-        .join(",")
-    ),
-  ].join("\n");
-
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-
-  link.setAttribute("href", url);
-  link.setAttribute("download", filename);
-  link.style.visibility = "hidden";
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+export function downloadText(text: string, filename: string, type = 'text/csv;charset=utf-8;'): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.style.display = 'none';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

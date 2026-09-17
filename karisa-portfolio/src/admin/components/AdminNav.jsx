@@ -6,6 +6,7 @@ export const NAV_ITEMS = [
   { to: '/admin', label: 'Overview', icon: 'overview', end: true },
   { to: '/admin/submissions', label: 'Submissions', icon: 'inbox' },
   { to: '/admin/analytics', label: 'Analytics', icon: 'chart' },
+  { to: '/admin/settings', label: 'Settings', icon: 'settings' },
 ];
 
 export function NavLinks({ onNavigate }) {

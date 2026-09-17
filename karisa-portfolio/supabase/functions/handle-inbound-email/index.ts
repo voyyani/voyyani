@@ -7,7 +7,10 @@ import {
   parseAddress,
   buildInboundReplyRow,
   buildAttachmentRow,
+  classifyInboundSender,
 } from '../_shared/inbound.ts';
+import { buildFrom, buildReplyAddress, buildThreadMessageId } from '../_shared/mail.ts';
+import { renderEmail, textToHtml, escapeHtml } from '../_shared/emailTemplate.ts';
 
 /**
  * Phase 4: Inbound Email Webhook Handler
@@ -31,6 +34,8 @@ const webhookSecret = Deno.env.get('RESEND_WEBHOOK_SECRET') || '';
 const mailDomain = Deno.env.get('MAIL_DOMAIN') || 'voyani.tech';
 const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'voyanitech@gmail.com';
 const resendApiKey = Deno.env.get('RESEND_API_KEY') || '';
+const fromName = Deno.env.get('MAIL_FROM_NAME') || 'Karisa';
+const fromAddress = Deno.env.get('MAIL_FROM_ADDRESS') || `karisa@${mailDomain}`;
 
 // Initialize Supabase client
 const supabase = supabaseUrl && supabaseServiceKey
@@ -142,7 +147,7 @@ function cleanEmailBody(text: string): string {
   for (const line of lines) {
     // Stop at common quote markers
     if (
-      line.match(/^On\s+.+written:/) || // "On Mon, ... wrote:"
+      line.match(/^On\s+.+wrote:/) || // "On Mon, ... wrote:"
       line.match(/^>/) || // Gmail quote
       line.match(/^-+\s*$/) || // Divider
       line.match(/^--$/) // Signature separator
@@ -322,13 +327,16 @@ async function calculateSpamScore(
  * Re-send an inbound message to the mailbox Karisa actually reads.
  *
  * `from` must stay on the verified domain — Resend will not send as the original
- * sender — so the original address goes in reply_to, which makes hitting Reply in
- * Gmail do the right thing.
+ * sender — so the reply address goes in reply_to instead: the thread address
+ * (reply+{id}@) for a threaded submission reply, or the human's own address for
+ * direct mail, so hitting Reply in Gmail does the right thing either way.
  */
 async function forwardToAdmin(
   payload: ResendWebhookPayload,
   toAddress: string,
-  banner: string
+  banner: string,
+  replyTo: string,
+  bannerHref?: string
 ): Promise<void> {
   if (!resendApiKey) {
     console.error('[forward] RESEND_API_KEY not set — cannot forward');
@@ -336,23 +344,17 @@ async function forwardToAdmin(
   }
 
   const sender = parseAddress(payload.from);
-  const body =
-    payload.html ||
-    `<pre style="white-space:pre-wrap;font-family:inherit">${
-      (payload.text || '').replace(/[<>&]/g, (c) =>
-        ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c] as string)
-      )
-    }</pre>`;
 
-  const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-      <p style="background:#f5f5f5;border-left:3px solid #888;padding:10px 14px;margin:0 0 18px;font-size:13px;color:#555">
-        ${banner}<br>
-        <strong>From:</strong> ${sender.name ? `${sender.name} ` : ''}&lt;${sender.email}&gt;<br>
-        <strong>To:</strong> ${toAddress}
-      </p>
-      ${body}
-    </div>`;
+  const html = renderEmail({
+    title: payload.subject || '(No subject)',
+    preheader: (payload.text || '').slice(0, 120),
+    lead: banner.replace(/<[^>]+>/g, ''),
+    sections: [
+      { label: 'From', html: `<p style="margin:0">${escapeHtml(sender.name ? `${sender.name} ` : '')}&lt;${escapeHtml(sender.email)}&gt; → ${escapeHtml(toAddress)}</p>` },
+      { html: payload.html || textToHtml(payload.text || ''), quoted: true },
+    ],
+    ...(bannerHref ? { cta: { href: bannerHref, label: 'Open this thread', note: 'Reply to this email to answer them — it is sent from your address and kept in the thread.' } } : {}),
+  });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -361,9 +363,9 @@ async function forwardToAdmin(
       Authorization: `Bearer ${resendApiKey}`,
     },
     body: JSON.stringify({
-      from: `Voyani Mail <karisa@${mailDomain}>`,
+      from: buildFrom(fromName, fromAddress),
       to: adminEmail,
-      reply_to: sender.email,
+      reply_to: replyTo,
       subject: `[voyani.tech] ${payload.subject || '(No subject)'}`,
       html,
     }),
@@ -388,7 +390,7 @@ async function handleDirectMail(
   console.log('[handler] Direct mail to', toAddress, 'from', payload.from);
 
   try {
-    await forwardToAdmin(payload, toAddress, 'Direct message to your voyani.tech address.');
+    await forwardToAdmin(payload, toAddress, 'Direct message to your voyani.tech address.', parseAddress(payload.from).email);
   } catch (error) {
     console.error('[handler] Forward failed:', error);
   }
@@ -398,6 +400,83 @@ async function handleDirectMail(
     JSON.stringify({ success: true, handled: 'direct' }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
+}
+
+/**
+ * An admin reply that arrived by email. Sent on to the visitor from the site's own
+ * address (so their reply threads back here), and stored exactly like a dashboard
+ * reply with email_metadata.source = 'email_relay' so the thread can say "via Gmail".
+ */
+async function relayAdminReply(
+  submission: { id: string; email: string; name: string; subject: string; responded_at: string | null },
+  payload: ResendWebhookPayload,
+  submissionId: string
+): Promise<Response> {
+  if (!supabase) {
+    console.error('[relay] Supabase client not configured');
+    return new Response(JSON.stringify({ error: 'Server not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  const text = cleanEmailBody(payload.text || extractTextFromHtml(payload.html || ''));
+  if (!text.trim()) {
+    console.warn('[relay] Empty admin reply; nothing to send');
+    return new Response(JSON.stringify({ success: true, handled: 'admin-empty' }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+
+  if (payload.attachments?.length) {
+    console.warn('[relay] Admin reply had', payload.attachments.length, 'attachment(s); relay sends text only');
+  }
+
+  const html = renderEmail({
+    title: payload.subject || 'Re: your enquiry',
+    preheader: text.slice(0, 120),
+    sections: [{ html: textToHtml(text) }],
+    footerNote: 'Reply to this email and it comes straight back to me.',
+  });
+
+  let resendId: string | null = null;
+  let emailStatus = 'sent';
+  if (!resendApiKey) {
+    console.error('[relay] RESEND_API_KEY not set — recording only');
+    emailStatus = 'failed';
+  } else {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
+      body: JSON.stringify({
+        from: buildFrom(fromName, fromAddress),
+        to: submission.email,
+        reply_to: buildReplyAddress(submissionId, mailDomain),
+        subject: `Re: ${submission.subject}`,
+        html,
+        headers: { 'X-Submission-ID': submissionId, 'Message-ID': buildThreadMessageId(submissionId, mailDomain) },
+      }),
+    });
+    if (res.ok) {
+      resendId = (await res.json()).id ?? null;
+    } else {
+      emailStatus = 'failed';
+      console.error('[relay] Resend rejected the relay:', res.status, await res.text());
+    }
+  }
+
+  const { error: insertError } = await supabase.from('submission_replies').insert({
+    submission_id: submissionId,
+    reply_message: text,
+    reply_type: 'manual',
+    sent_by: null,
+    resend_email_id: resendId,
+    email_status: emailStatus,
+    email_metadata: { source: 'email_relay', from: parseAddress(payload.from).email, inbound_message_id: payload.message_id ?? null },
+  });
+  if (insertError) console.error('[relay] Could not record the reply:', insertError.message);
+
+  const update: Record<string, unknown> = { status: 'responded', updated_at: new Date().toISOString() };
+  if (!submission.responded_at) update.responded_at = new Date().toISOString();
+  await supabase.from('submissions').update(update).eq('id', submissionId);
+
+  console.log('[relay] Admin reply relayed to', submission.email, 'status', emailStatus);
+  return new Response(JSON.stringify({ success: true, handled: 'admin-relay', email_status: emailStatus }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 }
 
 /**
@@ -509,6 +588,11 @@ serve(async (req: Request) => {
     }
 
     console.log('[handler] Found submission for:', submission.email);
+
+    // 4b. Karisa answering from Gmail: relay to the visitor, record as outbound, done.
+    if (classifyInboundSender(payload.from, submission.email, adminEmail) === 'admin') {
+      return await relayAdminReply(submission, payload, submissionId);
+    }
 
     // 5. Verify sender.
     // Compare bare addresses. The old version ran `includes()` on the raw From header,
@@ -641,9 +725,9 @@ serve(async (req: Request) => {
         await forwardToAdmin(
           payload,
           toAddress,
-          `Reply on submission <a href="${
-            Deno.env.get('PORTFOLIO_URL') || 'https://www.voyani.tech'
-          }/admin/submissions/${submissionId}">${submissionId}</a>.`
+          'Reply on a submission.',
+          buildReplyAddress(submissionId, mailDomain),
+          `${Deno.env.get('PORTFOLIO_URL') || 'https://www.voyani.tech'}/admin/submissions/${submissionId}`
         );
       } catch (error) {
         console.error('[handler] Reply forward failed:', error);

@@ -1,4 +1,4 @@
-# Admin Revamp Implementation Plan — "The Kanga Sheet, Operate mode"
+cd # Admin Revamp Implementation Plan — "The Kanga Sheet, Operate mode"
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Before editing any UI file in Tasks 1–10, load `impeccable:impeccable` and read its `reference/craft-floor.md`; the design contract is `DESIGN.md` plus §1 of this document.
 
@@ -3350,11 +3350,9 @@ At the call site:
 ```
 Keep the existing subjects if they differ; only the arguments change.
 
-- [ ] **Step 5: Flatten the email chrome to the system**
+- [ ] **Step 5: Email chrome — superseded by Task 15**
 
-In both templates' `<style>` blocks: replace every `linear-gradient(...)` background with the flat value below, delete the `@media (prefers-color-scheme: dark)` block, and set `border-radius: 0` wherever a radius is declared.
-- page ground → `#F2EEE5`; card ground → `#FAF8F3`; header ground → `#243D8F` with `#FAF8F3` text; body text → `#14171C`; muted → `#5B5F67`; rules → `#DCD5C5`; the `.button` → `background:#243D8F;color:#FAF8F3;border-radius:0`.
-Verify: `grep -n "gradient\|border-radius: [1-9]\|#061220\|#0a1929\|#61DAFB\|#005792" supabase/functions/send-notification/index.ts` → no matches.
+Do not restyle the templates here. Task 15 replaces every email template in every function with one shared brand renderer. Leave the `<style>` blocks untouched in this task.
 
 - [ ] **Step 6: Type-check the function**
 
@@ -3525,6 +3523,274 @@ Run: `deno check supabase/functions/handle-inbound-email/index.ts` if available;
 ```bash
 git add supabase/functions/_shared/inbound.ts supabase/functions/_shared/inbound.test.ts supabase/functions/handle-inbound-email/index.ts
 git commit -m "feat(email): replies Karisa sends from Gmail are relayed to the visitor and recorded in the thread"
+```
+
+---
+
+### Task 15: Email templates on the brand — one renderer for every send
+
+Added 2026-09-17 at the user's request. Every email the system sends today is a navy/cyan/gold dark template with a Google-Fonts `@import` and an SVG background pattern (`send-reply/index.ts:287-600`, `send-notification/index.ts:70-560`), and the inbound forward/relay bodies are unstyled. This task replaces all of them with one shared, tested renderer on the Kanga palette. Runs after Task 13, before Task 14.
+
+**Files:**
+- Create: `supabase/functions/_shared/emailTemplate.ts`
+- Test: `supabase/functions/_shared/emailTemplate.test.ts`
+- Modify: `supabase/functions/send-reply/index.ts` (`replyEmailTemplate`, ~lines 287–600), `supabase/functions/send-notification/index.ts` (`submissionEmailTemplate` ~70–430, `confirmationEmailTemplate` ~434–560), `supabase/functions/handle-inbound-email/index.ts` (`forwardToAdmin` html, `relayAdminReply` html)
+
+**Interfaces:**
+- Produces: `renderEmail(opts: EmailOptions): string` and `escapeHtml(s: string): string`, where
+  ```ts
+  export interface EmailOptions {
+    title: string;          // <title> and the printed line under the seam
+    preheader?: string;     // hidden inbox preview text
+    lead?: string;          // one sentence under the title, plain text
+    sections: Array<{ label?: string; html: string; quoted?: boolean }>; // label = small caps; quoted = recessed ground
+    cta?: { href: string; label: string; note?: string };
+    footerNote?: string;    // plain text
+  }
+  ```
+  `html` in a section is trusted (callers escape their own user data with `escapeHtml`). Everything else is escaped by the renderer.
+- Email design rules (the Kanga Sheet in an inbox): table-based layout, 600px, ground `#F2EEE5`, card `#FAF8F3` with a 1px `#14171C` hard edge, a **2px `#243D8F` seam** at the top of the card with the title beneath it in bold 24px, body `#14171C` 16px/1.6 in `Archivo, Helvetica, Arial, sans-serif` (no `@import`, no web-font fetch), secondary `#5B5F67`, rules `#DCD5C5`, quoted/recessed ground `#E9E3D6`, links `#243D8F` underlined, CTA a solid `#243D8F` block with `#FAF8F3` text and `border-radius:0`. No gradients, images, shadows, emoji, pattern backgrounds or dark-mode block. Footer: "Ngowa Karisa · Voyani.tech · Nairobi" and the site link, nothing else.
+
+- [ ] **Step 1: Write the failing test**
+
+`supabase/functions/_shared/emailTemplate.test.ts`:
+```ts
+import { describe, it, expect } from 'vitest';
+import { renderEmail, escapeHtml } from './emailTemplate';
+
+describe('escapeHtml', () => {
+  it('escapes the five characters', () => {
+    expect(escapeHtml(`<a href="x">Tom & 'Jerry'</a>`)).toBe('&lt;a href=&quot;x&quot;&gt;Tom &amp; &#39;Jerry&#39;&lt;/a&gt;');
+  });
+});
+
+describe('renderEmail', () => {
+  const html = renderEmail({
+    title: 'Re: Clinic <site>',
+    preheader: 'Thanks Amina',
+    lead: 'A reply from Ngowa Karisa.',
+    sections: [
+      { html: '<p>Happy to help.</p>' },
+      { label: 'You wrote', html: '<p>Hello there</p>', quoted: true },
+    ],
+    cta: { href: 'https://www.voyani.tech/admin/submissions/abc', label: 'Open this thread', note: 'Or just reply to this email.' },
+    footerNote: 'Sent from karisa@voyani.tech',
+  });
+
+  it('escapes the title and keeps section html', () => {
+    expect(html).toContain('<title>Re: Clinic &lt;site&gt;</title>');
+    expect(html).toContain('Re: Clinic &lt;site&gt;');
+    expect(html).toContain('<p>Happy to help.</p>');
+    expect(html).toContain('You wrote');
+  });
+
+  it('is on the brand, with no legacy chrome', () => {
+    expect(html).toContain('#243D8F');
+    expect(html).toContain('#F2EEE5');
+    expect(html).not.toMatch(/gradient|@import|#61DAFB|#005792|#0a1929|#061220|#D4A017|prefers-color-scheme/i);
+    expect(html).not.toMatch(/border-radius:\s*[1-9]/);
+  });
+
+  it('renders the cta, preheader and footer', () => {
+    expect(html).toContain('href="https://www.voyani.tech/admin/submissions/abc"');
+    expect(html).toContain('Open this thread');
+    expect(html).toContain('Or just reply to this email.');
+    expect(html).toContain('Thanks Amina');
+    expect(html).toContain('Sent from karisa@voyani.tech');
+    expect(html).toContain('Voyani.tech');
+  });
+
+  it('omits optional parts cleanly', () => {
+    const minimal = renderEmail({ title: 'Hi', sections: [{ html: '<p>x</p>' }] });
+    expect(minimal).not.toContain('class="cta"');
+    expect(minimal).not.toContain('preheader');
+  });
+});
+```
+
+- [ ] **Step 2: Run it to confirm it fails** — skipped under the user's process override (all verification runs in Task 14).
+
+- [ ] **Step 3: Create `emailTemplate.ts`**
+
+```ts
+/**
+ * One email, one look: the Kanga Sheet in an inbox. Table layout for mail clients,
+ * system fonts (no web-font fetch), flat cotton ground, indigo seam, square corners.
+ * Pure — no Deno globals — so the edge functions and Vitest import the same file.
+ */
+const INK = '#14171C';
+const INK_2 = '#5B5F67';
+const CLOTH = '#F2EEE5';
+const CLOTH_RAISED = '#FAF8F3';
+const CLOTH_RECESSED = '#E9E3D6';
+const RULE = '#DCD5C5';
+const INDIGO = '#243D8F';
+const FONT = "Archivo, Helvetica, Arial, sans-serif";
+
+export function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export interface EmailSection { label?: string; html: string; quoted?: boolean }
+export interface EmailCta { href: string; label: string; note?: string }
+export interface EmailOptions {
+  title: string;
+  preheader?: string;
+  lead?: string;
+  sections: EmailSection[];
+  cta?: EmailCta;
+  footerNote?: string;
+}
+
+function section(s: EmailSection): string {
+  const ground = s.quoted ? `background:${CLOTH_RECESSED};padding:16px 20px;` : '';
+  const label = s.label
+    ? `<p style="margin:0 0 8px;font:400 11px/1.35 ${FONT};letter-spacing:0.09em;text-transform:uppercase;color:${INK_2}">${escapeHtml(s.label)}</p>`
+    : '';
+  return `<tr><td style="padding:0 0 24px"><div style="${ground}font:400 16px/1.6 ${FONT};color:${INK}">${label}${s.html}</div></td></tr>`;
+}
+
+export function renderEmail(o: EmailOptions): string {
+  const title = escapeHtml(o.title);
+  const preheader = o.preheader
+    ? `<div class="preheader" style="display:none;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:${CLOTH}">${escapeHtml(o.preheader)}</div>`
+    : '';
+  const lead = o.lead ? `<p style="margin:8px 0 0;font:400 16px/1.6 ${FONT};color:${INK_2}">${escapeHtml(o.lead)}</p>` : '';
+  const cta = o.cta
+    ? `<tr><td class="cta" style="padding:8px 0 24px">
+        <a href="${escapeHtml(o.cta.href)}" style="display:inline-block;background:${INDIGO};color:${CLOTH_RAISED};font:600 15px/1 ${FONT};text-decoration:none;padding:14px 24px;border-radius:0">${escapeHtml(o.cta.label)}</a>
+        ${o.cta.note ? `<p style="margin:12px 0 0;font:400 13px/1.5 ${FONT};color:${INK_2}">${escapeHtml(o.cta.note)}</p>` : ''}
+      </td></tr>`
+    : '';
+  const footerNote = o.footerNote ? `<p style="margin:0 0 6px;font:400 12px/1.5 ${FONT};color:${INK_2}">${escapeHtml(o.footerNote)}</p>` : '';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:${CLOTH}">
+${preheader}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:${CLOTH}">
+  <tr><td align="center" style="padding:32px 16px">
+    <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:${CLOTH_RAISED};border:1px solid ${INK}">
+      <tr><td style="border-top:2px solid ${INDIGO};padding:28px 32px 20px">
+        <h1 style="margin:0;font:700 24px/1.15 ${FONT};letter-spacing:-0.02em;color:${INK}">${title}</h1>
+        ${lead}
+      </td></tr>
+      <tr><td style="padding:0 32px">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+          ${o.sections.map(section).join('\n')}
+          ${cta}
+        </table>
+      </td></tr>
+      <tr><td style="padding:20px 32px 28px;border-top:1px solid ${RULE}">
+        ${footerNote}
+        <p style="margin:0;font:400 12px/1.5 ${FONT};color:${INK_2}">Ngowa Karisa · Voyani.tech · Nairobi · <a href="https://www.voyani.tech" style="color:${INDIGO};text-decoration:underline">www.voyani.tech</a></p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+}
+
+/** Plain text → safe paragraphs, preserving line breaks. */
+export function textToHtml(text: string): string {
+  return escapeHtml(text)
+    .split(/\n{2,}/)
+    .map((p) => `<p style="margin:0 0 12px">${p.replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+```
+Add `textToHtml` to the test's import and one assertion: `expect(textToHtml('a\n\nb<')).toBe('<p style="margin:0 0 12px">a</p><p style="margin:0 0 12px">b&lt;</p>');`
+
+- [ ] **Step 4: `send-reply` — replace `replyEmailTemplate`**
+
+Delete the whole function body (the `africanPattern` constant, the `<style>` block and markup) and replace it with:
+```ts
+function replyEmailTemplate(recipientName: string, replyMessage: string, originalSubject: string, originalMessage: string): string {
+  return renderEmail({
+    title: `Re: ${originalSubject}`,
+    preheader: replyMessage.slice(0, 120),
+    lead: `Hi ${recipientName}, a reply from Ngowa Karisa.`,
+    sections: [
+      { html: textToHtml(replyMessage) },
+      { label: 'You wrote', html: textToHtml(originalMessage), quoted: true },
+    ],
+    footerNote: 'Reply to this email and it comes straight back to me.',
+  });
+}
+```
+Import `renderEmail, textToHtml` from `'../_shared/emailTemplate.ts'`. Delete the function's local `escapeHtml` **only if** nothing else in the file uses it (`grep -n "escapeHtml(" supabase/functions/send-reply/index.ts`); otherwise import `escapeHtml` from the shared module and delete the local copy.
+
+- [ ] **Step 5: `send-notification` — replace both templates**
+
+```ts
+function submissionEmailTemplate(senderName: string, senderEmail: string, phone: string | undefined, subject: string, message: string, threadUrl: string): string {
+  const contact = [
+    `<p style="margin:0 0 4px"><strong>${escapeHtml(senderName)}</strong> · <a href="mailto:${escapeHtml(senderEmail)}" style="color:#243D8F">${escapeHtml(senderEmail)}</a></p>`,
+    phone ? `<p style="margin:0 0 4px">Phone: <a href="tel:${escapeHtml(phone)}" style="color:#243D8F">${escapeHtml(phone)}</a></p>` : '',
+    `<p style="margin:0">Subject: ${escapeHtml(subject)}</p>`,
+  ].join('');
+  return renderEmail({
+    title: `New enquiry: ${subject}`,
+    preheader: `${senderName}: ${message.slice(0, 100)}`,
+    lead: 'From the contact form on voyani.tech.',
+    sections: [
+      { label: 'From', html: contact },
+      { label: 'Message', html: textToHtml(message), quoted: true },
+    ],
+    cta: { href: threadUrl, label: 'Open this thread', note: `Or just reply to this email — your answer goes to ${senderName} and is kept in the thread.` },
+  });
+}
+
+function confirmationEmailTemplate(senderName: string, subject: string): string {
+  return renderEmail({
+    title: 'Message received',
+    preheader: `Thanks ${senderName} — I have your message about ${subject}.`,
+    lead: `Hi ${senderName}, thanks for getting in touch.`,
+    sections: [
+      { html: `<p style="margin:0 0 12px">I have your message about <strong>${escapeHtml(subject)}</strong> and will reply personally, usually within one working day.</p><p style="margin:0">If anything changes in the meantime, reply to this email — it reaches me directly.</p>` },
+    ],
+    footerNote: 'This confirmation was sent automatically.',
+  });
+}
+```
+Keep the existing call sites (Task 12 already passes `threadUrl`). Import `renderEmail, textToHtml, escapeHtml` from the shared module and delete the local `escapeHtml`.
+
+- [ ] **Step 6: `handle-inbound-email` — forward and relay bodies**
+
+In `forwardToAdmin`, replace the hand-built `html` with:
+```ts
+  const html = renderEmail({
+    title: payload.subject || '(No subject)',
+    preheader: (payload.text || '').slice(0, 120),
+    lead: banner.replace(/<[^>]+>/g, ''),
+    sections: [
+      { label: 'From', html: `<p style="margin:0">${escapeHtml(sender.name ? `${sender.name} ` : '')}&lt;${escapeHtml(sender.email)}&gt; → ${escapeHtml(toAddress)}</p>` },
+      { html: payload.html || textToHtml(payload.text || ''), quoted: true },
+    ],
+    ...(bannerHref ? { cta: { href: bannerHref, label: 'Open this thread', note: 'Reply to this email to answer them — it is sent from your address and kept in the thread.' } } : {}),
+  });
+```
+and change `forwardToAdmin`'s signature to `(payload, toAddress, banner: string, replyTo: string, bannerHref?: string)`; the visitor-reply call passes the thread URL as `bannerHref` and a plain-text banner `Reply on a submission.`; the direct-mail call passes no href. In `relayAdminReply`, replace its `html` with `renderEmail({ title: payload.subject || 'Re: your enquiry', preheader: text.slice(0, 120), sections: [{ html: textToHtml(text) }], footerNote: 'Reply to this email and it comes straight back to me.' })`. Import `renderEmail, textToHtml, escapeHtml` from the shared module.
+
+- [ ] **Step 7: Verify nothing legacy remains** — deferred to Task 14: `grep -n "gradient\|@import\|#61DAFB\|#005792\|#0a1929\|#061220\|#D4A017\|africanPattern\|prefers-color-scheme" supabase/functions/*/index.ts` → no matches.
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add supabase/functions/_shared/emailTemplate.ts supabase/functions/_shared/emailTemplate.test.ts supabase/functions/send-reply/index.ts supabase/functions/send-notification/index.ts supabase/functions/handle-inbound-email/index.ts
+git commit -m "feat(email): every email on the brand — one Kanga renderer for alerts, confirmations, replies and forwards"
 ```
 
 ---

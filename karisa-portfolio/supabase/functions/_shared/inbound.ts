@@ -139,3 +139,18 @@ export function buildAttachmentRow(input: AttachmentRowInput): Record<string, un
     content_id: input.contentId ?? null,
   };
 }
+
+export type InboundSender = 'visitor' | 'admin' | 'stranger';
+
+/**
+ * Who wrote to reply+{id}@? The visitor is the normal case. The admin is Karisa
+ * answering an alert from Gmail — that mail must be relayed to the visitor and
+ * recorded as outbound, not stored as an unverified inbound and bounced back to her.
+ * A self-test submission (visitor == admin) is treated as the visitor.
+ */
+export function classifyInboundSender(from: string, submissionEmail: string, adminEmail: string): InboundSender {
+  const sender = parseAddress(from).email;
+  if (sender === String(submissionEmail).trim().toLowerCase()) return 'visitor';
+  if (sender === String(adminEmail).trim().toLowerCase()) return 'admin';
+  return 'stranger';
+}
