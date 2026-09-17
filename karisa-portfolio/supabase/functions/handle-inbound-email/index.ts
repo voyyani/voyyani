@@ -10,6 +10,7 @@ import {
   classifyInboundSender,
 } from '../_shared/inbound.ts';
 import { buildFrom, buildReplyAddress, buildThreadMessageId } from '../_shared/mail.ts';
+import { renderEmail, textToHtml, escapeHtml } from '../_shared/emailTemplate.ts';
 
 /**
  * Phase 4: Inbound Email Webhook Handler
@@ -334,7 +335,8 @@ async function forwardToAdmin(
   payload: ResendWebhookPayload,
   toAddress: string,
   banner: string,
-  replyTo: string
+  replyTo: string,
+  bannerHref?: string
 ): Promise<void> {
   if (!resendApiKey) {
     console.error('[forward] RESEND_API_KEY not set — cannot forward');
@@ -342,23 +344,17 @@ async function forwardToAdmin(
   }
 
   const sender = parseAddress(payload.from);
-  const body =
-    payload.html ||
-    `<pre style="white-space:pre-wrap;font-family:inherit">${
-      (payload.text || '').replace(/[<>&]/g, (c) =>
-        ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c] as string)
-      )
-    }</pre>`;
 
-  const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-      <p style="background:#f5f5f5;border-left:3px solid #888;padding:10px 14px;margin:0 0 18px;font-size:13px;color:#555">
-        ${banner}<br>
-        <strong>From:</strong> ${sender.name ? `${sender.name} ` : ''}&lt;${sender.email}&gt;<br>
-        <strong>To:</strong> ${toAddress}
-      </p>
-      ${body}
-    </div>`;
+  const html = renderEmail({
+    title: payload.subject || '(No subject)',
+    preheader: (payload.text || '').slice(0, 120),
+    lead: banner.replace(/<[^>]+>/g, ''),
+    sections: [
+      { label: 'From', html: `<p style="margin:0">${escapeHtml(sender.name ? `${sender.name} ` : '')}&lt;${escapeHtml(sender.email)}&gt; → ${escapeHtml(toAddress)}</p>` },
+      { html: payload.html || textToHtml(payload.text || ''), quoted: true },
+    ],
+    ...(bannerHref ? { cta: { href: bannerHref, label: 'Open this thread', note: 'Reply to this email to answer them — it is sent from your address and kept in the thread.' } } : {}),
+  });
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -431,9 +427,12 @@ async function relayAdminReply(
     console.warn('[relay] Admin reply had', payload.attachments.length, 'attachment(s); relay sends text only');
   }
 
-  const html = `<div style="font-family:Archivo,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;color:#14171C;white-space:pre-wrap">${
-    text.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c] as string))
-  }</div>`;
+  const html = renderEmail({
+    title: payload.subject || 'Re: your enquiry',
+    preheader: text.slice(0, 120),
+    sections: [{ html: textToHtml(text) }],
+    footerNote: 'Reply to this email and it comes straight back to me.',
+  });
 
   let resendId: string | null = null;
   let emailStatus = 'sent';
@@ -726,8 +725,9 @@ serve(async (req: Request) => {
         await forwardToAdmin(
           payload,
           toAddress,
-          `Reply on <a href="${Deno.env.get('PORTFOLIO_URL') || 'https://www.voyani.tech'}/admin/submissions/${submissionId}">this thread</a>. Reply to this email to answer ${parseAddress(payload.from).name || 'them'} — it is sent from karisa@${mailDomain} and kept in the thread.`,
-          buildReplyAddress(submissionId, mailDomain)
+          'Reply on a submission.',
+          buildReplyAddress(submissionId, mailDomain),
+          `${Deno.env.get('PORTFOLIO_URL') || 'https://www.voyani.tech'}/admin/submissions/${submissionId}`
         );
       } catch (error) {
         console.error('[handler] Reply forward failed:', error);
