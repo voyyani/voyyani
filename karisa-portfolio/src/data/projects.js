@@ -237,20 +237,21 @@ export const PROJECTS = [
         "DND Kit",
         "Lucide Icons"
       ],
-      // Verified 2026-08-29 against the live site: the donate page reports
-      // "10,000+ lives touched" and "4 active programs". The previous "Programs 15+"
-      // was not backed by anything the client publishes, and "RBAC Roles 6"
-      // contradicted this same object's own "5-tier RBAC" description.
+      // Verified 2026-09-17 against the live site: after the client's redesign the
+      // home and programmes pages report "3 programmes · running now" and "2,950+
+      // people reached · since 2020". The earlier "4 active programs" / "10,000+ lives
+      // touched" came from the old donate page (checked 29 Aug 2026), which no longer
+      // publishes either figure. Smaller, but it is what the client says today.
       metrics: [
         {
-          label: "Active Programs",
-          value: "4",
-          source: "The client's own donate page, checked 29 Aug 2026"
+          label: "Active Programmes",
+          value: "3",
+          source: "The client's own programmes page, checked 17 Sep 2026"
         },
         {
-          label: "Lives Touched",
-          value: "10K+",
-          source: "The client's own donate page, checked 29 Aug 2026"
+          label: "People Reached",
+          value: "2,950+",
+          source: "The client's own home page impact counters, checked 17 Sep 2026"
         },
         {
           label: "RBAC Tiers",
@@ -357,32 +358,34 @@ export const PROJECTS = [
       ],
       liveUrl: "https://neemafoundationkilifi.org",
       githubUrl: "https://github.com/voyyani/Neema-Foundation-Kilifi",
-      liveStatus: { state: "live", checkedOn: "29 Aug 2026" },
-      // Captured from the live site on 2026-08-29 at 1440x900 @2x.
+      liveStatus: { state: "live", checkedOn: "17 Sep 2026" },
+      // Captured 2026-09-17 with scripts/capture-screenshots.mjs after the site's
+      // editorial redesign (ruled-paper layout, impact counters). Alt text describes
+      // what is in the frame, not what the page does — that is the caption's job.
       screenshots: [
         {
           src: "/images/projects/neema/home.jpg",
-          alt: "Neema Foundation home page: full-bleed hero reading 'Need meets God's Grace In Ganze Community' over a dark red gradient, with donate and programs calls to action",
+          alt: "Neema Foundation home page: bold headline 'Need meets God's grace' beside an aerial photo of the Ganze mission site, with Donate Now and See the programmes buttons and impact counters reading 2,950+ people reached, 3 programmes and founded 2020",
           caption: "Home — hero copy, imagery and impact counters are all editable from the admin CMS"
         },
         {
           src: "/images/projects/neema/programs.jpg",
-          alt: "Programs page listing transformational programs with a gallery timeline and category filters",
-          caption: "Programs — CMS-driven listings with drag-and-drop ordering and category filters"
+          alt: "Programmes page headed 'The programmes' with counters for 3 programmes and 2,950+ people reached, category filters for Education and Community, and programme photo cards below",
+          caption: "Programmes — CMS-driven listings with drag-and-drop ordering and category filters"
         },
         {
           src: "/images/projects/neema/donate.jpg",
-          alt: "Donation page headed 'Support Neema Foundation' showing impact statistics and multiple ways to give",
+          alt: "Donation page headed 'Give to the foundation' explaining M-Pesa and bank transfer giving, with a checklist of trust points and a 'Your gift' amount chooser below",
           caption: "Donate — multi-pathway giving (bank, mobile money, sponsorship)"
         },
         {
           src: "/images/projects/neema/media.jpg",
-          alt: "Media gallery page titled 'Our Story, In Pictures' with album filters for programs, events and behind the scenes",
+          alt: "Media page headed 'Photographs' with album filters for All, Programmes and Events above a large photo of a community event under a tent",
           caption: "Media — album gallery with filtering, populated entirely through the CMS"
         },
         {
           src: "/images/projects/neema/volunteer.jpg",
-          alt: "Volunteer registration page headed 'Join Our Volunteer Family'",
+          alt: "Volunteer page headed 'Give your time in Ganze' listing medical, teaching, outreach and technical roles, with Apply to volunteer and See the roles buttons and a section titled 'The roles'",
           caption: "Volunteer — registration workflow with role matching"
         }
       ],

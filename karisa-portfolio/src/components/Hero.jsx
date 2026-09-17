@@ -62,7 +62,7 @@ const Hero = () => {
 
             <ImageWithFallback
               src="/images/projects/neema/home.jpg"
-              alt="The Neema Foundation home page, built and maintained by Karisa: a full-bleed hero over a dark red gradient with donate and programmes calls to action"
+              alt="The Neema Foundation home page, built and maintained by Karisa: the headline 'Need meets God's grace' beside an aerial photo of the Ganze mission site, with donate and programmes calls to action and impact counters"
               width={1600}
               height={1000}
               sizes="(max-width: 1024px) 100vw, 760px"

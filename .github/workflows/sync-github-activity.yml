@@ -1,0 +1,56 @@
+# Keeps the "GitHub activity" section of voyani.tech honest without anyone remembering
+# to run `npm run sync:github`. The section renders a committed snapshot
+# (karisa-portfolio/src/data/github-activity.json) rather than fetching at runtime —
+# see scripts/fetch-github-activity.mjs for why — so a stale snapshot means stale
+# numbers on the live site. This re-syncs weekly and commits only when something
+# changed; the commit to main triggers the normal Vercel deploy.
+#
+# The script only touches public GitHub endpoints, so the default GITHUB_TOKEN is
+# used purely to lift the unauthenticated rate limit.
+name: Sync GitHub activity
+
+on:
+  schedule:
+    - cron: '17 3 * * 1' # Mondays 03:17 UTC — off the hour, as GitHub asks
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-github-activity
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: karisa-portfolio
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch public commit history
+        run: node scripts/fetch-github-activity.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit the snapshot if it changed
+        run: |
+          # Only `syncedAt` moving is not a change worth a deploy.
+          if git diff --quiet --ignore-matching-lines='"syncedAt"' -- src/data/github-activity.json; then
+            git checkout -- src/data/github-activity.json
+            echo "Snapshot unchanged; nothing to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/data/github-activity.json
+          git commit -m "chore(activity): weekly GitHub activity sync"
+          git push origin HEAD:main

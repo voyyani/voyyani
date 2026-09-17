@@ -1,7 +1,7 @@
 # Changelog
 
 **Status:** Live
-**Last updated:** 2026-09-16
+**Last updated:** 2026-09-17
 
 All notable changes to the Ngowa Karisa portfolio (voyani.tech), newest first.
 Format follows [Keep a Changelog](https://keepachangelog.com); dates come from git history.
@@ -10,6 +10,32 @@ This file replaces the ~40 phase- and week-completion reports that used to live 
 `docs/`. Those are preserved in [`archive/`](./archive/) but are no longer maintained,
 and several of them contradict each other — where an archived doc disagrees with this
 file or with the code, the code wins.
+
+---
+
+## [Unreleased] — 2026-09-17 — Neema recaptured; GitHub activity refreshes itself
+
+### Added
+- `scripts/capture-screenshots.mjs` — one capture recipe for every project card
+  (1440×900 @2x, fonts and lazy images settled, cache warmed, smooth-scroll disabled).
+  Pages per project are listed in the script; `convert-screenshots.mjs` still does the
+  jpg/webp/avif step.
+- `.github/workflows/sync-github-activity.yml` — runs `sync:github` every Monday and
+  commits `src/data/github-activity.json` to `main` when the numbers move, so the
+  activity section no longer depends on someone remembering to re-sync.
+
+### Changed
+- Neema Foundation screenshots recaptured 2026-09-17 after the client's editorial
+  redesign (ruled layout, impact counters, "Give to the foundation" / "Photographs" /
+  "Give your time in Ganze" pages). Alt text in `projects.js` and the Hero figure
+  rewritten to describe the new frames; `checkedOn` → 17 Sep 2026.
+- Neema metrics follow the redesign: "Active Programs 4" → "Active Programmes 3" and
+  "Lives Touched 10K+" → "People Reached 2,950+", which is what the client's home and
+  programmes pages publish today (the old donate-page figures are gone). Smaller
+  numbers, but the card would otherwise contradict its own screenshot.
+- GitHub activity snapshot re-synced: 251 → 444 commits across the same 4 repos,
+  last commit 2026-09-16 (was 2026-08-17); September 2026 is now the peak month.
+  `fetch-github-activity.mjs` sends `GITHUB_TOKEN` when set, purely for the rate limit.
 
 ---
 

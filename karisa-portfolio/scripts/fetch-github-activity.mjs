@@ -6,6 +6,8 @@
  * src/data/github-activity.json, which the GitHubActivity section renders.
  *
  * Run it with `npm run sync:github`. Re-run before a deploy to refresh the numbers.
+ * .github/workflows/sync-github-activity.yml also runs it every Monday and commits the
+ * result to main, so the live site never falls more than a week behind.
  *
  * Why a build-time snapshot rather than a runtime fetch:
  *  - GitHub's /stats/* endpoints answer 202 ("computing") on a cold cache, which a
@@ -15,7 +17,8 @@
  * The rendered section shows the sync date and links to the profile, so a reader can
  * check any figure against the source themselves.
  *
- * No token needed — every endpoint used here is public.
+ * No token needed — every endpoint used here is public. If GITHUB_TOKEN is set (it is
+ * in Actions) it is sent only to lift the 60/hour unauthenticated rate limit.
  */
 import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -24,9 +27,15 @@ import { fileURLToPath } from 'node:url';
 const USER = 'voyyani';
 const OUT = resolve(dirname(fileURLToPath(import.meta.url)), '../src/data/github-activity.json');
 
+const TOKEN = process.env.GITHUB_TOKEN;
+
 const api = async (path) => {
   const res = await fetch(`https://api.github.com${path}`, {
-    headers: { Accept: 'application/vnd.github+json', 'User-Agent': `${USER}-portfolio-build` },
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': `${USER}-portfolio-build`,
+      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+    },
   });
   if (!res.ok) throw new Error(`GitHub ${res.status} on ${path}`);
   return res.json();

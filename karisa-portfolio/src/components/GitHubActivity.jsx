@@ -28,8 +28,9 @@ const PAD = { top: 20, right: 8, bottom: 34, left: 38 };
 const PLOT = { w: VB.w - PAD.left - PAD.right, h: VB.h - PAD.top - PAD.bottom };
 const MAX_BAR = 24;
 
+// Steps are all multiples of 4 so the quarter ticks below land on whole, round numbers.
 const niceMax = (v) => {
-  const step = v <= 20 ? 5 : v <= 60 ? 20 : 50;
+  const step = v <= 20 ? 4 : v <= 100 ? 20 : 40;
   return Math.ceil(v / step) * step;
 };
 
@@ -56,7 +57,8 @@ const CommitChart = ({ months }) => {
   const band = PLOT.w / months.length;
   const barW = Math.min(MAX_BAR, band - 8);
   const y = (v) => PAD.top + PLOT.h - (v / max) * PLOT.h;
-  const ticks = [0, max / 3, (max / 3) * 2, max].map((t) => Math.round(t));
+  // Quarters, not thirds: with niceMax's steps the axis never reads 67 / 133.
+  const ticks = [0, max / 4, max / 2, (max / 4) * 3, max].map((t) => Math.round(t));
   const peak = months.reduce((a, b) => (b.commits > a.commits ? b : a));
 
   return (

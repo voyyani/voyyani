@@ -1,12 +1,12 @@
 {
-  "syncedAt": "2026-08-29",
+  "syncedAt": "2026-09-17",
   "profileUrl": "https://github.com/voyyani",
   "totals": {
-    "commits": 251,
+    "commits": 444,
     "repos": 4,
-    "months": 15,
+    "months": 16,
     "firstCommit": "2025-06-17",
-    "lastCommit": "2026-08-17"
+    "lastCommit": "2026-09-16"
   },
   "months": [
     {
@@ -67,63 +67,67 @@
     },
     {
       "month": "2026-08",
-      "commits": 1
+      "commits": 17
+    },
+    {
+      "month": "2026-09",
+      "commits": 177
     }
   ],
   "repos": [
     {
-      "name": "Neema-Foundation-Kilifi",
-      "url": "https://github.com/voyyani/Neema-Foundation-Kilifi",
-      "description": null,
-      "commits": 88,
-      "firstCommit": "2025-10-20",
-      "lastCommit": "2026-07-14",
+      "name": "raslipwani",
+      "url": "https://github.com/voyyani/raslipwani",
+      "description": "Raslipwani Properties is a modern real estate platform built with React, Vite, and Supabase that enables users to list, search, and book property viewings while offering a powerful admin dashboard for managing listings and analytics.",
+      "commits": 235,
+      "firstCommit": "2025-06-17",
+      "lastCommit": "2026-09-11",
       "languages": [
         {
-          "name": "TypeScript",
-          "bytes": 2935230
+          "name": "JavaScript",
+          "bytes": 1414888
         },
         {
           "name": "PLpgSQL",
-          "bytes": 182079
-        },
-        {
-          "name": "HTML",
-          "bytes": 41802
+          "bytes": 109728
         },
         {
           "name": "CSS",
-          "bytes": 12583
+          "bytes": 25121
         },
         {
-          "name": "JavaScript",
-          "bytes": 1672
+          "name": "HTML",
+          "bytes": 3067
         }
       ]
     },
     {
-      "name": "raslipwani",
-      "url": "https://github.com/voyyani/raslipwani",
-      "description": "Raslipwani Properties is a modern real estate platform built with React, Vite, and Supabase that enables users to list, search, and book property viewings while offering a powerful admin dashboard for managing listings and analytics.",
-      "commits": 85,
-      "firstCommit": "2025-06-17",
-      "lastCommit": "2026-08-17",
+      "name": "Neema-Foundation-Kilifi",
+      "url": "https://github.com/voyyani/Neema-Foundation-Kilifi",
+      "description": null,
+      "commits": 115,
+      "firstCommit": "2025-10-20",
+      "lastCommit": "2026-09-16",
       "languages": [
         {
-          "name": "JavaScript",
-          "bytes": 903278
+          "name": "TypeScript",
+          "bytes": 2380626
         },
         {
           "name": "PLpgSQL",
-          "bytes": 31102
-        },
-        {
-          "name": "CSS",
-          "bytes": 17928
+          "bytes": 214113
         },
         {
           "name": "HTML",
-          "bytes": 1042
+          "bytes": 43317
+        },
+        {
+          "name": "JavaScript",
+          "bytes": 38657
+        },
+        {
+          "name": "CSS",
+          "bytes": 18929
         }
       ]
     },
@@ -131,33 +135,33 @@
       "name": "voyyani",
       "url": "https://github.com/voyyani/voyyani",
       "description": null,
-      "commits": 70,
+      "commits": 86,
       "firstCommit": "2025-06-21",
-      "lastCommit": "2026-03-28",
+      "lastCommit": "2026-08-31",
       "languages": [
         {
           "name": "JavaScript",
-          "bytes": 379414
+          "bytes": 396445
         },
         {
           "name": "TypeScript",
-          "bytes": 224500
+          "bytes": 225623
         },
         {
           "name": "PLpgSQL",
-          "bytes": 47845
+          "bytes": 27937
         },
         {
           "name": "HTML",
-          "bytes": 21111
+          "bytes": 23884
+        },
+        {
+          "name": "CSS",
+          "bytes": 12655
         },
         {
           "name": "Shell",
           "bytes": 5486
-        },
-        {
-          "name": "CSS",
-          "bytes": 1421
         }
       ]
     },
