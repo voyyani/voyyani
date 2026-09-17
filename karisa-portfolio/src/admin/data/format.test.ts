@@ -18,6 +18,6 @@ describe('formatRelative', () => {
 
 describe('formatDateTime', () => {
   it('prints a full, unambiguous timestamp', () => {
-    expect(formatDateTime('2026-09-02T09:05:00Z')).toMatch(/2 Sep 2026/);
+    expect(formatDateTime('2026-09-02T09:05:00Z')).toMatch(/^[12] Sep 2026, \d{2}:\d{2}$/);
   });
 });
