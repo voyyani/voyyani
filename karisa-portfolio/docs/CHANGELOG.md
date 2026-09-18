@@ -1,7 +1,7 @@
 # Changelog
 
 **Status:** Live
-**Last updated:** 2026-09-17
+**Last updated:** 2026-09-18
 
 All notable changes to the Ngowa Karisa portfolio (voyani.tech), newest first.
 Format follows [Keep a Changelog](https://keepachangelog.com); dates come from git history.
@@ -10,6 +10,97 @@ This file replaces the ~40 phase- and week-completion reports that used to live 
 `docs/`. Those are preserved in [`archive/`](./archive/) but are no longer maintained,
 and several of them contradict each other — where an archived doc disagrees with this
 file or with the code, the code wins.
+
+---
+
+## [Unreleased] — 2026-09-18 — The admin sheet: `/admin` on the Kanga system, one thread per submission, Gmail replies in the loop
+
+Plan and audit: [`adminplan.md`](./adminplan.md) (§0 findings F1–F15, A1–A8; §1 design contract).
+Deploy steps: [`admin/DEPLOY.md`](./admin/DEPLOY.md). Branch `worktree-admin-revamp-plan`,
+commits `d1de312..e9f1bdc`.
+
+### Added
+- `/admin/submissions/:id` — one chronological thread per submission (original message,
+  every reply Karisa sent from the dashboard or from Gmail, every visitor reply), each
+  outbound message carrying its Resend delivery state (queued / sent / delivered / opened /
+  bounced / failed) as a printed `StateMark`. Held (quarantined) inbound mail is shown as
+  held, not as a legitimate reply. Opening the thread marks its unread inbound as read.
+  An inline `ReplyComposer` replaces the modal; it still calls `send-reply` and no longer
+  logs the session token (F11).
+- `/admin/settings` — notification preferences, labels (the old `LabelsManager`, inline),
+  and account. The sidebar's dead link now lands (F13).
+- `AdminLayout` is a layout route with an `<Outlet>` and mounts sonner's `<Toaster>`, so
+  admin toasts render for the first time (F1).
+- Gmail reply relay: `send-notification` deep-links each alert to
+  `/admin/submissions/<id>` and sets `reply_to`; `handle-inbound-email` recognises a reply
+  *from the admin* to that address, relays it to the visitor from `karisa@voyani.tech`, and
+  records it in `submission_replies` with `email_metadata.source = 'email_relay'` (F2, F3).
+- Analytics with real numbers: previous-period deltas from a second query, a zero-filled
+  daily bucket chart as inline SVG (`DailyChart`), median response time in humane units,
+  inbound replies counted, a delivery funnel, and an RFC-4180 CSV export that no longer
+  dumps `notes` (A1–A7). All maths is in `src/utils/analyticsMath.ts`, unit-tested.
+- Overview answers "what needs me": unread inbound, awaiting-you, and a real activity
+  feed linking to threads, built by `src/admin/data/overview.ts`.
+- Realtime: `supabase/migrations/20260917000000_admin_realtime.sql` puts `submissions`,
+  `submission_replies` and `inbound_replies` on the `supabase_realtime` publication with
+  `REPLICA IDENTITY FULL`; the list and the thread subscribe instead of polling (F8).
+- Every email template on the brand via `_shared/emailTemplate.ts` (`renderEmail`), used by
+  `send-notification`, `handle-inbound-email` and `send-reply`.
+- A quiet "Admin" link in the footer's legal line.
+- Pure, client-free data modules with tests: `src/admin/data/{format,submissionsQuery,
+  thread,overview}.ts`; a chainable Supabase mock (`src/test/mockSupabase.js`) for page tests.
+
+### Changed
+- The admin wears the site's design system ("Operate mode", `DESIGN.md` → *The admin sheet*):
+  `cloth`/`mark`/`pindo` tokens, square corners, no shadows, no gradients, no blur, no
+  `dark:` variants, no Tailwind default palette, no emoji icons (inline SVG `Icon`), no
+  framer-motion, skeleton loading. One 2px indigo rule (the top bar); page heads are a 1px
+  ink rule. New primitives in `src/index.css`: `.adm-topbar .adm-nav-link .adm-head
+  .adm-title .adm-figure .adm-table .adm-chip .adm-skel .adm-card .field-sm .btn-alarm`
+  and `.mark-state[data-state]` for the admin state vocabulary.
+- Submissions list: filters live in the URL, "Unanswered" is a filter rather than a sort
+  that secretly filtered (F9, F10), rows stack below `md` instead of scrolling sideways,
+  bulk delete asks first (F15), and the state array is no longer sorted in place.
+- Login: inline errors, no motion, no empty "Demo Info" divider (F14).
+- `tailwind.config.js`: the legacy `ink`/`signal` dark ramp is deleted; the config is now an
+  ES module (`export default`), matching `"type": "module"`.
+- `vitest.config.js`: `testTimeout` 15 s — the suite grew from 12 to 28 files and a cold
+  first run on a 4-core box pushed one `userEvent` test past the 5 s default.
+
+### Removed
+- Twelve admin components with no future or no importers: `AdminSidebar`, `AdminNavbar`,
+  `MobileDrawer`, `ResponsiveTable`, `ResponsiveFilters`, `ResponsiveModal`,
+  `SpamQuarantineView`, `InboundRepliesFilter`, `ConversationTimeline`, `InboundEmailCard`,
+  `ReplyModal`, `SubmissionDetailPanel` (F5, F7, F12). `useInboundEmails` keeps its helpers
+  and drops the hook.
+- `DESIGN.md` → *The Legacy Boundary Rule* (the ramp it guarded no longer exists).
+
+### Verification (2026-09-18, this machine)
+- Tests: `npx vitest run` — **28 files, 279 passed, 3 skipped** (baseline 12 files, 220
+  passed, 3 skipped). One test in this pass was wrong and was fixed rather than skipped:
+  `AdminLayout.test.jsx` queried `[data-sonner-toaster]` on an idle layout, but sonner
+  renders nothing until a toast exists; it now fires a toast and finds it.
+- Lint: `src/admin`, `tailwind.config.js` and `vitest.config.js` are clean (59 → 51
+  problems; the 8 this branch owned are fixed). `npm run lint` overall still reports
+  **51 errors, 0 warnings**, all pre-existing and all in files this branch did not touch
+  (`src/components/*` test mocks with `require`, unused `motion` imports,
+  `src/test/setup.js` globals, `vite.config.js` `__dirname`, `setup-database.js`,
+  `src/utils/sentry.js`). Recorded, not fixed — out of scope for the admin.
+- Build: `npm run build` succeeds in 1m 9s; CSS 45.8 kB; admin chunks
+  `SubmissionDetailPage` 20.8 kB, `AnalyticsPage` 11.4 kB, `SubmissionsPage` 10.3 kB,
+  `SettingsPage` 6.7 kB, `AdminDashboard` 4.9 kB (all before gzip); PWA precache 74 entries.
+- Design detector (`impeccable detect`, 4.1.2) over `src/admin`, `src/index.css`,
+  `tailwind.config.js`: **0 findings**, with and without project config. Ban greps
+  (framer-motion, `dark:`, `bg-white/`, default palette, `rounded-*`, `shadow-*`,
+  `backdrop-blur`, `gradient`, the four legacy hexes, `console.log`) over `src/admin`:
+  **0 matches**.
+- `deno check`: not run — Deno is not installed here. Run it before deploying.
+- Visual: `/admin/login` captured at 390×844 and 1440×900 from `vite preview` — no
+  horizontal overflow, no console errors. The signed-in pages were not captured: the
+  worktree has no `.env.local`, so there is no Supabase client to sign in with.
+
+### Open
+- A8 — `analytics_events` RLS is `USING (true) WITH CHECK (true)`; see `AUDIT.md` §8.
 
 ---
 

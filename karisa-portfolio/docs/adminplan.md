@@ -10,6 +10,30 @@
 
 **Spec:** §0 (audit) and §1 (design contract) of this document, plus `DESIGN.md` and `PRODUCT.md` at the repo root. Everything below argues from those.
 
+## Status (2026-09-18)
+
+All fifteen tasks are done on branch `worktree-admin-revamp-plan`, commits `d1de312..e9f1bdc` plus the docs commit that follows. Final pass (Task 14): **tests 28 files, 279 passed, 3 skipped** (baseline 12 / 220 / 3); **lint** clean on `src/admin`, `tailwind.config.js`, `vitest.config.js` (51 pre-existing errors remain in untouched public-site files); **build** ok (1m 9s, CSS 45.8 kB); **detector** 0 findings; **ban greps** 0 matches; **deno check** not run (Deno not installed). Deploy steps: `docs/admin/DEPLOY.md`.
+
+| Task | Status | Commits | Note |
+|---|---|---|---|
+| 1 Foundations — tokens, primitives, StateMark, Skeleton, PageHead, Icon | ✅ | `d1de312` | |
+| 2 Shell — AdminNav, AdminLayout with Toaster, layout route | ✅ | `5bc1cc5`, `3e90b81`, `9a4c5b2` | Toaster test corrected in Task 14 (sonner renders nothing until a toast exists) |
+| 3 Login page on the cloth | ✅ | `6f0ac82` | |
+| 4 Data layer — format, filters, thread, client mock | ✅ | `658a62e`, `88070ce` | |
+| 5 Submissions list — URL filters, live updates, stacked rows, bulk bar | ✅ | `4b64c72`, `fe55dad` | |
+| 6 Submission detail route — thread, composer, delivery state, read-marking | ✅ | `ec01814`, `94c1a2a`, `b2cbebe` | |
+| 7 Overview — honest figures and an activity feed | ✅ | `e752d28`, `7a4d797` | |
+| 8 Analytics math | ✅ | `1ec1052` | |
+| 9 Analytics page | ✅ | `e9511d6`, `aea1b7a` | |
+| 10 Settings — notifications, labels, account | ✅ | `58294ff`, `1555804` | |
+| 11 Realtime publication migration | ⚠️ | `3518e00` | Written and committed; **not applied** to the live project (no credentials here) — DEPLOY.md step 1 |
+| 12 `send-notification` — deep link, `reply_to` | ⚠️ | `3f85b29` | Committed; **not deployed**, `deno check` not run — DEPLOY.md step 2 |
+| 13 `handle-inbound-email` — relay the admin's Gmail reply | ⚠️ | `1d58da6`, `73d6b47` | Committed; **not deployed**, `deno check` not run — DEPLOY.md step 2 |
+| 15 Email templates on the brand | ⚠️ | `f200321` | Committed; `send-reply` also changed, so deploy three functions, not two |
+| 14 Finish — detector, verification, docs, deploy checklist | ✅ | `3e90b81`, `9a4c5b2`, `e9f1bdc`, docs commit | Visual pass covered `/admin/login` only: no `.env.local` in the worktree, so no sign-in |
+
+⚠️ means the code is complete and reviewed but its effect depends on a step only the user can run.
+
 ## Global Constraints
 
 - **No new dependencies.** Charts are inline SVG. No chart library, no icon library, no date library.
@@ -3800,19 +3824,19 @@ git commit -m "feat(email): every email on the brand — one Kanga renderer for 
 **Files:**
 - Modify: `DESIGN.md` (add "The admin sheet"; delete "The Legacy Boundary Rule"), `docs/CHANGELOG.md`, `docs/AUDIT.md` (A8), `.env.example` (no new vars; confirm `MAIL_DOMAIN`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME`, `PORTFOLIO_URL`, `ADMIN_EMAIL` are documented — they are), `docs/adminplan.md` (mark the status table)
 
-- [ ] **Step 1: Mechanical design detector**
+- [x] **Step 1: Mechanical design detector**
 
 Run once over the finished UI: `node /home/kkk/.claude/plugins/cache/impeccable/impeccable/4.1.2/skills/impeccable/scripts/detect.mjs --json src/admin src/index.css tailwind.config.js`
 Expected: no findings in the categories *gradient*, *shadow*, *radius*, *emoji-icon*, *default-palette*. Fix anything it lists in one batch; do not loop.
 
-- [ ] **Step 2: Grep the bans**
+- [x] **Step 2: Grep the bans**
 
 ```bash
 grep -rn "framer-motion\|dark:\|bg-white/\|gray-[0-9]\|blue-[0-9]\|red-[0-9]\|emerald-\|amber-\|purple-\|rounded-\(lg\|md\|sm\)\|shadow-\|backdrop-blur\|gradient\|#61DAFB\|#005792\|#0a1929\|#061220" src/admin
 ```
 Expected: no matches. Then `grep -rn "console.log" src/admin` — Expected: no matches.
 
-- [ ] **Step 3: Full verification**
+- [x] **Step 3: Full verification**
 
 ```bash
 npm run lint
@@ -3821,11 +3845,11 @@ npm run build 2>&1 | tail -3
 ```
 Expected: lint clean; ≥ 24 test files, all passing (baseline 220 + the new files), 3 skipped; build succeeds. Record the actual numbers in the CHANGELOG entry.
 
-- [ ] **Step 4: Visual pass — one batched round**
+- [x] **Step 4: Visual pass — one batched round**
 
 Run: `npm run preview` in the background and use the `run` skill (or Playwright, already a devDependency) to capture `/admin/login`, `/admin`, `/admin/submissions`, `/admin/submissions/<a real id>`, `/admin/analytics`, `/admin/settings` at 390×844 and 1440×900. Requires `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` in `.env.local` and an admin sign-in; if unavailable, capture `/admin/login` only and note it. Fix every defect in one batch, confirm with at most one more round, stop.
 
-- [ ] **Step 5: Documents**
+- [x] **Step 5: Documents**
 
 `DESIGN.md`: delete the paragraph headed **The Legacy Boundary Rule**; add under *Layout*:
 ```
@@ -3835,7 +3859,7 @@ Run: `npm run preview` in the background and use the `run` skill (or Playwright,
 `docs/CHANGELOG.md`: one entry dated 2026-09-17 listing: admin on the Kanga system; Toaster on admin routes; `/admin/submissions/:id` and `/admin/settings`; unified thread with delivery state and held mail; Gmail reply relay; analytics with real deltas and a chart; realtime migration; 12 components deleted; test counts.
 `docs/AUDIT.md`: append A8 (`analytics_events` RLS is `USING (true)`) as an open item.
 
-- [ ] **Step 6: Deploy checklist for the user (paste into the final report)**
+- [x] **Step 6: Deploy checklist for the user (paste into the final report)**
 
 ```
 1. Apply the migration: Supabase → SQL editor → run supabase/migrations/20260917000000_admin_realtime.sql
@@ -3852,7 +3876,7 @@ Run: `npm run preview` in the background and use the `run` skill (or Playwright,
 5. Push the branch and open the PR (no credentials in Claude sessions).
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add DESIGN.md docs/CHANGELOG.md docs/AUDIT.md docs/adminplan.md
