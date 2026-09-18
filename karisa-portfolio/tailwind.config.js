@@ -26,7 +26,7 @@
  * The private /admin area runs on the same tokens in Operate mode — denser, fixed
  * rem type, one family, no entrance orchestration. See DESIGN.md → "The admin sheet".
  */
-module.exports = {
+export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: {
     screens: {

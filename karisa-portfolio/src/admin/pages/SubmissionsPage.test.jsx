@@ -59,7 +59,7 @@ describe('SubmissionsPage', () => {
   });
 
   it('asks before a bulk delete', async () => {
-    const client = renderPage();
+    renderPage();
     const table = await screen.findByRole('table');
     await userEvent.click(within(table).getByRole('checkbox', { name: /select amina/i }));
     await userEvent.click(screen.getByRole('button', { name: /^delete$/i }));
