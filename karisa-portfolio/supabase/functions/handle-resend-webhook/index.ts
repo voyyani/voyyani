@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.100.0";
+import { readSvixHeaders, verifySvixSignature } from "../_shared/webhook.ts";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -8,71 +9,6 @@ const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 // so it needs its own secret. Falls back to the shared name for the single-endpoint setup.
 const resendWebhookSecret =
   Deno.env.get("RESEND_STATUS_WEBHOOK_SECRET") || Deno.env.get("RESEND_WEBHOOK_SECRET") || "";
-
-// Verify webhook signature using HMAC-SHA256
-async function verifyWebhookSignature(
-  body: string,
-  signature: string,
-  secret: string
-): Promise<boolean> {
-  if (!secret) {
-    console.error("RESEND_WEBHOOK_SECRET is not set — rejecting");
-    return false;
-  }
-
-  try {
-    // Resend sends signature as: v1,<timestamp>:<signature_hex>
-    const parts = signature.split(',');
-    if (parts.length < 2 || !parts[1].includes(':')) {
-      console.error("[Webhook] Invalid signature format");
-      return false;
-    }
-
-    const [timestamp, signatureHex] = parts[1].split(':');
-    const signedPayload = `${timestamp}.${body}`;
-
-    // Create HMAC-SHA256 using Web Crypto API
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-
-    const signatureBytes = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      encoder.encode(signedPayload)
-    );
-
-    // Convert to hex
-    const expectedHex = Array.from(new Uint8Array(signatureBytes))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    // Constant-time comparison to prevent timing attacks
-    if (expectedHex.length !== signatureHex.length) {
-      console.error("[Webhook] Signature length mismatch");
-      return false;
-    }
-
-    let result = 0;
-    for (let i = 0; i < expectedHex.length; i++) {
-      result |= expectedHex.charCodeAt(i) ^ signatureHex.charCodeAt(i);
-    }
-
-    const isValid = result === 0;
-    if (!isValid) {
-      console.error("[Webhook] Signature mismatch - possible tampering");
-    }
-    return isValid;
-  } catch (error) {
-    console.error("[Webhook] Signature verification error:", error);
-    return false;
-  }
-}
 
 // Map Resend event types to our email_status values
 const EVENT_TYPE_MAP: Record<string, string> = {
@@ -98,21 +34,20 @@ serve(async (req) => {
     // Read raw body for signature verification
     const rawBody = await req.text();
 
-    // Verify webhook signature
-    const signature = req.headers.get("x-resend-signature");
-    if (!signature) {
-      console.error("[Webhook] Missing x-resend-signature header");
+    // Fail closed if the secret is missing — do not skip verification.
+    if (!resendWebhookSecret) {
+      console.error("[Webhook] RESEND_WEBHOOK_SECRET is not set — refusing the request");
       return new Response(
-        JSON.stringify({ error: "Unauthorized - missing signature" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Webhook secret not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const isValidSignature = await verifyWebhookSignature(rawBody, signature, resendWebhookSecret);
-    if (!isValidSignature) {
-      console.error("[Webhook] Invalid signature");
+    const verdict = await verifySvixSignature(rawBody, readSvixHeaders(req.headers), resendWebhookSecret);
+    if (!verdict.ok) {
+      console.error("[Webhook] Signature rejected:", verdict.reason);
       return new Response(
-        JSON.stringify({ error: "Unauthorized - invalid signature" }),
+        JSON.stringify({ error: "Unauthorized - invalid signature", reason: verdict.reason }),
         { status: 401, headers: { "Content-Type": "application/json" } }
       );
     }

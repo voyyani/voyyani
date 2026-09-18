@@ -1,7 +1,6 @@
 // supabase/functions/handle-inbound-email/index.ts
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { crypto } from 'https://deno.land/std@0.208.0/crypto/mod.ts';
 import {
   routeInboundAddress,
   parseAddress,
@@ -9,6 +8,7 @@ import {
   buildAttachmentRow,
   classifyInboundSender,
 } from '../_shared/inbound.ts';
+import { readSvixHeaders, verifySvixSignature } from '../_shared/webhook.ts';
 import { buildFrom, buildReplyAddress, buildThreadMessageId } from '../_shared/mail.ts';
 import { renderEmail, textToHtml, escapeHtml } from '../_shared/emailTemplate.ts';
 
@@ -65,65 +65,6 @@ interface ResendAttachment {
   content_id?: string;
   content_type?: string;
   size?: number;
-}
-
-/**
- * Verify webhook signature using HMAC
- */
-async function verifyWebhookSignature(
-  payload: string,
-  signature: string | null
-): Promise<boolean> {
-  if (!webhookSecret || !signature) {
-    console.error('[verify] Missing webhook secret or signature');
-    return false;
-  }
-
-  try {
-    // Resend uses "t=" prefix for timestamp and "signature=" for the HMAC
-    // Format: t=<timestamp>,signature=<hmac_sha256>
-    const parts = signature.split(',');
-    const timestampPart = parts.find(p => p.startsWith('t='));
-    const signaturePart = parts.find(p => p.startsWith('signature='));
-
-    if (!timestampPart || !signaturePart) {
-      console.error('[verify] Invalid signature format');
-      return false;
-    }
-
-    const timestamp = timestampPart.replace('t=', '');
-    const providedSignature = signaturePart.replace('signature=', '');
-
-    // Create signed content: timestamp + payload
-    const signedContent = `${timestamp}.${payload}`;
-
-    // Create HMAC-SHA256
-    const encoder = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(webhookSecret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-
-    const signature_bytes = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      encoder.encode(signedContent)
-    );
-
-    // Convert to hex
-    const computed = Array.from(new Uint8Array(signature_bytes))
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
-
-    // Constant-time comparison
-    return computed === providedSignature;
-  } catch (error) {
-    console.error('[verify] Signature verification error:', error);
-    return false;
-  }
 }
 
 /**
@@ -490,7 +431,7 @@ serve(async (req: Request) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'content-type, x-resend-signature',
+        'Access-Control-Allow-Headers': 'content-type, svix-id, svix-timestamp, svix-signature',
       },
     });
   }
@@ -516,7 +457,6 @@ serve(async (req: Request) => {
 
     // 1. Verify webhook signature
     const bodyText = await req.text();
-    const signature = req.headers.get('x-resend-signature');
 
     // Fail closed. The previous version logged an invalid signature and carried on with
     // the commented-out 401 still in the file, which made the endpoint world-writable.
@@ -528,12 +468,10 @@ serve(async (req: Request) => {
       );
     }
 
-    if (!(await verifyWebhookSignature(bodyText, signature))) {
-      console.error('[handler] Invalid webhook signature — rejecting');
-      return new Response(
-        JSON.stringify({ error: 'Invalid signature' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+    const verdict = await verifySvixSignature(bodyText, readSvixHeaders(req.headers), webhookSecret);
+    if (!verdict.ok) {
+      console.error('[handler] Webhook signature rejected:', verdict.reason);
+      return new Response(JSON.stringify({ error: 'Invalid signature', reason: verdict.reason }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
     console.log('[handler] Webhook signature verified');
