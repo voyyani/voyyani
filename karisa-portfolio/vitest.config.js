@@ -8,6 +8,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
+    // 28 files on a small runner: a cold first run pushed one userEvent test past 5 s.
+    testTimeout: 15000,
     css: true,
     coverage: {
       provider: 'v8',
