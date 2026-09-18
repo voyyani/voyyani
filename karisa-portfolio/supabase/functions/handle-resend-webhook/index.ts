@@ -56,23 +56,27 @@ serve(async (req) => {
     const body = JSON.parse(rawBody);
     const { type, data } = body;
 
-    // Extract email ID (Resend uses 'id' field in the email object)
-    const emailId = data?.email?.id || data?.id;
+    // Map event type to status. Non-status events (e.g. email.received, which is
+    // handled by handle-inbound-email on its own endpoint, or any future event type
+    // Resend adds) must be acknowledged with 200 BEFORE the email-id check below —
+    // otherwise Resend retries them forever since they never carry a status email id.
+    const status = EVENT_TYPE_MAP[type];
+    if (!status) {
+      console.warn(`Unknown event type: ${type}`);
+      return new Response(
+        JSON.stringify({ success: true, ignored: type }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Extract email ID. Resend's status-event payloads carry it at data.email_id;
+    // data.email.id / data.id are kept as fallbacks for other shapes.
+    const emailId = data?.email_id || data?.email?.id || data?.id;
     if (!emailId) {
       console.warn("No email ID found in webhook payload");
       return new Response(
         JSON.stringify({ error: "No email ID" }),
         { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Map event type to status
-    const status = EVENT_TYPE_MAP[type];
-    if (!status) {
-      console.warn(`Unknown event type: ${type}`);
-      return new Response(
-        JSON.stringify({ success: true, message: "Event logged" }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
 

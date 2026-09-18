@@ -88,6 +88,8 @@ export interface InboundRowInput {
   spamScore: number;
   spamReasons: string[];
   isSpam: boolean;
+  /** The Resend `data.email_id` from an `email.received` webhook, when the payload came from one. */
+  resendEmailId?: string;
 }
 
 export function buildInboundReplyRow(input: InboundRowInput): Record<string, unknown> {
@@ -112,6 +114,7 @@ export function buildInboundReplyRow(input: InboundRowInput): Record<string, unk
     spam_reasons: input.spamReasons,
     is_spam: input.isSpam,
     is_sender_verified: input.senderVerified,
+    resend_email_id: input.resendEmailId ?? null,
     received_at: now,
     processed_at: now,
   };
@@ -153,4 +156,143 @@ export function classifyInboundSender(from: string, submissionEmail: string, adm
   if (sender === String(submissionEmail).trim().toLowerCase()) return 'visitor';
   if (sender === String(adminEmail).trim().toLowerCase()) return 'admin';
   return 'stranger';
+}
+
+/**
+ * Resend's real `email.received` webhook is a thin envelope — metadata only, no body,
+ * headers or attachment content. The full email is fetched separately from
+ * GET /emails/receiving/{email_id}. Other event types (email.sent, email.delivered, ...)
+ * arrive on the same endpoint in production and must be ignored, not treated as mail.
+ *
+ * A flat payload (top-level `from`/`to`, no `type`) is the legacy/test shape and stays
+ * supported so existing callers and fixtures keep working.
+ */
+export interface ReceivedEvent {
+  type: string;
+  data?: {
+    email_id?: string;
+    from?: string;
+    to?: string[];
+    subject?: string;
+    message_id?: string;
+    attachments?: Array<{
+      id: string;
+      filename: string;
+      content_type?: string;
+      content_disposition?: string;
+      content_id?: string;
+    }>;
+  };
+}
+
+export type InboundEnvelope =
+  | { kind: 'received'; emailId: string }
+  | { kind: 'flat' }
+  | { kind: 'ignore'; type: string }
+  | { kind: 'invalid' };
+
+export function classifyInboundPayload(body: unknown): InboundEnvelope {
+  if (!body || typeof body !== 'object') return { kind: 'invalid' };
+
+  const obj = body as Record<string, unknown>;
+
+  if (typeof obj.type === 'string') {
+    if (obj.type === 'email.received') {
+      const data = obj.data as Record<string, unknown> | undefined;
+      const emailId = data?.email_id;
+      if (typeof emailId === 'string' && emailId) {
+        return { kind: 'received', emailId };
+      }
+      return { kind: 'invalid' };
+    }
+    return { kind: 'ignore', type: obj.type };
+  }
+
+  if (typeof obj.from === 'string' && Array.isArray(obj.to)) {
+    return { kind: 'flat' };
+  }
+
+  return { kind: 'invalid' };
+}
+
+/**
+ * The flat shape the handler has always consumed downstream — now also the target
+ * shape `mergeReceivedEmail` produces from an `email.received` envelope plus the full
+ * fetched email.
+ */
+export interface FlatInbound {
+  from: string;
+  to: string[];
+  subject: string;
+  text?: string;
+  html?: string;
+  message_id?: string;
+  in_reply_to?: string;
+  references?: string;
+  headers?: Record<string, string>;
+  attachments?: Array<{
+    id?: string;
+    filename: string;
+    content?: string;
+    content_disposition?: 'attachment' | 'inline';
+    content_id?: string;
+    content_type?: string;
+    size?: number;
+  }>;
+}
+
+function headerLookup(headers: Record<string, string> | undefined, name: string): string | undefined {
+  if (!headers) return undefined;
+  const key = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
+  return key ? headers[key] : undefined;
+}
+
+export function mergeReceivedEmail(
+  event: ReceivedEvent,
+  full: {
+    from?: string;
+    to?: string[];
+    subject?: string;
+    html?: string | null;
+    text?: string | null;
+    headers?: Record<string, string>;
+    message_id?: string;
+    attachments?: Array<{
+      id: string;
+      filename: string;
+      content_type?: string;
+      content_disposition?: string;
+      content_id?: string;
+      size?: number;
+    }>;
+  }
+): FlatInbound {
+  const data = event.data ?? {};
+
+  const from = full.from ?? data.from ?? '';
+  const to = full.to ?? data.to ?? [];
+  const subject = full.subject ?? data.subject ?? '';
+  const message_id = full.message_id ?? data.message_id;
+  const attachments = full.attachments ?? data.attachments;
+
+  return {
+    from,
+    to,
+    subject,
+    text: full.text ?? undefined,
+    html: full.html ?? undefined,
+    message_id,
+    in_reply_to: headerLookup(full.headers, 'in-reply-to'),
+    references: headerLookup(full.headers, 'references'),
+    headers: full.headers,
+    attachments: attachments?.map((a) => ({
+      id: a.id,
+      filename: a.filename,
+      content_type: a.content_type,
+      content_disposition: a.content_disposition as 'attachment' | 'inline' | undefined,
+      content_id: a.content_id,
+      size: 'size' in a ? (a as { size?: number }).size : undefined,
+      content: undefined,
+    })),
+  };
 }

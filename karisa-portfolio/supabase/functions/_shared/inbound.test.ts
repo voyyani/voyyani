@@ -7,6 +7,8 @@ import {
   buildInboundReplyRow,
   buildAttachmentRow,
   classifyInboundSender,
+  classifyInboundPayload,
+  mergeReceivedEmail,
 } from './inbound';
 
 const UUID = '550e8400-e29b-41d4-a716-446655440000';
@@ -184,5 +186,100 @@ describe('classifyInboundSender', () => {
   });
   it('the visitor wins if the visitor is the admin (self-test submissions)', () => {
     expect(classifyInboundSender('voyanitech@gmail.com', 'voyanitech@gmail.com', 'voyanitech@gmail.com')).toBe('visitor');
+  });
+});
+
+
+describe('classifyInboundPayload', () => {
+  it('classifies an email.received event with a data.email_id', () => {
+    expect(classifyInboundPayload({ type: 'email.received', data: { email_id: 'abc-123' } }))
+      .toEqual({ kind: 'received', emailId: 'abc-123' });
+  });
+
+  it('treats email.received without data.email_id as invalid', () => {
+    expect(classifyInboundPayload({ type: 'email.received', data: {} })).toEqual({ kind: 'invalid' });
+    expect(classifyInboundPayload({ type: 'email.received' })).toEqual({ kind: 'invalid' });
+  });
+
+  it('ignores any other event type', () => {
+    expect(classifyInboundPayload({ type: 'email.sent', data: { email_id: 'x' } }))
+      .toEqual({ kind: 'ignore', type: 'email.sent' });
+    expect(classifyInboundPayload({ type: 'email.delivered' })).toEqual({ kind: 'ignore', type: 'email.delivered' });
+  });
+
+  it('recognises a flat legacy payload (top-level from/to, no type)', () => {
+    expect(classifyInboundPayload({ from: 'jane@example.com', to: ['reply+x@voyani.tech'] }))
+      .toEqual({ kind: 'flat' });
+  });
+
+  it('treats anything else as invalid', () => {
+    expect(classifyInboundPayload(null)).toEqual({ kind: 'invalid' });
+    expect(classifyInboundPayload(undefined)).toEqual({ kind: 'invalid' });
+    expect(classifyInboundPayload('a string')).toEqual({ kind: 'invalid' });
+    expect(classifyInboundPayload({})).toEqual({ kind: 'invalid' });
+    expect(classifyInboundPayload({ from: 'jane@example.com' })).toEqual({ kind: 'invalid' }); // no `to` array
+  });
+});
+
+describe('mergeReceivedEmail', () => {
+  const event = {
+    type: 'email.received',
+    data: {
+      email_id: 'e-1',
+      from: 'jane@example.com',
+      to: ['reply+x@voyani.tech'],
+      subject: 'From the envelope',
+      message_id: '<envelope@x.com>',
+      attachments: [{ id: 'a-1', filename: 'note.txt' }],
+    },
+  };
+
+  it('prefers the fetched full email over the envelope', () => {
+    const merged = mergeReceivedEmail(event, {
+      from: 'jane@example.com',
+      to: ['reply+x@voyani.tech'],
+      subject: 'From the full fetch',
+      html: '<p>hi</p>',
+      text: 'hi',
+      message_id: '<full@x.com>',
+    });
+    expect(merged.subject).toBe('From the full fetch');
+    expect(merged.message_id).toBe('<full@x.com>');
+    expect(merged.html).toBe('<p>hi</p>');
+    expect(merged.text).toBe('hi');
+  });
+
+  it('falls back to the envelope data when the full fetch is missing fields', () => {
+    const merged = mergeReceivedEmail(event, {});
+    expect(merged.from).toBe('jane@example.com');
+    expect(merged.to).toEqual(['reply+x@voyani.tech']);
+    expect(merged.subject).toBe('From the envelope');
+    expect(merged.message_id).toBe('<envelope@x.com>');
+    expect(merged.attachments).toEqual([
+      { id: 'a-1', filename: 'note.txt', content_type: undefined, content_disposition: undefined, content_id: undefined, size: undefined, content: undefined },
+    ]);
+  });
+
+  it('reads in-reply-to and references from headers case-insensitively', () => {
+    const merged = mergeReceivedEmail(event, {
+      headers: { 'In-Reply-To': '<parent@x.com>', REFERENCES: '<a@x.com> <parent@x.com>' },
+    });
+    expect(merged.in_reply_to).toBe('<parent@x.com>');
+    expect(merged.references).toBe('<a@x.com> <parent@x.com>');
+  });
+
+  it('turns null html/text into undefined rather than passing null through', () => {
+    const merged = mergeReceivedEmail(event, { html: null, text: null });
+    expect(merged.html).toBeUndefined();
+    expect(merged.text).toBeUndefined();
+  });
+
+  it('carries attachment metadata from the full fetch, leaving content unset for the handler to fill', () => {
+    const merged = mergeReceivedEmail(event, {
+      attachments: [{ id: 'a-2', filename: 'pic.png', content_type: 'image/png', content_disposition: 'inline', content_id: 'img1', size: 4096 }],
+    });
+    expect(merged.attachments).toEqual([
+      { id: 'a-2', filename: 'pic.png', content_type: 'image/png', content_disposition: 'inline', content_id: 'img1', size: 4096, content: undefined },
+    ]);
   });
 });

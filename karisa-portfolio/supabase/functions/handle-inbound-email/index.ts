@@ -7,6 +7,9 @@ import {
   buildInboundReplyRow,
   buildAttachmentRow,
   classifyInboundSender,
+  classifyInboundPayload,
+  mergeReceivedEmail,
+  type FlatInbound,
 } from '../_shared/inbound.ts';
 import { readSvixHeaders, verifySvixSignature } from '../_shared/webhook.ts';
 import { buildFrom, buildReplyAddress, buildThreadMessageId } from '../_shared/mail.ts';
@@ -42,23 +45,10 @@ const supabase = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
-interface ResendWebhookPayload {
-  from: string;
-  to: string[];
-  subject: string;
-  text?: string;
-  html?: string;
-  reply_to?: string;
-  cc?: string[];
-  bcc?: string[];
-  message_id?: string;
-  in_reply_to?: string;
-  references?: string;
-  headers?: Record<string, string>;
-  attachments?: ResendAttachment[];
-}
+type ResendWebhookPayload = FlatInbound;
 
 interface ResendAttachment {
+  id?: string;
   filename: string;
   content?: string; // base64
   content_disposition?: 'attachment' | 'inline';
@@ -321,6 +311,94 @@ async function forwardToAdmin(
 }
 
 /**
+ * Fetch the full received email from Resend. The `email.received` webhook only
+ * carries metadata — body, headers and attachment bytes come from this endpoint.
+ * Returns null on any failure so the caller can 500 and let Resend retry; the mail
+ * itself is safe in Resend, nothing is lost.
+ */
+async function fetchReceivedEmail(emailId: string): Promise<Record<string, unknown> | null> {
+  if (!resendApiKey) {
+    console.error('[fetch] RESEND_API_KEY not set — cannot fetch received email');
+    return null;
+  }
+
+  try {
+    const res = await fetch(`https://api.resend.com/emails/receiving/${emailId}`, {
+      headers: { Authorization: `Bearer ${resendApiKey}` },
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[fetch] Resend rejected the received-email fetch:', res.status, text.slice(0, 200));
+      return null;
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('[fetch] Error fetching received email:', error);
+    return null;
+  }
+}
+
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Best-effort: fill in `content` (base64) for each attachment by fetching its
+ * signed download URL from Resend. A failure on any one attachment is logged and
+ * skipped — it must never fail the whole webhook, the email itself already landed.
+ */
+async function attachContents(emailId: string, payload: ResendWebhookPayload): Promise<void> {
+  if (!payload.attachments?.length || !resendApiKey) return;
+
+  let totalBytes = 0;
+
+  for (const attachment of payload.attachments) {
+    if (!attachment.id) continue;
+    if (totalBytes >= MAX_ATTACHMENT_BYTES) {
+      console.warn('[attach] Attachment byte cap reached, skipping remaining attachments');
+      break;
+    }
+
+    try {
+      const metaRes = await fetch(
+        `https://api.resend.com/emails/receiving/${emailId}/attachments/${attachment.id}`,
+        { headers: { Authorization: `Bearer ${resendApiKey}` } }
+      );
+      if (!metaRes.ok) {
+        console.warn('[attach] Could not fetch attachment metadata:', attachment.filename, metaRes.status);
+        continue;
+      }
+
+      const meta = await metaRes.json();
+      const downloadUrl = meta?.download_url;
+      if (!downloadUrl) {
+        console.warn('[attach] No download_url for attachment:', attachment.filename);
+        continue;
+      }
+
+      const bytesRes = await fetch(downloadUrl);
+      if (!bytesRes.ok) {
+        console.warn('[attach] Could not download attachment bytes:', attachment.filename, bytesRes.status);
+        continue;
+      }
+
+      const buf = new Uint8Array(await bytesRes.arrayBuffer());
+      if (totalBytes + buf.byteLength > MAX_ATTACHMENT_BYTES) {
+        console.warn('[attach] Attachment would exceed byte cap, skipping:', attachment.filename);
+        continue;
+      }
+      totalBytes += buf.byteLength;
+
+      let binary = '';
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+      attachment.content = btoa(binary);
+    } catch (error) {
+      console.warn('[attach] Error fetching attachment content:', attachment.filename, error);
+    }
+  }
+}
+
+/**
  * Mail sent straight to karisa@voyani.tech (or any other mailbox on the domain).
  * There is no submission to thread it onto, so it is forwarded and acknowledged.
  */
@@ -476,7 +554,30 @@ serve(async (req: Request) => {
 
     console.log('[handler] Webhook signature verified');
 
-    const payload: ResendWebhookPayload = JSON.parse(bodyText);
+    const parsed = JSON.parse(bodyText);
+    const envelope = classifyInboundPayload(parsed);
+    if (envelope.kind === 'ignore') {
+      console.log('[handler] Ignoring event type', envelope.type);
+      return new Response(JSON.stringify({ success: true, ignored: envelope.type }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    if (envelope.kind === 'invalid') {
+      console.error('[handler] Unrecognised payload shape');
+      return new Response(JSON.stringify({ error: 'Unrecognised payload' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    let payload: ResendWebhookPayload;
+    if (envelope.kind === 'received') {
+      const full = await fetchReceivedEmail(envelope.emailId);
+      if (!full) {
+        // 500 so Resend retries; the mail exists in Resend and is not lost.
+        return new Response(JSON.stringify({ error: 'Could not retrieve received email' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
+      payload = mergeReceivedEmail(parsed, full as any);
+      await attachContents(envelope.emailId, payload);
+    } else {
+      payload = parsed as ResendWebhookPayload;
+    }
+
     console.log('[handler] Email from:', payload.from, '| to:', payload.to?.[0]);
 
     // 2. Validate received email
@@ -574,6 +675,7 @@ serve(async (req: Request) => {
           spamScore,
           spamReasons,
           isSpam,
+          resendEmailId: envelope.kind === 'received' ? envelope.emailId : undefined,
         })
       )
       .select()
