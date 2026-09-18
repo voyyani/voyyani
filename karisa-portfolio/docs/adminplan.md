@@ -1,4 +1,4 @@
-cd # Admin Revamp Implementation Plan — "The Kanga Sheet, Operate mode"
+# Admin Revamp Implementation Plan — "The Kanga Sheet, Operate mode"
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Before editing any UI file in Tasks 1–10, load `impeccable:impeccable` and read its `reference/craft-floor.md`; the design contract is `DESIGN.md` plus §1 of this document.
 
