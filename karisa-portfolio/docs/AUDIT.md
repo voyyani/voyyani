@@ -250,3 +250,27 @@ Ranking is competitive and query-dependent, and no audit can promise a position.
 ### One correction made while writing this
 
 An earlier pass of this audit was about to report "the homepage has no `<h1>`," based on a `grep` for `<h1`. That was wrong: the Hero headline is `<motion.h1>`, which the pattern missed. Heading structure is correct and is recorded as such in §3.5. Noting it because an audit that reports a false critical finding is worse than one that reports nothing.
+
+---
+
+## 8. Open items from the admin revamp (2026-09-18)
+
+Recorded during the `/admin` rebuild ([`adminplan.md`](./adminplan.md) §0.3). Everything else
+in that audit (F1–F15, A1–A7) was fixed on branch `worktree-admin-revamp-plan`; this one was
+deliberately left, because it needs a policy decision rather than a code change.
+
+**A8 — OPEN — `analytics_events` RLS is `USING (true) WITH CHECK (true)`.**
+`supabase/schema.sql` creates the policy `analytics_service_role` on `public.analytics_events`
+with `USING (true) WITH CHECK (true)` and no `TO` clause, and the comment above it says
+"Service role only". It is not: the service role bypasses RLS regardless, and a policy with
+no role restriction and a constant-true predicate grants every role — including `anon` via
+the public key shipped in the browser bundle — full SELECT, INSERT, UPDATE and DELETE on the
+table. Consequences: anyone with the anon key can read every event, insert fabricated ones
+(which the Analytics page would then count), or delete the history.
+
+What to decide: whether the browser writes events at all. If it does, the policy should be
+`FOR INSERT TO anon, authenticated WITH CHECK (true)` plus `FOR SELECT` restricted to
+`public.has_any_role(ARRAY['admin', 'content_manager', 'owner', 'super_admin'])`, with no
+UPDATE/DELETE for anyone but the service role. If it does not, drop the policy and let the
+service role be the only writer. Either way, the change is a migration against the live
+project, not this repo alone, so it is not done here.

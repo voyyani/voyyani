@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import Icon from './Icon';
 
-export const NAV_ITEMS = [
+const NAV_ITEMS = [
   { to: '/admin', label: 'Overview', icon: 'overview', end: true },
   { to: '/admin/submissions', label: 'Submissions', icon: 'inbox' },
   { to: '/admin/analytics', label: 'Analytics', icon: 'chart' },

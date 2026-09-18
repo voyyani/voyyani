@@ -191,8 +191,6 @@ A warm, printed neutral field with a single indigo ink — the palette of a two-
 
 **The Non-Text Floor Rule.** `cloth-400` is 2.2:1 on the page ground and is **never** used for text. Every text colour on this site is one of `mark-900` / `700` / `600` / `500`, each of which clears WCAG AA on `cloth-50`, `cloth-100` and `cloth-200` (15.5:1 / 9.3:1 / 6.8:1 / 5.5:1 on `cloth-100`). `mark-500` is the floor; placeholders are text and sit on it.
 
-**The Legacy Boundary Rule.** `tailwind.config.js` also carries an `ink` / `signal` dark ramp. That is the previous identity, retained solely because the private `/admin` area still runs on it. Nothing under `src/components` or `src/sections` may reference it — by token name **or as a literal hex in a default prop, a fallback, or an inline style**. The leak that survived longest was `#C8FF3D`, the previous identity's acid lime, sitting as a default argument on a public loading spinner where no class name would ever betray it. If `/admin` is ever redesigned, the block is deleted with it.
-
 ## Typography
 
 **Display Font:** Bricolage Grotesque (self-hosted variable woff2, 400–800; falls back to Archivo)
@@ -233,6 +231,9 @@ The lead panel is a two-column grid at `lg` (minimum height `calc(100svh - 8rem)
 **The Seam Is The Law.** Every panel head is a 2px indigo top rule (`.hem`) with the jina hanging directly beneath it at `pt-6` / `md:pt-8`, in the same place on every panel of the sheet. **Nothing else on this site draws a 2px indigo rule.** That exclusivity is the rule: the moment a second element borrows the seam, the sheet stops being a sheet.
 
 **The Mirror-Margins Rule.** `PanelHead`'s `reversed` variant bleeds to the panel's own edges using negative margins (`-mx-4 -mt-8` → `sm:-mx-8 -mt-10` → `lg:-mx-12 -mt-14`) that mirror `Panel`'s inner padding exactly. Change one and you must change the other, or the reversed band tears away from the frame.
+
+### The admin sheet
+`/admin` is the same cloth in Operate mode. Its one seam is the top bar's 2px indigo rule; page heads draw a 1px ink rule. Type is Archivo at fixed rem sizes; Bricolage appears only on the page title and on figures. Tables stack below `md`. Loading is a skeleton. State is `.mark-state[data-state]` with the admin vocabulary (new, in_progress, responded, closed, waiting, pending, sent, delivered, opened, bounced, failed, held). Indigo is spent on the seam, the current nav item, links, the primary action and state marks. The legacy `ink`/`signal` ramp is gone.
 
 ## Elevation & Depth
 
@@ -336,6 +337,6 @@ The parts of the page nobody draws still carry the design. Selection is indigo w
 - **Don't** introduce a monospace face, or set labels, dates, repo names or figures as if they were code.
 - **Don't** set a small uppercase label above a heading as a kicker or eyebrow; the seam and the jina are the introduction.
 - **Don't** author per-section entrance animations, or a second easing curve.
-- **Don't** reference the legacy `ink` / `signal` ramp anywhere in `src/components` or `src/sections`, including as a raw hex in a default prop or fallback.
+- **Don't** reintroduce the retired dark ramp (`#061220`, `#0a1929`, `#61DAFB`, `#005792`, `#C8FF3D`) anywhere — `src/admin` included — as a token, a raw hex in a default prop or fallback, or an inline style. The admin wears the same cloth.
 - **Don't** solve an overflowing face with `overflow-x: auto` and a `min-width`; pin the track and render narrow instead.
 - **Don't** reach for a Tailwind default palette colour (`red-500` and friends) for an error surface; `alarm` is the destructive ink.

@@ -31,7 +31,7 @@ const renderPage = (tables = {}) => {
 };
 
 describe('SubmissionDetailPage', () => {
-  beforeEach(() => { vi.clearAllMocks(); global.fetch = vi.fn(); });
+  beforeEach(() => { vi.clearAllMocks(); globalThis.fetch = vi.fn(); });
 
   it('loads the thread by route id and marks unread inbound as read', async () => {
     const client = renderPage();
@@ -42,13 +42,13 @@ describe('SubmissionDetailPage', () => {
 
   it('sends a reply through send-reply with the session token, never logging it', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    global.fetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+    globalThis.fetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
     renderPage();
     await screen.findByRole('heading', { name: 'Clinic site' });
     await userEvent.type(screen.getByLabelText(/your reply/i), 'Happy to help — can we talk on Thursday?');
     await userEvent.click(screen.getByRole('button', { name: /send reply/i }));
-    await waitFor(() => expect(global.fetch).toHaveBeenCalled());
-    const [url, init] = global.fetch.mock.calls[0];
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalled());
+    const [url, init] = globalThis.fetch.mock.calls[0];
     expect(url).toMatch(/\/functions\/v1\/send-reply$/);
     expect(init.headers.Authorization).toBe('Bearer token');
     expect(JSON.parse(init.body)).toMatchObject({ submission_id: ID, reply_type: 'manual' });

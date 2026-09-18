@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
+import { toast } from 'sonner';
 import AdminLayout from './AdminLayout';
 
 const renderAt = (path, onLogout = vi.fn()) =>
@@ -30,8 +31,11 @@ describe('AdminLayout', () => {
     expect(overview).not.toHaveAttribute('aria-current');
   });
 
-  it('mounts a toaster region so admin toasts are visible', () => {
+  it('mounts a toaster region so admin toasts are visible', async () => {
     renderAt('/admin');
+    // sonner renders nothing until a toast exists, so fire one and look for it.
+    toast('Reply sent');
+    expect(await screen.findByText('Reply sent')).toBeInTheDocument();
     expect(document.querySelector('[data-sonner-toaster]')).toBeTruthy();
   });
 

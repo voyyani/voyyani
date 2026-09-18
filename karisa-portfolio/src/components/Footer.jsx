@@ -104,9 +104,14 @@ const Footer = () => (
         <p className="text-sm text-mark-600">
           © {new Date().getFullYear()} {SITE.name}. All rights reserved.
         </p>
-        <a href="/privacy-policy" className="link text-sm">
-          Privacy policy
-        </a>
+        <nav aria-label="Site" className="flex items-center gap-4">
+          <a href="/privacy-policy" className="link text-sm">
+            Privacy policy
+          </a>
+          <a href="/admin" className="link text-sm">
+            Admin
+          </a>
+        </nav>
       </div>
     </div>
   </footer>
