@@ -18,7 +18,7 @@ type ReplyLike = { id: string; reply_message: string; reply_type: string; email_
 type InboundLike = {
   id: string; from_email: string; from_name: string | null; subject: string; body_text: string | null; body_html: string | null;
   received_at: string; is_read: boolean; is_important: boolean; status: string; spam_score: number | null;
-  spam_reasons: string[] | null; sender_verified?: boolean | null; inbound_attachments?: InboundAttachment[];
+  spam_reasons: string[] | null; is_sender_verified?: boolean | null; inbound_attachments?: InboundAttachment[];
 };
 
 const HELD = new Set(['spam', 'quarantined', 'failed']);
@@ -37,7 +37,7 @@ export function buildThread(submission: SubmissionLike, replies: ReplyLike[], in
       return {
         kind: 'inbound', id: i.id, at: i.received_at, subject: i.subject, bodyText: i.body_text, bodyHtml: i.body_html,
         fromName: i.from_name, fromEmail: i.from_email, isRead: i.is_read, isImportant: i.is_important,
-        held, heldReason, senderVerified: i.sender_verified !== false, spamScore: i.spam_score,
+        held, heldReason, senderVerified: i.is_sender_verified !== false, spamScore: i.spam_score,
         attachments: i.inbound_attachments ?? [],
       };
     }),

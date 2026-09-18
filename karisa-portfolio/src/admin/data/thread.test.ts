@@ -7,8 +7,8 @@ const replies = [
   { id: 'r2', submission_id: 's1', reply_message: 'From my phone', reply_type: 'manual', email_status: 'sent', resend_email_id: 're2', email_metadata: { source: 'email_relay' }, created_at: '2026-09-12T12:00:00Z' },
 ];
 const inbound = [
-  { id: 'i1', submission_id: 's1', from_email: 'amina@example.com', from_name: 'Amina', subject: 'Re: Thanks', body_text: 'Great', body_html: null, received_at: '2026-09-11T09:00:00Z', is_read: false, is_important: false, status: 'processed', spam_score: 0.5, spam_reasons: null, sender_verified: true, inbound_attachments: [] },
-  { id: 'i2', submission_id: 's1', from_email: 'x@spam.io', from_name: null, subject: 'WIN', body_text: 'lottery', body_html: null, received_at: '2026-09-11T10:00:00Z', is_read: false, is_important: false, status: 'spam', spam_score: 8, spam_reasons: ['keywords'], sender_verified: false, inbound_attachments: [] },
+  { id: 'i1', submission_id: 's1', from_email: 'amina@example.com', from_name: 'Amina', subject: 'Re: Thanks', body_text: 'Great', body_html: null, received_at: '2026-09-11T09:00:00Z', is_read: false, is_important: false, status: 'processed', spam_score: 0.5, spam_reasons: null, is_sender_verified: true, inbound_attachments: [] },
+  { id: 'i2', submission_id: 's1', from_email: 'x@spam.io', from_name: null, subject: 'WIN', body_text: 'lottery', body_html: null, received_at: '2026-09-11T10:00:00Z', is_read: false, is_important: false, status: 'spam', spam_score: 8, spam_reasons: ['keywords'], is_sender_verified: false, inbound_attachments: [] },
 ];
 
 describe('buildThread', () => {
