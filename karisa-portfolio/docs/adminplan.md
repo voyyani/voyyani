@@ -26,13 +26,13 @@ All fifteen tasks are done on branch `worktree-admin-revamp-plan`, commits `d1de
 | 8 Analytics math | ✅ | `1ec1052` | |
 | 9 Analytics page | ✅ | `e9511d6`, `aea1b7a` | |
 | 10 Settings — notifications, labels, account | ✅ | `58294ff`, `1555804` | |
-| 11 Realtime publication migration | ⚠️ | `3518e00` | Written and committed; **not applied** to the live project (no credentials here) — DEPLOY.md step 1 |
-| 12 `send-notification` — deep link, `reply_to` | ⚠️ | `3f85b29` | Committed; **not deployed**, `deno check` not run — DEPLOY.md step 2 |
-| 13 `handle-inbound-email` — relay the admin's Gmail reply | ⚠️ | `1d58da6`, `73d6b47` | Committed; **not deployed**, `deno check` not run — DEPLOY.md step 2 |
-| 15 Email templates on the brand | ⚠️ | `f200321` | Committed; `send-reply` also changed, so deploy three functions, not two |
+| 11 Realtime publication migration | ✅ | `3518e00` | **Applied 2026-09-18** via Management API; `pg_publication_tables` lists all three tables; both RLS policies present |
+| 12 `send-notification` — deep link, `reply_to` | ✅ | `3f85b29` | **Deployed 2026-09-18** as v32 (`verify_jwt=false`); OPTIONS 204, POST validates |
+| 13 `handle-inbound-email` — relay the admin's Gmail reply | ✅ | `1d58da6`, `73d6b47` | **Deployed 2026-09-18** as v20 (`verify_jwt=false`); boots (405 on GET) |
+| 15 Email templates on the brand | ✅ | `f200321` | **Deployed 2026-09-18** with all three functions; `send-reply` v45 (`verify_jwt=true`), boots (401 on GET) |
 | 14 Finish — detector, verification, docs, deploy checklist | ✅ | `3e90b81`, `9a4c5b2`, `e9f1bdc`, docs commit | Visual pass covered `/admin/login` only: no `.env.local` in the worktree, so no sign-in |
 
-⚠️ means the code is complete and reviewed but its effect depends on a step only the user can run.
+Merged to `main` and pushed by the user (`e3c926b`); migration and functions pushed to project `mrqzsfcfzvejreowkykm` from this session. Remaining manual step: the end-to-end email loop test (DEPLOY.md step 4). The final whole-branch review was skipped at the user's request.
 
 ## Global Constraints
 
