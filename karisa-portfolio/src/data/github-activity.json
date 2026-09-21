@@ -1,14 +1,22 @@
 {
-  "syncedAt": "2026-09-17",
+  "syncedAt": "2026-09-21",
   "profileUrl": "https://github.com/voyyani",
   "totals": {
-    "commits": 444,
-    "repos": 4,
-    "months": 16,
-    "firstCommit": "2025-06-17",
-    "lastCommit": "2026-09-16"
+    "commits": 538,
+    "repos": 5,
+    "months": 18,
+    "firstCommit": "2025-04-05",
+    "lastCommit": "2026-09-21"
   },
   "months": [
+    {
+      "month": "2025-04",
+      "commits": 1
+    },
+    {
+      "month": "2025-05",
+      "commits": 0
+    },
     {
       "month": "2025-06",
       "commits": 50
@@ -67,11 +75,11 @@
     },
     {
       "month": "2026-08",
-      "commits": 17
+      "commits": 27
     },
     {
       "month": "2026-09",
-      "commits": 177
+      "commits": 260
     }
   ],
   "repos": [
@@ -102,20 +110,54 @@
       ]
     },
     {
-      "name": "Neema-Foundation-Kilifi",
-      "url": "https://github.com/voyyani/Neema-Foundation-Kilifi",
+      "name": "voyyani",
+      "url": "https://github.com/voyyani/voyyani",
       "description": null,
-      "commits": 115,
-      "firstCommit": "2025-10-20",
-      "lastCommit": "2026-09-16",
+      "commits": 140,
+      "firstCommit": "2025-06-21",
+      "lastCommit": "2026-09-21",
       "languages": [
         {
+          "name": "JavaScript",
+          "bytes": 377011
+        },
+        {
           "name": "TypeScript",
-          "bytes": 2380626
+          "bytes": 214329
         },
         {
           "name": "PLpgSQL",
-          "bytes": 214113
+          "bytes": 29529
+        },
+        {
+          "name": "HTML",
+          "bytes": 23884
+        },
+        {
+          "name": "CSS",
+          "bytes": 16143
+        },
+        {
+          "name": "Shell",
+          "bytes": 7698
+        }
+      ]
+    },
+    {
+      "name": "Neema-Foundation-Kilifi",
+      "url": "https://github.com/voyyani/Neema-Foundation-Kilifi",
+      "description": null,
+      "commits": 121,
+      "firstCommit": "2025-10-20",
+      "lastCommit": "2026-09-18",
+      "languages": [
+        {
+          "name": "TypeScript",
+          "bytes": 2376814
+        },
+        {
+          "name": "PLpgSQL",
+          "bytes": 212345
         },
         {
           "name": "HTML",
@@ -132,62 +174,58 @@
       ]
     },
     {
-      "name": "voyyani",
-      "url": "https://github.com/voyyani/voyyani",
+      "name": "cultureszn",
+      "url": "https://github.com/voyyani/cultureszn",
       "description": null,
-      "commits": 86,
-      "firstCommit": "2025-06-21",
-      "lastCommit": "2026-08-31",
+      "commits": 41,
+      "firstCommit": "2026-02-04",
+      "lastCommit": "2026-09-21",
       "languages": [
         {
-          "name": "JavaScript",
-          "bytes": 396445
-        },
-        {
           "name": "TypeScript",
-          "bytes": 225623
+          "bytes": 184513
         },
         {
-          "name": "PLpgSQL",
-          "bytes": 27937
-        },
-        {
-          "name": "HTML",
-          "bytes": 23884
+          "name": "JavaScript",
+          "bytes": 12089
         },
         {
           "name": "CSS",
-          "bytes": 12655
+          "bytes": 6734
         },
         {
-          "name": "Shell",
-          "bytes": 5486
+          "name": "HTML",
+          "bytes": 3483
+        },
+        {
+          "name": "MDX",
+          "bytes": 2696
         }
       ]
     },
     {
-      "name": "cultureszn",
-      "url": "https://github.com/voyyani/cultureszn",
-      "description": null,
-      "commits": 8,
-      "firstCommit": "2026-02-04",
-      "lastCommit": "2026-02-19",
+      "name": "Neema-Foundation",
+      "url": "https://github.com/voyyani/Neema-Foundation",
+      "description": "Neema Foundation (NF) is a community-focused non-profit organization based in Kilifi County, Kenya, dedicated to improving the quality of life for vulnerable communities through education, health, and social empowerment initiatives.",
+      "commits": 1,
+      "firstCommit": "2025-04-05",
+      "lastCommit": "2025-04-05",
       "languages": [
         {
           "name": "TypeScript",
-          "bytes": 622775
+          "bytes": 288381
         },
         {
           "name": "CSS",
-          "bytes": 9194
-        },
-        {
-          "name": "JavaScript",
-          "bytes": 6820
+          "bytes": 4436
         },
         {
           "name": "HTML",
-          "bytes": 6072
+          "bytes": 1500
+        },
+        {
+          "name": "JavaScript",
+          "bytes": 869
         }
       ]
     }
