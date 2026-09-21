@@ -2,7 +2,8 @@
  * The two client platforms, extracted verbatim from Projects.jsx during the Kanga Sheet
  * rebuild. Neema's figures were verified in a prior pass. Raslipwani's were re-verified
  * on 2026-09-14 against the repo at `d3e978b` and on 2026-09-16 against the live site —
- * see docs/RASLIPWANI_GO_LIVE.md §7 for every source.
+ * see docs/RASLIPWANI_GO_LIVE.md §7 for every source. Culture SZN was added 2026-09-21
+ * from the completed intake in docs/cultureszn.md, verified against its repo at `90007b2`.
  *
  * `liveStatus.checkedOn` is a real date someone opened the site. If you change a status,
  * change the date with it.
@@ -390,6 +391,166 @@ export const PROJECTS = [
         }
       ],
       index: "02"
+    },
+    {
+      id: 3,
+      title: "Culture SZN",
+      tagline: "Catalogue and link-in-bio for a Nairobi music collective",
+      summary: "The online home of a Nairobi music-and-design collective: every release playable in one tap, artist profiles, a journal and a newsletter — built for fans on mid-range Android phones over metered data.",
+      description: "A catalogue site for Culture SZN, a Nairobi music-and-design collective (XiiX, Wavy SRF, Pipí Ciagi). A fan lands from a WhatsApp or Instagram link on any release page, taps once to play it on YouTube (or the Spotify embed when there is no YouTube link), sees the tracklist and every platform it is on, reads who the artist is, and shares it back. There is no admin side and no login: the team publishes by editing JSON, TypeScript and MDX files in the repo, and a scheduled GitHub Action keeps the Spotify discography current by committing a JSON catalogue daily. Paid client work, credited to VOYANI.",
+      // Verified against package.json @ 90007b2 (2026-09-21). lucide-react is in the
+      // dependency tree but imported nowhere in src/ or api/ — left off the list.
+      // Playwright is a devDependency used only for design-review captures, not tests.
+      technologies: [
+        "React 19.2",
+        "TypeScript 5.9",
+        "Vite 7",
+        "Tailwind CSS 4",
+        "React Router 7",
+        "Framer Motion 12",
+        "MDX 3",
+        "Vitest 3",
+        "React Testing Library",
+        "ESLint 9",
+        "Vercel",
+        "GitHub Actions",
+        "Spotify Web API",
+        "Resend",
+        "Cloudinary",
+        "YouTube Embed"
+      ],
+      /**
+       * All three shown figures were measured on 2026-09-21 in a checkout of the
+       * cultureszn repo at 90007b2 (docs/cultureszn.md §8a). The "before" chunk size is
+       * a `vite build` of c5d41b0, the last commit of the February version, run the same
+       * day in a scratch checkout — not a figure copied from a status doc.
+       */
+      metrics: [
+        {
+          label: "Largest JS chunk",
+          value: "202 → 71 kB",
+          source: "gzip. Before: vite build of c5d41b0 (one chunk, 690.28 kB / 202.34 kB gzip). After: npm run check:size at 90007b2 (react chunk 70.9 kB gzip). Both run 2026-09-21."
+        },
+        {
+          label: "Tests",
+          value: "133",
+          source: "31 files, all passing — npm test at 90007b2 on 2026-09-21; lint, tests, build and the size gate run in CI on every push"
+        },
+        {
+          label: "Bundle budget",
+          value: "100 kB",
+          source: "scripts/check-bundle-size.mjs fails CI when any chunk exceeds 100 kB gzip; measured largest chunk 70.9 kB on 2026-09-21"
+        },
+        // Unsourced — retained, not shown. Lighthouse has never been run against the
+        // site (docs/LAUNCH.md says "Not yet measured"); the dead-code figure comes from
+        // the audit's estimate, not from a totalled commit stat.
+        { label: "Lighthouse mobile", value: "Perf ≥ 90 · A11y 100" },
+        { label: "Dead code removed", value: "~4,500 lines" }
+      ],
+      category: "Frontend",
+      challenge: "The first version did not build — 24 type errors — and its single 690 kB JavaScript chunk shipped Node polyfills and, worst, read the Spotify client secret from a VITE_-prefixed variable, which Vite inlines into the browser bundle. An audit found 30 defects: an OAuth flow that never validated its state parameter, encryption that discarded its IV, ~4,500 lines that never rendered, fabricated stats and stock photos presented as members, and a newsletter form that faked success on a timer. All of it aimed at fans on mid-range Android over metered data, where every kilobyte and every dead end costs something.",
+      solution: "Rather than patch the Spotify player, the rebuild deleted every credentialed browser path and moved the only Spotify call into a scheduled job: a GitHub Action fetches the discography with client credentials, writes a JSON catalogue, and commits it. At build time that JSON is merged with the hand-curated release list, so the site renders from static data and never waits on a network call — and no secret exists anywhere a visitor can reach. Playback became a pure decision function: YouTube first, Spotify embed second, platform buttons last, with every embed behind a click-to-load facade so no third-party iframe loads before a tap. Then the payload was attacked directly — lazy routes, vendor chunks, per-artist and per-article chunks, console stripping — and a CI gate that fails when any chunk exceeds 100 kB gzip. The largest chunk went from 202 kB to 71 kB gzip, with a 133-test harness and CI that did not exist before.",
+      features: [
+        "Home with roster panels, a NOW PLAYING strip for the latest release and recent drops",
+        "Artist profiles: bio, credits, verified platform links, discography as numbered stops",
+        "Release pages with one-tap play, tracklist, description and every platform link",
+        "YouTube-first playback with Spotify embed as fallback, both behind a tap",
+        "Releases index grouped by year with a 'New' tape on the newest card",
+        "Platform buttons for Spotify, Apple Music, SoundCloud, YouTube, Audiomack and Boomplay",
+        "SZNals journal authored as MDX files, one chunk per article",
+        "Join SZN: WhatsApp community link and a newsletter into a Resend audience",
+        "Share row: WhatsApp, X and copy-link on every artist and release",
+        "Route-board header with a lit 'current stop' indicator and mobile menu",
+        "Per-route title, description, Open Graph card and schema.org JSON-LD, prerendered so WhatsApp previews work without a server",
+        "Legacy /members/:slug redirects to /artists/:slug",
+        "Skip link, landmark structure and labelled sections; reduced motion honoured",
+        "Honest placeholders: a missing portrait paints the name on a colour panel, a missing link omits the button"
+      ],
+      // Each line points at a file in the cultureszn repo (docs/cultureszn.md §7c).
+      technicalHighlights: [
+        "Build-time catalogue merge: Spotify JSON joined to curated releases by album id (src/lib/catalog.ts)",
+        "Scheduled sync in GitHub Actions: client-credentials token, paginated fetch, 429 backoff, no commit when nothing changed",
+        "Playback as a pure decision: YouTube → Spotify → links (src/lib/playback.ts, unit-tested)",
+        "Click-to-load facades for every third-party iframe; youtube-nocookie domain",
+        "Home in the entry chunk, every other page lazy; react and motion vendor chunks; per-artist and per-article chunks",
+        "Bundle budget gate in CI: fails above 100 kB gzip per chunk (scripts/check-bundle-size.mjs)",
+        "Per-route static <head> prerendered from an SSR-built metadata module (scripts/prerender.mjs)",
+        "Strict CSP (script-src 'self'), HSTS preload, frame-ancestors 'none', immutable caching for hashed assets",
+        "Cloudinary f_auto,q_auto transforms with generated srcset; two self-hosted WOFF2 font subsets",
+        "Data-honesty tests: no placeholder imagery or fabricated content can reach the page; every internal link must hit a declared route",
+        "Newsletter endpoint with honeypot, server-side validation and Resend via plain fetch — no SDK"
+      ],
+      architecture: [
+        "Frontend: React 19 + TypeScript (strict), built with Vite 7",
+        "Styling: Tailwind CSS 4 bound to role tokens; self-hosted font subsets",
+        "Routing: React Router 7, nine routes, every page but Home lazy-loaded",
+        "Data: static modules in the repo — curated releases, artist profiles, MDX journal",
+        "Catalogue: daily GitHub Action commits Spotify discography as JSON, merged at build",
+        "Backend: one Vercel serverless function (newsletter → Resend)",
+        "Media: Cloudinary for imagery; YouTube and Spotify embeds behind facades",
+        "Deployment: Vercel static + security headers; prerendered per-route <head>",
+        "CI/CD: GitHub Actions — lint, tests, build, bundle-size gate on every push"
+      ],
+      // There is no database. Content is files in the repo (src/data/*, content/sznals/*)
+      // and the Spotify catalogue is a committed JSON file. The card says so in one line.
+      databaseSchema: [],
+      keyAchievements: [
+        "Turned a codebase that would not compile and leaked a Spotify secret into a green, typed, tested build with CI gates",
+        "Cut the largest JavaScript chunk from 202 kB to 71 kB gzip and locked the budget into CI",
+        "Replaced a runtime OAuth player with a build-time catalogue: no secrets in the visitor's path",
+        "Removed every fabricated element the audit found and codified 'never fabricate' as tests"
+      ],
+      // No admin side exists. The team publishes by editing files in the repo.
+      adminFeatures: [],
+      // Only the first two lines have artifacts (docs/cultureszn.md §8a); the modal does
+      // not render this array.
+      performanceMetrics: [
+        "Largest JS chunk: 202.3 kB → 70.9 kB gzip (vite build of c5d41b0 vs check:size at 90007b2, 2026-09-21)",
+        "Initial route: ≈135.6 kB gzip in three parallel chunks (react 70.9 + motion 37.0 + index 27.7)",
+        "Lighthouse mobile targets: performance ≥ 90, accessibility 100, SEO ≥ 95 — unsourced, not yet measured"
+      ],
+      liveUrl: "https://www.cultureszn.com",
+      githubUrl: "https://github.com/voyyani/cultureszn",
+      // Checked 2026-09-21: / returns 200 and renders the product. Deep routes (/artists,
+      // /releases/…, /join) return Vercel NOT_FOUND on direct load — a vercel.json routing
+      // fix pending in the cultureszn repo; client-side navigation from / is unaffected.
+      liveStatus: { state: "live", checkedOn: "21 Sep 2026" },
+      // Captured 2026-09-21 with scripts/capture-screenshots.mjs against `vite preview`
+      // of the cultureszn repo at 90007b2 — the same build the live site serves — because
+      // the live deep routes 404 on direct load (see liveStatus).
+      screenshots: [
+        {
+          src: "/images/projects/cultureszn/home.jpg",
+          alt: "Culture SZN home page on black: the headline 'MADE IN NAIROBI.' in white and yellow, three tall photo panels of XiiX, Wavy SRF and Pipí Ciagi with name plates, and a green LED strip below reading NOW PLAYING · 6 AM · XiiX · Album with a Play button",
+          caption: "Home — the roster leads; the newest drop follows on a lit NOW PLAYING strip. Home ships in the entry chunk; every other page loads on first visit"
+        },
+        {
+          src: "/images/projects/cultureszn/release.jpg",
+          alt: "Release page for 6 AM by XiiX: square cover art on the left, the title '6 AM' at display scale, a yellow plate reading Album · 31 January 2026, a green Play button beside a Spotify button, a numbered tracklist and a Share on WhatsApp button",
+          caption: "Release — one tap plays on YouTube (or the Spotify embed as fallback); no third-party iframe loads before the tap"
+        },
+        {
+          src: "/images/projects/cultureszn/artist.jpg",
+          alt: "Artist page for XiiX: the name set at sign scale beside a black-and-white portrait, plates reading Hip-hop artist and Sabaki, Kenya, buttons for YouTube, Spotify, Apple Music and SoundCloud, then a Discography list starting with 6 AM",
+          caption: "Artist — a body of work, not a feed. The full profile is its own chunk, fetched only when the page opens"
+        },
+        {
+          src: "/images/projects/cultureszn/releases.jpg",
+          alt: "Releases index headed '8 drops · newest first', grouped under 2026 and 2025 with four cover-art cards per row; the 6 AM card carries a red-and-white chevron tape reading New",
+          caption: "Releases — curated data merged at build time with the Spotify catalogue; releases without cover art render as title tiles, not stock images"
+        },
+        {
+          src: "/images/projects/cultureszn/sznals.jpg",
+          alt: "SZNals journal index: a yellow plate reading 'The journal · culture, process, philosophy', a line saying the first SZNals are being written, then numbered rows under 'In the works' with titles, a summary and category plates, no dates",
+          caption: "SZNals — MDX articles code-split per entry; drafts show category only, never an invented publish date"
+        },
+        {
+          src: "/images/projects/cultureszn/join.jpg",
+          alt: "Join SZN page: large heading, the line 'One message when something drops — a release, a SZNal, a show. No accounts. No noise.', a panel with an email field and a green Subscribe button, and the site footer below",
+          caption: "Join SZN — newsletter into a Resend audience via one serverless function with honeypot and validation"
+        }
+      ],
+      index: "03"
     }
 ];
 

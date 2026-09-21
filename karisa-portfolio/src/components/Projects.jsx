@@ -188,6 +188,12 @@ const Packet = ({ project, onOpen }) => {
               constrained, pushed the whole packet through the panel's border instead.
               Below sm the same rows stack; at sm and up the columns return.
             */}
+            {project.databaseSchema.length === 0 && (
+              <p className="mt-4 border-b border-cloth-300 pb-3 text-sm text-mark-700">
+                No database — content is files in the repo, merged at build time.
+              </p>
+            )}
+
             <ul className="mt-4 list-none space-y-3 p-0 sm:hidden">
               {project.databaseSchema.map((row) => (
                 <li key={row.name} className="border-b border-cloth-300 pb-3">
@@ -200,6 +206,7 @@ const Packet = ({ project, onOpen }) => {
               ))}
             </ul>
 
+            {project.databaseSchema.length > 0 && (
             <div className="mt-3 hidden max-w-full overflow-x-auto sm:block">
               <table className="w-full border-collapse text-left text-sm">
                 <caption className="sr-only">
@@ -223,6 +230,7 @@ const Packet = ({ project, onOpen }) => {
                 </tbody>
               </table>
             </div>
+            )}
 
             <h4 className="mt-7 font-display text-title font-bold text-mark-900">How it is put together</h4>
             <ul className="mt-3 list-none space-y-1.5 p-0 text-sm text-mark-700">
@@ -301,8 +309,8 @@ const Projects = () => {
             Order by evidence, not by id.
             The panel's jina is "What I built is still running", so a project that can
             show the running product leads and one without a capture goes last. As of
-            2026-09-16 both have captures, so the sort is a no-op and array order holds:
-            Raslipwani (01) first, Neema (02) second. The rule stays so a future project
+            2026-09-21 all three have captures, so the sort is a no-op and array order
+            holds: Raslipwani (01), Neema (02), Culture SZN (03). The rule stays so a future project
             added without screenshots cannot land under that claim as a "capture
             pending" rectangle. The index on each card is its identifier, not its
             position, so it travels with the project.
@@ -316,7 +324,7 @@ const Projects = () => {
           </div>
 
           <p className="mt-10 max-w-prose text-mark-600">
-            Both platforms are still maintained. The technical detail behind each one is in
+            All three are still maintained. The technical detail behind each one is in
             its case study.
           </p>
 

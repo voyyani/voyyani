@@ -42,6 +42,21 @@ const SITES = {
       // 'property' is a listing modal opened from /properties — captured by hand.
     ],
   },
+  cultureszn: {
+    // Captured from `vite preview` of ~/projects/cultureszn (same build the live site
+    // serves) because www.cultureszn.com 404s deep routes on direct load as of
+    // 2026-09-21. Switch to the live base once that routing fix ships. `?motion=off`
+    // is the site's own flag for deterministic frames.
+    base: process.env.CAPTURE_BASE ?? 'http://localhost:4173',
+    pages: [
+      ['home', '/?motion=off'],
+      ['release', '/releases/6-am?motion=off'],
+      ['artist', '/artists/xiix?motion=off'],
+      ['releases', '/releases?motion=off'],
+      ['sznals', '/sznals?motion=off'],
+      ['join', '/join?motion=off'],
+    ],
+  },
 };
 
 const slug = process.argv[2];

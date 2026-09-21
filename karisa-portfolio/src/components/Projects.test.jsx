@@ -135,7 +135,17 @@ describe('Projects Component', () => {
 
     it('should display "Explore Full Details" CTA', () => {
       render(<Projects />);
-      expect(screen.getAllByText('Explore Full Details').length).toBe(2);
+      expect(screen.getAllByText('Explore Full Details').length).toBe(3);
+    });
+
+    it('states plainly when a project has no database instead of rendering an empty table', async () => {
+      const user = userEvent.setup();
+      render(<Projects />);
+      // Culture SZN is the third card; its specification face is behind the turn.
+      const turns = screen.getAllByRole('button', { name: /turn to the specification/i });
+      await user.click(turns[2]);
+      expect(screen.getByText(/no database/i)).toBeDefined();
+      expect(screen.queryByText('Database tables in the Culture SZN schema')).toBeNull();
     });
 
     it('should have cursor-pointer class for interactivity', () => {

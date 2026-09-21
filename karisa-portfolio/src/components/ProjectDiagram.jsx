@@ -12,6 +12,9 @@ import React from 'react';
  *   Raslipwani — where the three optimisations sit in the request path, before vs after.
  *   Neema      — why hiding a button is not access control: both the UI and a hand-rolled
  *                request land on the same RLS policy.
+ *   Culture SZN — where the Spotify call moved: from a browser holding the client secret
+ *                to a scheduled job that commits JSON, so nothing the visitor touches
+ *                carries a credential or waits on an API.
  *
  * Hand-authored inline SVG: no library, no runtime, scales with the container, and
  * `currentColor` keeps it on-theme. The single indigo is reserved for the mark each
@@ -156,7 +159,59 @@ const NeemaDiagram = () => (
   </figure>
 );
 
-const DIAGRAMS = { 1: RaslipwaniDiagram, 2: NeemaDiagram };
+const CultureSznDiagram = () => (
+  <figure className="m-0">
+    <svg
+      viewBox="0 0 760 300"
+      role="img"
+      aria-label="Before: the browser held the Spotify client secret, inlined by Vite, and called the Spotify API at runtime from one 202 kilobyte chunk. After: a daily GitHub Action holds the secret, fetches the catalogue and commits it as JSON; the Vite build merges that with the curated releases and ships static HTML to a CDN. The browser receives no secret and makes no API call; YouTube and Spotify embeds load only after a tap, and CI fails any chunk over 100 kilobytes gzip."
+      style={{ maxWidth: '100%', height: 'auto' }}
+    >
+      <Defs />
+
+      {/* BEFORE */}
+      <text x="16" y="28" fill={MUTED} fontSize="10" letterSpacing="1.4">
+        BEFORE — SECRET IN THE BUNDLE
+      </text>
+      <Box x={16} y={44} w={196} label="Browser" sub="VITE_SPOTIFY_CLIENT_SECRET" />
+      <Arrow x1={212} x2={380} y={70} label="OAuth + player calls at runtime" />
+      <Box x={380} y={44} label="Spotify API" />
+      <Box x={580} y={44} w={150} label="index.js" sub="202 kB gzip, one chunk" />
+
+      <line x1="16" y1="128" x2="730" y2="128" stroke={EDGE} strokeWidth="1" />
+
+      {/* AFTER */}
+      <text x="16" y="164" fill={SIGNAL} fontSize="10" letterSpacing="1.4">
+        AFTER — SECRET NEVER LEAVES CI
+      </text>
+      <Box x={16} y={180} w={128} label="Spotify API" />
+      <Arrow x1={144} x2={196} y={206} accent />
+      <Box x={196} y={180} w={136} label="GitHub Action" sub="daily · holds the secret" accent />
+      <Arrow x1={332} x2={384} y={206} label="catalog.json" accent />
+      <Box x={384} y={180} w={124} label="vite build" sub="merge + prerender" accent />
+      <Arrow x1={508} x2={580} y={206} label="static HTML" accent />
+      <Box x={580} y={180} w={150} label="Browser" sub="no secret · no API" />
+
+      {/* The line the visitor never crosses */}
+      <line x1="356" y1="150" x2="356" y2="245" stroke={SIGNAL} strokeWidth="1" strokeDasharray="4 3" />
+      <text x="350" y="256" textAnchor="end" fill={SIGNAL} fontSize="10">
+        has the secret
+      </text>
+      <text x="362" y="256" fill={MUTED} fontSize="10">
+        has none — everything the visitor touches
+      </text>
+
+      <text x="16" y="281" fill={MUTED} fontSize="11">
+        Embeds load only after a tap; CI fails any chunk over 100 kB gzip. Largest chunk now 71 kB.
+      </text>
+    </svg>
+    <figcaption className="mt-3 text-xs text-mark-500">
+      Where the Spotify call moved, and why no secret can reach the visitor.
+    </figcaption>
+  </figure>
+);
+
+const DIAGRAMS = { 1: RaslipwaniDiagram, 2: NeemaDiagram, 3: CultureSznDiagram };
 
 const ProjectDiagram = ({ projectId }) => {
   const Diagram = DIAGRAMS[projectId];
