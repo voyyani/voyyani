@@ -1,17 +1,11 @@
 import React from 'react';
 import Panel from './Panel';
 import { PanelHead } from './Band';
-import ImageWithFallback from './ImageWithFallback';
 import { SITE } from '../config/site';
 import { PANELS } from '../config/panels';
 
 /**
  * Every biographical detail below traces to the résumé. Nothing is invented.
- *
- * The portrait is a plate in the field, framed the way the hero's platform is framed:
- * one hairline, no rounding, no vignette. Under it, the same caption strip the work
- * panels use, so a person and a product are presented in the same grammar — which is
- * the argument the page is making about who does the work.
  */
 const About = () => (
   <Panel id="about" labelledBy="about-heading">
@@ -24,23 +18,8 @@ const About = () => (
           printed={printed}
         />
 
-        <div className="mt-10 grid items-start gap-8 lg:grid-cols-12 lg:gap-14">
-          <figure className="m-0 lg:col-span-4">
-            <ImageWithFallback
-              src={SITE.headshot.portrait}
-              alt={SITE.headshot.alt}
-              width={1024}
-              height={1280}
-              sizes="(max-width: 1024px) 100vw, 380px"
-              className="border border-mark-900"
-            />
-            <figcaption className="flex items-baseline justify-between gap-4 border-x border-b border-cloth-300 bg-cloth-200 px-4 py-3">
-              <span className="text-label uppercase text-mark-600">Based in</span>
-              <span className="font-semibold text-mark-900">{SITE.location}</span>
-            </figcaption>
-          </figure>
-
-          <div className="space-y-6 lg:col-span-8">
+        <div className="mt-10">
+          <div className="space-y-6">
             <p className="max-w-prose text-lead text-mark-700">
               I trained as a mechanical engineer at Shenyang Agricultural University, where my
               thesis was on optimising mechanical systems using computational methods. Most of
