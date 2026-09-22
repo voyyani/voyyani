@@ -36,7 +36,7 @@ const Hero = () => {
       },
     },
     {
-      value: '2',
+      value: '3',
       label: 'Client platforms, shipped end to end',
       href: '#projects',
       onClick: (e) => {

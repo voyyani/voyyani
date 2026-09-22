@@ -22,7 +22,7 @@ export const PANELS = {
   },
   work: {
     nav: 'Work',
-    heading: 'Two platforms, both in daily use',
+    heading: 'Three platforms, all in daily use',
     jina: 'What I built is still running.',
     lead:
       'Real client work, not demos. Each one I built end to end — schema, permissions, ' +

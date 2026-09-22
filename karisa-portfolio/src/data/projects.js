@@ -1,6 +1,6 @@
 /**
- * The two client platforms, extracted verbatim from Projects.jsx during the Kanga Sheet
- * rebuild. Neema's figures were verified in a prior pass. Raslipwani's were re-verified
+ * The three client platforms. Raslipwani and Neema were extracted verbatim from
+ * Projects.jsx during the Kanga Sheet rebuild. Neema's figures were verified in a prior pass. Raslipwani's were re-verified
  * on 2026-09-14 against the repo at `d3e978b` and on 2026-09-16 against the live site —
  * see docs/RASLIPWANI_GO_LIVE.md §7 for every source. Culture SZN was added 2026-09-21
  * from the completed intake in docs/cultureszn.md, verified against its repo at `90007b2`.

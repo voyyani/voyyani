@@ -95,7 +95,7 @@ describe('Hero Component', () => {
     // The point of Phase 1: a number on this page must be checkable from this page.
     it('claims only the number of platforms the Projects section actually shows', () => {
       render(<Hero />);
-      expect(screen.getByText('2')).toBeDefined();
+      expect(screen.getByText('3')).toBeDefined();
       expect(screen.getByText(/Client platforms, shipped end to end/i)).toBeDefined();
     });
 

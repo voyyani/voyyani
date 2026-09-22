@@ -46,12 +46,12 @@ describe('Projects Component', () => {
 
     it('should display the section heading', () => {
       render(<Projects />);
-      expect(screen.getByText(/Two platforms,/i)).toBeDefined();
+      expect(screen.getByText(/Three platforms,/i)).toBeDefined();
     });
 
     it('should display "Full-Stack Platform" text', () => {
       render(<Projects />);
-      expect(screen.getByText(/both in daily use/i)).toBeDefined();
+      expect(screen.getByText(/all in daily use/i)).toBeDefined();
     });
 
     it('should display the section description', () => {
@@ -292,7 +292,7 @@ describe('Projects Component', () => {
       const { container } = render(<Projects />);
       const h2 = container.querySelector('h2');
       expect(h2).toBeDefined();
-      expect(h2.textContent).toContain('Two platforms');
+      expect(h2.textContent).toContain('Three platforms');
     });
 
     it('should have clickable card elements', () => {

@@ -16,7 +16,7 @@ I trained as a mechanical engineer (B.Eng, Shenyang Agricultural University; the
 
 ## Shipped
 
-Two client platforms, both live and maintained. Every figure below links to the artifact that proves it — nothing is quoted from memory.
+Three client platforms, all live and maintained. Every figure below links to the artifact that proves it — nothing is quoted from memory.
 
 ### [Raslipwani Properties](https://raslipwani.co.ke) — real-estate booking & client management
 Buyers search listings and book viewings; agency staff run the whole pipeline — properties, reschedules, client history, every conversation — from one dashboard.
@@ -36,18 +36,27 @@ Everything a visitor sees — hero copy, programmes, stories, events, gallery, d
 | **Live** | **3** active programmes · **2,950+** people reached · **5**-tier RBAC |
 | **Code** | [github.com/voyyani/Neema-Foundation-Kilifi](https://github.com/voyyani/Neema-Foundation-Kilifi) |
 
+### [Culture SZN](https://www.cultureszn.com) — catalogue and link-in-bio for a Nairobi music collective
+Every release playable in one tap, artist profiles, a journal and a newsletter — built for fans on mid-range Android over metered data. No database and no login: the team publishes by editing files in the repo, and a scheduled Action keeps the Spotify catalogue current.
+
+| | |
+|---|---|
+| **Stack** | React 19 · TypeScript · Vite 7 · Tailwind 4 · React Router 7 · Framer Motion · MDX · Vitest · GitHub Actions · Resend · Cloudinary |
+| **Measured** | Largest chunk **202 → 71 kB** gzip (CI fails any chunk over 100 kB) · **133** tests, all passing in CI |
+| **Code** | [github.com/voyyani/cultureszn](https://github.com/voyyani/cultureszn) |
+
 ## Stack
 
 | | |
 |---|---|
-| **Frontend** | React, TypeScript, Vite, Tailwind CSS, React Query, React Hook Form + Zod, Framer Motion, TipTap |
+| **Frontend** | React, TypeScript, Vite, Tailwind CSS, React Query, React Hook Form + Zod, Framer Motion, TipTap, MDX |
 | **Backend** | PostgreSQL, Supabase (Auth, Row-Level Security, Edge Functions / Deno), Node.js, Resend |
 | **Quality & Ops** | Vitest, React Testing Library, Playwright, ESLint, Sentry, GitHub Actions, Vercel |
 | **Engineering** | MATLAB, CATIA, AutoCAD, Finite Element Analysis |
 
 ## Now
 
-- Maintaining both client platforms above.
+- Maintaining all three client platforms above.
 - [voyani.tech](https://www.voyani.tech) — this portfolio: React 19 + Vite, contact pipeline on Supabase Edge Functions + Resend, GitHub activity synced weekly by Actions.
 - Open to a full-time role with a team that designs to a tolerance and verifies.
 

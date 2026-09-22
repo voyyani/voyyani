@@ -81,13 +81,16 @@ Real and usable:
 - **Raslipwani Properties** — property platform, Clerk auth; a measured page-load
   improvement from 3s to 1.2s. Client site is in maintenance, so **no screenshots
   exist**.
+- **Culture SZN** (cultureszn.com) — live catalogue and link-in-bio site for a Nairobi
+  music collective; no database, static data committed daily by a GitHub Action. Six
+  real screenshots under `public/images/projects/cultureszn/`.
 - Résumé PDF (`public/Ngowa-Karisa-Resume.pdf`, currently 3.1 MB), headshot in
   jpg/webp/avif, `og-image.jpg`, GitHub activity synced to
   `src/data/github-activity.json`, and two authored SVG architecture diagrams.
 
 Absent — must not be fabricated: **no testimonials** (two were requested from clients and
 never returned), **no written case-study articles**, **no Lighthouse scores recorded**,
-no pricing, no client roster beyond the two above, no admin-area screen captures.
+no pricing, no client roster beyond the three above, no admin-area screen captures.
 
 ## Product Principles
 
@@ -95,7 +98,7 @@ no pricing, no client roster beyond the two above, no admin-area screen captures
    it, or it does not go on the page.
 2. **Shipped software is the argument.** Show the running product before describing it.
 3. **One accountable builder, end to end.** Schema through deploy is the offer; the
-   proof is that both live platforms were built that way.
+   proof is that all three live platforms were built that way.
 4. **Engineering discipline is the differentiator**, expressed through specific
    decisions rather than as a metaphor.
 5. **It must work at 11pm on a slow connection** — for the visitor as much as for the
